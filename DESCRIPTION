@@ -26,5 +26,6 @@ Remotes: dataraft-r/dataraft.core,
     dataraft-r/dataraft.metrics,
     dataraft-r/dataraft.dbt,
     dataraft-r/dataraft.catalog
-URL: https://github.com/dataraft-r/dataraft
+URL: https://dataraft-r.github.io/dataraft/,
+    https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues
