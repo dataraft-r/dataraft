@@ -71,6 +71,34 @@ jobs:
                   download.file.extra = "--retry 3 --retry-all-errors")
           source("scripts/build-site.R")
         shell: Rscript {0}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install accessibility test tools
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 @axe-core/playwright@4.10.2
+          npx playwright install --with-deps chromium
+      - name: Audit reports and catalog accessibility
+        run: |
+          Rscript -e 'pak::pkg_install(c("shiny", "bslib"))'
+          DATARAFT_A11Y_SERVE=true Rscript scripts/accessibility/fixtures.R > accessibility-server.log 2>&1 &
+          python -m http.server 8765 --directory accessibility-artifacts > accessibility-http.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8766/ > /dev/null; then break; fi
+            sleep 1
+          done
+          python -m pip install jsonschema==4.23.0
+          python scripts/check-odcs-schema.py
+          node scripts/accessibility/audit.cjs
+      - name: Run compiler-free example
+        run: Rscript examples/checked-report/run.R
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-results
+          path: |
+            accessibility-artifacts/
+            accessibility-server.log
       - name: Check internal documentation links
         run: python scripts/check-site-links.py site
       - uses: actions/upload-artifact@v4

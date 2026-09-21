@@ -16,3 +16,12 @@
 ^maintenance$
 ^README\.Rmd$
 ^\.lintr$
+
+^SECURITY\.md$
+^ROADMAP\.md$
+^CHEATSHEET\.md$
+^ACCESSIBILITY\.md$
+^community$
+^examples$
+^accessibility-artifacts$
+^node_modules$

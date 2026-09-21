@@ -6,10 +6,17 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-Deliver checked data with reusable specifications, recipes and
-workflows. A changed column type or a negative amount blocks a delivery
-before its target is written. The result retains the checks and
-offending rows for diagnosis.
+Keep R-based reports reproducible with checked data and pinned input
+versions. DataRaft is the contract, quality and reproducibility layer
+for teams whose business logic lives in R. Use your existing database or
+an open lakehouse, or start with compiler-free RDS releases. A changed
+column type or a negative amount blocks a delivery before its target is
+written. The result retains the checks and offending rows for diagnosis.
+
+See the [one-page cheatsheet](CHEATSHEET.md), [roadmap](ROADMAP.md) and
+[security policy](SECURITY.md). Numeric coverage is published per
+component and commit in the [Coverage workflow
+summaries](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml).
 
 DataRaft is under development. Before 1.0 the current API is the
 supported API.

@@ -37,3 +37,20 @@ covr::to_cobertura(
   filename = file.path("coverage", paste0(component, ".xml"))
 )
 print(coverage)
+
+percent <- covr::percent_coverage(coverage)
+summary <- sprintf(
+  "| %s | %.1f%% | %s |\n",
+  component,
+  percent,
+  Sys.getenv("GITHUB_SHA", "local")
+)
+cat(summary, file = file.path("coverage", paste0(component, "-summary.md")))
+if (nzchar(Sys.getenv("GITHUB_STEP_SUMMARY"))) {
+  cat(
+    "| Component | Line coverage | Commit |\n|---|---:|---|\n",
+    summary,
+    file = Sys.getenv("GITHUB_STEP_SUMMARY"),
+    append = TRUE
+  )
+}
