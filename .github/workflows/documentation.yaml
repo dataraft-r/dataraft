@@ -1,0 +1,93 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: documentation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  documentation:
+    runs-on: ubuntu-24.04
+    env:
+      DATARAFT_TEST_DUCKLAKE: "true"
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.core
+          path: packages/dataraft.core
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.lake
+          path: packages/dataraft.lake
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.adapters
+          path: packages/dataraft.adapters
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.metrics
+          path: packages/dataraft.metrics
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.dbt
+          path: packages/dataraft.dbt
+      - uses: actions/checkout@v6
+        with:
+          repository: dataraft-r/dataraft.catalog
+          path: packages/dataraft.catalog
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.5.1'
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::pkgdown
+            any::devtools
+            local::packages/dataraft.core
+            local::packages/dataraft.lake
+            local::packages/dataraft.adapters
+            local::packages/dataraft.metrics
+            local::packages/dataraft.dbt
+            local::packages/dataraft.catalog
+            local::.
+          needs: website
+      - name: Check and build documentation
+        run: |
+          rmarkdown::render("README.Rmd", output_format = "github_document", quiet = TRUE)
+          pkgdown::check_pkgdown()
+          options(download.file.method = "curl",
+                  download.file.extra = "--retry 3 --retry-all-errors")
+          pkgdown::build_site(new_process = FALSE)
+        shell: Rscript {0}
+      - name: Check internal documentation links
+        run: python scripts/check-site-links.py site
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: documentation-preview
+          path: site/
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: site/
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: documentation
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

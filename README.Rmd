@@ -14,10 +14,11 @@ is written. The result retains the checks and offending rows for diagnosis.
 
 DataRaft is under development. Before 1.0 the current API is the supported API.
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
 
-
-
-```r
+```{r failure}
 library(dataraft)
 
 orders <- dr_product("orders") |>
@@ -31,27 +32,15 @@ flow <- dr_workflow() |>
 bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
 checked <- dr_trial(flow, data = bad_delivery)
 checked$status
-#> [1] "blocked"
 dr_quality_rows(checked)
-#> # A tibble: 1 × 2
-#>      id amount
-#>   <int>  <dbl>
-#> 1     2    -75
 ```
 
 Correct the delivery and reuse the same workflow:
 
-
-```r
+```{r success}
 next_delivery <- data.frame(id = 1:3, amount = c(25, 75, 50))
 result <- dr_trial(flow, data = next_delivery)
 dr_collect(result)
-#> # A tibble: 3 × 2
-#>      id amount
-#>   <int>  <dbl>
-#> 1     1     25
-#> 2     2     75
-#> 3     3     50
 ```
 
 A **product** defines identity, contract and quality requirements. A **recipe**

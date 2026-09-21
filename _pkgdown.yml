@@ -1,0 +1,17 @@
+url: https://dataraft-r.github.io/dataraft/
+destination: site
+home:
+  title: DataRaft
+  description: Modular workflows for checked data products.
+template:
+  bootstrap: 5
+navbar:
+  structure:
+    left: [intro, articles, reference, news]
+    right: [search, github]
+reference:
+  - title: Family API
+    contents: [starts_with("dr_")]
+articles:
+  - title: DataRaft
+    contents: [get-started, integrations, guarantees]
