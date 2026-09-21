@@ -28,6 +28,14 @@ governed releases to ordinary product composition and consumer exports.
 When publishing back to the same lake, execution can reuse its open handle;
 configuration sources still return materialized values without owning it.
 }
+\examples{
+if (FALSE) {
+  dataraft.core::dr_product("summary") |>
+    dataraft.core::dr_add_source(dr_source_release(lake, "orders")) |>
+    dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_transform(function(data) dplyr::summarise(data, rows = dplyr::n()))) |>
+    dataraft.core::dr_run()
+}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_source_release]{dataraft.lake::dr_source_release()}}
 }

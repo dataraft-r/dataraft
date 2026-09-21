@@ -72,6 +72,17 @@ For data exceeding available memory, use a lazy product and database target.
 Connections opened from a configuration are closed before returning;
 \code{\link[dataraft.core:dr_collect]{dataraft.core::dr_collect()}} can reopen the exact accepted release when needed.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("raw-ingestion-")
+config <- dr_lake_config(path = root)
+orders <- data.frame(id = 1:2, amount = c(25, 75))
+accepted <- orders |> dr_ingest(to = config, quality = ~ amount >= 0)
+dataraft.core::dr_collect(accepted)
+accepted$outputs
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_ingest]{dataraft.lake::dr_ingest()}}
 }

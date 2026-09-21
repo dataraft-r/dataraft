@@ -47,6 +47,12 @@ Only the mapped key columns are copied. No data rows are included in quality
 evidence or contract metadata. References are resolved again on each run;
 cached publication is unsuitable for a reference that can change separately.
 }
+\examples{
+customers <- data.frame(id = c("a", "b"))
+orders <- data.frame(customer_id = c("a", "missing", NA))
+rule <- dr_quality_reference(customers, c(customer_id = "id"))
+dr_run_quality(rule, orders)
+}
 \seealso{
 \code{\link[dataraft.core:dr_quality_reference]{dataraft.core::dr_quality_reference()}}
 }

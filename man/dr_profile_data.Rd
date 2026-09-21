@@ -28,6 +28,9 @@ maximum are reported only for numeric, integer64, date and timestamp columns;
 text output preserves large integer64 values without converting to doubles.
 A profile describes observations and never creates quality rules implicitly.
 }
+\examples{
+dr_profile_data(data.frame(id = c(1L, 1L, NA), amount = c(5, 10, 20)))
+}
 \seealso{
 \code{\link[dataraft.core:dr_profile_data]{dataraft.core::dr_profile_data()}}
 }

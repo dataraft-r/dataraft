@@ -38,6 +38,12 @@ run evidence. Set \code{DATARAFT_EVIDENCE} to an appropriate persistent director
 in deployments. The renv option writes a bootstrap script; a lockfile is
 created only when you explicitly run that script.
 }
+\examples{
+path <- tempfile("orders-project-")
+dr_init_project(path)
+list.files(path)
+unlink(path, recursive = TRUE)
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_init_project]{dataraft.adapters::dr_init_project()}}
 }

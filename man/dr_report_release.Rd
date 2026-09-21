@@ -41,6 +41,36 @@ Report JSON stores numeric values. Integer64 columns must stay within
 integers are rejected before writing; retain those individual results
 in a storage format with integer64 support.
 }
+\examples{
+\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dataraft.lake::dr_lake_config(
+  dataraft.lake::dr_registry_duckdb(file.path(root, "lake.db")),
+  dataraft.lake::dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+lake <- dataraft.lake::dr_connect_lake(config)
+path <- file.path(root, "orders.csv")
+utils::write.csv(data.frame(order_id = 1:2, amount = c(25, 75)), path,
+  row.names = FALSE)
+source <- dataraft.core::dr_source_file("orders.file", path, reader = utils::read.csv)
+contract <- dataraft.core::dr_contract(
+  "orders", "1.0.0", "Analytics", "Order amounts", "One order",
+  c(order_id = "integer", amount = "numeric"), key = "order_id"
+)
+release <- dataraft.core::dr_product("orders", contract = contract, code_version = "v1") |>
+  dataraft.core::dr_add_source(source) |> dataraft.core::dr_publish(to = lake)
+metric <- dr_metric(
+  "orders.total", "orders", expr = sum(amount), time_behavior = "flow",
+  unit = "EUR", owner = "Analytics", description = "Total order value",
+  approved = TRUE, code_version = "v1"
+)
+values <- dr_measure(lake, metric)
+dr_report_release(lake, "report.v1", list(total = values), code_version = "v1")
+dataraft.lake::dr_disconnect_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.metrics:dr_report_release]{dataraft.metrics::dr_report_release()}}
 }

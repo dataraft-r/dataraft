@@ -25,6 +25,10 @@ JSON representation stored in the report; dates are ISO strings. With \code{valu
 named result tibbles; batch reports return the long measurement table, with
 Date selections restored in the \code{.period} list column.
 }
+\examples{
+# After saving report.v1 with dr_report_release():
+# dr_report_read(lake, "report.v1", values_only = TRUE)
+}
 \seealso{
 \code{\link[dataraft.metrics:dr_report_read]{dataraft.metrics::dr_report_read()}}
 }

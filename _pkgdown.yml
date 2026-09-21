@@ -29,6 +29,10 @@ reference:
   - title: Start here
     desc: Define a product, prepare a delivery, check it and collect or publish the result.
     contents:
+      - dr_demo
+      - dr_report_verify
+      - dr_expire_snapshots
+      - dr_test_adapter
       - dr_product
       - dr_contract
       - dr_add_contract

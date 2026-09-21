@@ -26,7 +26,7 @@ delivery is separate from data publication: a catalog failure is recorded
 as a warning and does not pretend that a committed data release was undone.
 }
 \details{
-\code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_build()}} and \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_test()}} also accept a catalog function, or an S3
+\code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_build()}} and \code{\link[dataraft.dbt:dr_dbt_test]{dataraft.dbt::dr_dbt_test()}} also accept a catalog function, or an S3
 adapter with \code{dr_capabilities(x)$metadata_inputs = "dr_dbt_result"}. These
 receive the full dbt result, including local artifact paths, the manifest,
 and dbt stdout/stderr. Callback authors control what is transmitted; these
@@ -34,6 +34,11 @@ diagnostics can contain SQL or database messages. Valid artifacts from
 failed dbt tests can still be delivered without changing the dbt outcome.
 \code{\link[dataraft.catalog:dr_catalog_openmetadata_dbt]{dataraft.catalog::dr_catalog_openmetadata_dbt()}} delegates to the existing OpenMetadata ingestion
 engine and returns a retryable, credential-free delivery receipt.
+}
+\examples{
+received <- NULL
+dr_publish_metadata(function(metadata) received <<- metadata,
+  list(product = "orders", rows = 2L))
 }
 \seealso{
 \code{\link[dataraft.core:dr_publish_metadata]{dataraft.core::dr_publish_metadata()}}

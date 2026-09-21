@@ -4,7 +4,14 @@
 \alias{dr_storage_s3}
 \title{Define metadata and storage configuration}
 \usage{
-dr_storage_s3(bucket, prefix = "dataloom/", endpoint, region = "eu-central-1")
+dr_storage_s3(
+  bucket,
+  prefix = "dataloom/",
+  endpoint,
+  region = "eu-central-1",
+  credential_provider = c("config", "credential_chain"),
+  credential_chain = NULL
+)
 }
 \arguments{
 \item{bucket}{S3 bucket.}
@@ -14,12 +21,23 @@ dr_storage_s3(bucket, prefix = "dataloom/", endpoint, region = "eu-central-1")
 \item{endpoint}{S3 endpoint, including https://.}
 
 \item{region}{AWS region.}
+
+\item{credential_provider}{Static environment credentials (\code{config}) or the
+AWS SDK \code{credential_chain} (profiles, instance roles or web identity).}
+
+\item{credential_chain}{Optional ordered AWS providers, separated by semicolons.
+Only used with \code{credential_provider = "credential_chain"}.}
 }
 \value{
 A serializable configuration object containing no credentials.
 }
 \description{
 Define metadata and storage configuration
+}
+\examples{
+dr_registry_duckdb(file.path(tempdir(), "lake.db"))
+dr_storage_local(file.path(tempdir(), "data"))
+dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
 }
 \seealso{
 \code{\link[dataraft.lake:dr_registry_duckdb]{dataraft.lake::dr_storage_s3()}}

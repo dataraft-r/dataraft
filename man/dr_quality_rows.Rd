@@ -28,6 +28,12 @@ values and duplicate keys are also supported. Aggregate and custom agent
 checks do not necessarily identify rows and are rejected with an explanation.
 Failed lake candidates remain available until cleanup removes them.
 }
+\examples{
+orders <- dr_product("orders", data.frame(amount = c(10, -2))) |>
+  dr_add_quality(list(positive = ~ amount >= 0))
+failed <- dr_trial(orders, stop_on_failure = FALSE)
+dr_quality_rows(failed, "positive")
+}
 \seealso{
 \code{\link[dataraft.core:dr_quality_rows]{dataraft.core::dr_quality_rows()}}
 }

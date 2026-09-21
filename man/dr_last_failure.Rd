@@ -21,6 +21,13 @@ errors do not replace it. The object can retain input data and connections;
 call \code{dr_last_failure(clear = TRUE)} to release the package's reference.
 Nothing is written to disk or sent to a catalog.
 }
+\examples{
+product <- dr_product("orders", data.frame(amount = -1)) |>
+  dr_add_quality(~ amount >= 0)
+try(dr_trial(product) |> dr_collect(), silent = TRUE)
+dr_quality_report(dr_last_failure())
+invisible(dr_last_failure(clear = TRUE))
+}
 \seealso{
 \code{\link[dataraft.core:dr_last_failure]{dataraft.core::dr_last_failure()}}
 }

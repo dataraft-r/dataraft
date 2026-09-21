@@ -22,6 +22,14 @@ Configure remote credentials through Arrow. A lazy source returns an Arrow
 Dataset; use dplyr verbs and \code{\link[dataraft.core:dr_collect]{dataraft.core::dr_collect()}} to materialize it. Remote availability
 is checked when reading, not during structural validation.
 }
+\examples{
+\dontshow{if (requireNamespace("arrow", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+path <- tempfile(fileext = ".parquet")
+arrow::write_parquet(data.frame(id = 1:2), path)
+dataraft.core::dr_read_source(dr_source_parquet(path)) |> dataraft.core::dr_collect()
+unlink(path)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_source_parquet]{dataraft.adapters::dr_source_parquet()}}
 }

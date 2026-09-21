@@ -65,6 +65,14 @@ Metrics and dbt project specifications also have execution methods; see
 Managed dbt projects also accept \code{sources}, a named list of successful lake
 releases. Bindings are validated before the dbt command runs.
 }
+\examples{
+orders <- dr_product("orders") |>
+  dr_add_source(data.frame(id = 1:2, amount = c(25, 75))) |>
+  dr_add_quality(~ amount >= 0)
+result <- dr_run(orders)
+dr_collect(result)
+dr_inspect(result)
+}
 \seealso{
 \code{\link[dataraft.core:dr_run]{dataraft.core::dr_run()}}
 }

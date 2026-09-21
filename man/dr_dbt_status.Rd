@@ -19,6 +19,10 @@ Read structured statuses without parsing console output. A directory must
 contain a matching pair of \code{run_results.json} and \code{manifest.json} artifacts.
 The returned table contains executed nodes only, not the entire dbt project.
 }
+\examples{
+artifacts <- system.file("extdata", "dbt-artifacts", package = "dataraft.dbt")
+dr_dbt_status(artifacts)
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_status]{dataraft.dbt::dr_dbt_status()}}
 }

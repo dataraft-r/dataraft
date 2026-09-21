@@ -44,6 +44,14 @@ consumers rerun. Failed branches retry on the next explicit call. Change
 This is sequential orchestration, not a scheduler or a distributed transaction.
 Already committed steps stay committed if a later step fails.
 }
+\examples{
+spec <- dr_product("orders") |> dr_add_quality(~ amount >= 0)
+preparation <- dr_recipe() |> dr_step_mutate(amount = round(amount, 2))
+flow <- dr_workflow() |> dr_add_product(spec) |> dr_add_recipe(preparation)
+result <- dr_trial(flow, data = data.frame(amount = c(10.123, 20)))
+dr_collect(result)
+dr_extract_recipe(flow)
+}
 \seealso{
 \code{\link[dataraft.core:dr_workflow]{dataraft.core::dr_workflow()}}
 }

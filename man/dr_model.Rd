@@ -33,6 +33,32 @@ A dm object containing lazy tables. No automatic flattening is done.
 \description{
 Create and validate a relational dm model from pinned releases
 }
+\examples{
+\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE) && requireNamespace("dm", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dataraft.lake::dr_lake_config(
+  dataraft.lake::dr_registry_duckdb(file.path(root, "lake.db")),
+  dataraft.lake::dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+lake <- dataraft.lake::dr_connect_lake(config)
+path <- file.path(root, "orders.csv")
+utils::write.csv(data.frame(order_id = 1:2, amount = c(25, 75)), path,
+  row.names = FALSE)
+source <- dr_source_file("orders.file", path, reader = utils::read.csv)
+contract <- dr_contract(
+  "orders", "1.0.0", "Analytics", "Order amounts", "One order",
+  c(order_id = "integer", amount = "numeric"), key = "order_id"
+)
+release <- dr_product("orders", contract = contract, code_version = "v1") |>
+  dr_add_source(source) |> dr_publish(to = lake)
+model <- dr_model(lake, c(orders = "orders"),
+  primary_keys = list(orders = "order_id"))
+model
+dataraft.lake::dr_disconnect_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.core:dr_model]{dataraft.core::dr_model()}}
 }

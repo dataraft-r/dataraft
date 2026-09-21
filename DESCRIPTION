@@ -9,9 +9,9 @@ Description: Installs a family of cooperating packages for checked data
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.2.0)
-Imports: dataraft.core, dataraft.lake, dataraft.adapters, dataraft.dbt,
-    dataraft.catalog, dataraft.metrics
-Suggests: testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
+Imports: codetools, dataraft.core (>= 0.1.0.9000), dataraft.lake (>= 0.1.0.9000), dataraft.adapters (>= 0.1.0.9000), dataraft.dbt (>= 0.1.0.9000),
+    dataraft.catalog (>= 0.1.0.9000), dataraft.metrics (>= 0.1.0.9000)
+Suggests: hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
     rlang, digest, jsonlite, withr, duckdb (>= 1.5.5), pointblank, dm, shiny,
     bslib, yaml, readr, readxl, paws.storage, processx, RPostgres, arrow,
     pins (>= 1.2.0), httr2, targets, renv, RSQLite, webfakes, bit64, covr
@@ -20,12 +20,12 @@ Config/Needs/website: pkgdown
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
-Remotes: dataraft-r/dataraft.core,
-    dataraft-r/dataraft.lake,
-    dataraft-r/dataraft.adapters,
-    dataraft-r/dataraft.metrics,
-    dataraft-r/dataraft.dbt,
-    dataraft-r/dataraft.catalog
+Remotes: dataraft-r/dataraft.core@ffe18183aedaa080a6d0d2250c38dd688e7e532c,
+    dataraft-r/dataraft.lake@26183f3799e151317d0aa01340f7e063f2fbcbe3,
+    dataraft-r/dataraft.adapters@902f5d2486ec795114e3473785b2cd3cde530339,
+    dataraft-r/dataraft.metrics@6bb98ec5e900124dd9d818627db268cd44763c92,
+    dataraft-r/dataraft.dbt@727860a8440fc9d14cd7d05e7fc6d69fc7b7bad6,
+    dataraft-r/dataraft.catalog@e3556a9391e861f883836b189a7b864ea983f36c
 URL: https://dataraft-r.github.io/dataraft/,
     https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues

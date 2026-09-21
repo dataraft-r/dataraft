@@ -23,6 +23,16 @@ Atomic replacement depends on the filesystem: platforms that cannot replace
 an existing file this way report an error. Coordinate concurrent writers
 externally. Remote URIs and dataset-directory writes are unsupported here.
 }
+\examples{
+\dontshow{if (requireNamespace("arrow", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+path <- tempfile(fileext = ".parquet")
+dataraft.core::dr_product("orders") |>
+  dataraft.core::dr_add_source(data.frame(id = 1:2)) |>
+  dataraft.core::dr_set_target(dr_target_parquet(path)) |>
+  dataraft.core::dr_run()
+unlink(path)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_target_parquet]{dataraft.adapters::dr_target_parquet()}}
 }

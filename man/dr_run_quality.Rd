@@ -22,6 +22,10 @@ from \code{dr_rule}. Return the same columns as a native call. Unknown states,
 empty evidence and malformed results never authorize publication.
 Rule exceptions are retained locally only when requested by \code{\link[dataraft.core:dr_validate]{dr_validate()}}.
 }
+\examples{
+dr_run_quality(dr_quality_rule("positive", ~ amount > 0),
+  data.frame(amount = c(10, -1, NA)))
+}
 \seealso{
 \code{\link[dataraft.core:dr_run_quality]{dataraft.core::dr_run_quality()}}
 }

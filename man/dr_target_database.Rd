@@ -52,6 +52,17 @@ Caller connections stay open; factory connections close after success and
 failure. Extra arguments go to \code{\link[DBI:dbWriteTable]{DBI::dbWriteTable()}}. Reserved arguments
 \code{conn}, \code{name}, \code{value}, \code{append}, and \code{overwrite} cannot be overridden.
 }
+\examples{
+\dontshow{if (requireNamespace("RSQLite", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+result <- dataraft.core::dr_product("orders") |>
+  dataraft.core::dr_add_source(data.frame(id = 1:2)) |>
+  dataraft.core::dr_set_target(dr_target_database(con, "orders")) |>
+  dataraft.core::dr_run()
+DBI::dbReadTable(con, "orders")
+DBI::dbDisconnect(con)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_target_database]{dataraft.adapters::dr_target_database()}}
 }

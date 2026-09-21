@@ -37,6 +37,11 @@ It also accepts an engine-configured \code{\link[dataraft.core:dr_lookup_spec]{d
 
 }
 
+\examples{
+dr_recipe() |>
+  dr_step_mutate(net = gross / 1.19) |>
+  dr_step_select(id, net)
+}
 \seealso{
 \code{\link[dataraft.core:dr_step_transform]{dataraft.core::dr_step_arrange()}}
 }

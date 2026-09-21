@@ -13,4 +13,4 @@ assignees: ''
 Use synthetic data only.
 
 ## Environment
-R version, tidyweave version, dependency versions, backend and operating system.
+R version, dataraft version, dependency versions, backend and operating system.

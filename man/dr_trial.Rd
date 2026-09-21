@@ -25,6 +25,11 @@ The original definition is unchanged. Source and transformation callbacks are
 ordinary user code: their own side effects cannot be prevented by the framework.
 Read-only access to existing published inputs is still allowed.
 }
+\examples{
+orders <- dr_product("orders", data.frame(amount = c(10, 20))) |>
+  dr_add_quality(~ amount >= 0)
+dr_trial(orders) |> dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_trial]{dataraft.core::dr_trial()}}
 }

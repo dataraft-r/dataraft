@@ -19,6 +19,11 @@ The contract describes shape and keys; quality rules describe acceptable
 values. Checks apply after preparation and gate framework writers.
 Adding a contract replaces the previous contract. Quality rules accumulate.
 }
+\examples{
+dr_product("orders") |>
+  dr_add_contract(c(id = "integer", amount = "numeric")) |>
+  dr_add_quality(~ amount >= 0)
+}
 \seealso{
 \code{\link[dataraft.core:dr_add_contract]{dataraft.core::dr_add_contract()}}
 }

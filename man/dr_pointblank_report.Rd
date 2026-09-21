@@ -25,6 +25,20 @@ checked-table samples are disabled during interrogation. The native report
 describes pointblank action levels; the authoritative dataraft gate is shown
 by \code{\link[dataraft.core:dr_quality_report]{dr_quality_report()}}, especially when using \code{policy = "rule"}.
 }
+\examples{
+\dontshow{if (requireNamespace("pointblank", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+contract <- dr_contract("orders", "1", "Analytics", "Orders", "One order",
+  c(amount = "numeric"), rules = list(dr_pointblank_checks("amounts", function(data) {
+    pointblank::create_agent(data) |>
+      pointblank::col_vals_gte("amount", 0)
+  })))
+quality <- dr_validate(data.frame(amount = c(10, -1)), contract,
+  keep_agents = TRUE)
+path <- tempfile(fileext = ".html")
+dr_pointblank_report(quality, "amounts", path)
+unlink(path)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.core:dr_pointblank_report]{dataraft.core::dr_pointblank_report()}}
 }

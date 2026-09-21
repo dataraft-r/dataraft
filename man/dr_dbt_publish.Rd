@@ -72,6 +72,11 @@ dbt invocation ID. This prevents changed tables reusing stale quality
 evidence.
 This publishes one relation, not an atomic bundle of all dbt models.
 }
+\examples{
+# After dr_dbt_build() and reopening the lake connection:
+# release <- dr_dbt_publish(config, result, "customer_revenue")
+# dataraft.core::dr_collect(release)
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_publish]{dataraft.dbt::dr_dbt_publish()}}
 }

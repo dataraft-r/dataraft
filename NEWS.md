@@ -1,5 +1,10 @@
 # dataraft 0.1.0.9000
 
+* Family CI uses immutable sibling references and a dated CRAN snapshot; nightly checks exercise current sibling branches separately.
+* The metapackage reference now includes inherited executable examples.
+
+* `dr_demo()` demonstrates blocked and successful insurance deliveries entirely in memory.
+
 * Replace combined reexport help with individual inherited references. Add an execution cheatsheet, open-contracts vignette, security policy, roadmap, compiler-free example, numeric CI coverage summaries and accessibility checks. CRAN submission remains deferred.
 
 * Re-export session failure diagnostics and versioned RDS storage. Restore the relational insurance guide; keep component tests with their implementations.

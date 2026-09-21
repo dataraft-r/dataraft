@@ -47,6 +47,14 @@ controls its publication target, not a rollback of dbt's database changes.
 The returned table is materialized so every factory-owned connection closes.
 Invocation ID and selected model are attached as \code{dr_transform_metadata}.
 }
+\examples{
+# dbt's selected model must read the dedicated staged_orders relation.
+project <- dr_dbt_project("analytics", profiles_dir = "analytics")
+step <- dr_transform_dbt(project, "model.shop.customer_revenue",
+  connection = function() DBI::dbConnect(duckdb::duckdb(), "analytics.duckdb"),
+  input = "staged_orders")
+dataraft.core::dr_inspect(step)
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_transform_dbt]{dataraft.dbt::dr_transform_dbt()}}
 }

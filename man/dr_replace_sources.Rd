@@ -40,6 +40,12 @@ Replacements must be successful immutable lake results in the same catalog.
 Unselected bindings retain their exact release IDs. Files are updated only
 when the project executes. External-profile projects are not supported.
 }
+\examples{
+orders <- dr_product("orders", data.frame(amount = 10))
+totals <- dr_product("totals", orders)
+corrected <- totals |> dr_replace_sources(orders = data.frame(amount = 20))
+corrected |> dr_run() |> dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_replace_sources]{dataraft.core::dr_replace_sources()}}
 }

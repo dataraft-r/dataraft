@@ -17,6 +17,13 @@ Flags schema tightening conservatively. \code{breaking = NA} means semantic
 review is required, for example after changing an R rule or row grain.
 No compatibility result is inferred by running example data.
 }
+\examples{
+old <- dr_contract("orders", "1", "Analytics", "Orders", "One order",
+  c(id = "integer"), key = "id")
+new <- dr_contract("orders", "2", "Analytics", "Orders", "One order",
+  c(id = "integer", amount = "numeric"), key = "id")
+dr_contract_diff(old, new)
+}
 \seealso{
 \code{\link[dataraft.core:dr_contract_diff]{dataraft.core::dr_contract_diff()}}
 }

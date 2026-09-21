@@ -63,6 +63,13 @@ A dbt build is not an atomic dataraft release: earlier models can have been
 materialized even if a later model or test fails. dbt logs and artifacts can
 contain SQL, paths and database messages; treat them as project data.
 }
+\examples{
+\dontshow{if (nzchar(Sys.getenv("DATARAFT_DBT_EXAMPLE_PROJECT"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+project <- dr_dbt_project(Sys.getenv("DATARAFT_DBT_EXAMPLE_PROJECT"))
+result <- dr_dbt_build(project, select = "tag:reporting", echo = FALSE)
+dr_dbt_status(result)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_test()}}
 }

@@ -51,6 +51,11 @@ recorded separately under \code{r_policies}; they still require R validation.
 The export is deliberately a bounded schema bridge, not a replacement for
 the original contract or its quality engines.
 }
+\examples{
+schema <- dataraft.core::dr_contract(columns = c(id = "integer", amount = "numeric"), key = "id")
+properties <- dr_dbt_contract(schema, "orders")
+properties$models[[1]]$columns
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_contract]{dataraft.dbt::dr_dbt_contract()}}
 }

@@ -26,6 +26,21 @@ A Shiny app object (when launch = FALSE).
 \description{
 Start a read-only data catalog
 }
+\examples{
+\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE) && requireNamespace("bit64", quietly = TRUE) && requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dataraft.lake::dr_lake_config(
+  dataraft.lake::dr_registry_duckdb(file.path(root, "lake.db")),
+  dataraft.lake::dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+lake <- dataraft.lake::dr_connect_lake(config)
+app <- dr_catalog_app(lake, launch = FALSE)
+class(app)
+dataraft.lake::dr_disconnect_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.catalog:dr_catalog_app]{dataraft.catalog::dr_catalog_app()}}
 }

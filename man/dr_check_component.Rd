@@ -21,6 +21,9 @@ do not fetch data, execute user callbacks or write anything. Return \code{x}
 invisibly or raise an actionable error. Passing preflight does not prove
 that remote resources are available or that the data meet their contract.
 }
+\examples{
+dr_check_component(dr_quality_rule("nonnegative", ~ amount >= 0))
+}
 \seealso{
 \code{\link[dataraft.core:dr_check_component]{dataraft.core::dr_check_component()}}
 }

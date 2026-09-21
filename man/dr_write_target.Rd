@@ -26,6 +26,9 @@ It owns its destination's atomicity and cleanup. Return a list describing
 the output, without input rows, credentials or open connections. File and
 database adapters can return paths or stable table identifiers.
 }
+\examples{
+dr_write_target(NULL, data.frame(id = 1L), list(product = "orders"))
+}
 \seealso{
 \code{\link[dataraft.core:dr_write_target]{dataraft.core::dr_write_target()}}
 }

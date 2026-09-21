@@ -17,6 +17,11 @@ Confirms that the caller has reviewed the inferred types and chosen the
 nullability, keys, rules and optional metadata. This is a local specification
 transition, not an approval workflow or a proof that any data passed.
 }
+\examples{
+draft <- dr_contract_from(data.frame(id = 1L), "orders", "Analytics",
+  "Order identifiers", "One order", key = "id")
+dr_contract_confirm(draft)
+}
 \seealso{
 \code{\link[dataraft.core:dr_contract_confirm]{dataraft.core::dr_contract_confirm()}}
 }

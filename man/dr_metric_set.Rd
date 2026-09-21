@@ -42,6 +42,12 @@ Business approval is explicit; exploratory definitions need no code version.
 choose a report layout. Select the grouping with \code{dr_measure(by = "company")}
 or request an overall total explicitly with \code{dr_measure(by = character())}.
 }
+\examples{
+definitions <- dr_metric_set(
+  "orders", total = sum(amount), count = dplyr::n(),
+  dimensions = "company", units = c(total = "EUR")
+)
+}
 \seealso{
 \code{\link[dataraft.metrics:dr_metric_set]{dataraft.metrics::dr_metric_set()}}
 }

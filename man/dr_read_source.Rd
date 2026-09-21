@@ -19,6 +19,9 @@ Data frames and zero-argument functions work directly. File paths are
 normalized by \code{\link[dataraft.core:dr_add_source]{dr_add_source()}}. A source method returns a data frame or
 tibble or a lazy table. Use a function to call an API or another existing client.
 }
+\examples{
+dr_read_source(function() data.frame(id = 1:2))
+}
 \seealso{
 \code{\link[dataraft.core:dr_read_source]{dataraft.core::dr_read_source()}}
 }

@@ -17,6 +17,15 @@ The input is available as \code{data} in a private, temporary DuckDB connection.
 SQL is executed unchanged by DuckDB and must return a table. This adapter is
 intended for trusted analytical queries; it does not sandbox SQL.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+dataraft.core::dr_product("totals") |>
+  dataraft.core::dr_add_source(data.frame(amount = c(10, 20))) |>
+  dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_transform(dr_sql_transform("SELECT sum(amount) AS total FROM data"))) |>
+  dataraft.core::dr_run() |>
+  dataraft.core::dr_collect()
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_sql_transform]{dataraft.adapters::dr_sql_transform()}}
 }

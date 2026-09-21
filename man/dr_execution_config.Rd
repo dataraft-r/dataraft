@@ -41,6 +41,13 @@ or a root target with no layer. Explicit
 \code{dr_publish(to = , layer = )} arguments override the root product only.
 Ingestion always uses the raw layer and rejects another layer default.
 }
+\examples{
+execution <- dr_execution_config()
+dr_product("orders", data.frame(amount = c(10, 20))) |>
+  dr_add_quality(~ amount > 0) |>
+  dr_run(execution = execution) |>
+  dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_execution_config]{dataraft.core::dr_execution_config()}}
 }

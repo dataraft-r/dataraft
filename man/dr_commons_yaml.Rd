@@ -4,7 +4,7 @@
 \alias{dr_commons_yaml}
 \title{Export an explicit declarative definition for data-dict and commons}
 \usage{
-dr_commons_yaml(metric, table, sql_expr, path)
+dr_commons_yaml(metric, table, sql_expr, path, expected_binding = NULL)
 }
 \arguments{
 \item{metric}{Registered metric definition for business metadata.}
@@ -16,6 +16,11 @@ environment.}
 SUM(reserve).}
 
 \item{path}{Output YAML file.}
+
+\item{expected_binding}{Optional hash from the returned path's
+\code{definition_binding} attribute, saved after independent SQL review. A changed
+metric, table or SQL expression fails before writing. This does not prove
+equivalence of the R and SQL computations.}
 }
 \value{
 Path. This adapter exports metadata; it does not execute or install
@@ -23,6 +28,19 @@ commons.
 }
 \description{
 Export an explicit declarative definition for data-dict and commons
+}
+\examples{
+\dontshow{if (requireNamespace("yaml", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+metric <- dr_metric(
+  "orders.total", "orders", expr = sum(amount), time_behavior = "flow",
+  unit = "EUR", owner = "Analytics", description = "Total order value",
+  approved = TRUE, code_version = "v1"
+)
+path <- tempfile(fileext = ".yml")
+dr_commons_yaml(metric, "orders", "SUM(amount)", path)
+cat(readLines(path), sep = "\n")
+unlink(path)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[dataraft.metrics:dr_commons_yaml]{dataraft.metrics::dr_commons_yaml()}}

@@ -84,6 +84,20 @@ or rules run again by default because captured values and external state
 cannot be fingerprinted reliably. Supply \code{code_version} to enable reuse and
 update it whenever code, dependencies or captured values change.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-")
+lake <- dr_open_lake(root)
+orders <- data.frame(id = 1:3, amount = c(25, 75, 50))
+dr_write_data(lake, orders)
+dr_read_release(lake, "orders")
+contract <- dataraft.core::dr_contract("orders.checked",
+  columns = c(id = "integer", amount = "numeric"), key = "id")
+dr_write_data(lake, orders, contract = contract)
+dr_close_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_write_data]{dataraft.lake::dr_write_data()}}
 }

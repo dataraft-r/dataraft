@@ -37,6 +37,19 @@ equal. Integer and numeric columns are compatible. A schema change marks
 every matched row as changed. Numeric totals ignore missing values, whose
 counts are reported separately. Row order has no significance.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-")
+lake <- dr_open_lake(root)
+dr_write_data(lake, data.frame(id = c(1L, 2L), amount = c(10, 20)), "orders")
+dr_write_data(lake, data.frame(id = c(1L, 3L), amount = c(12, 30)), "orders")
+difference <- dr_compare(lake, "orders", key = "id")
+difference
+difference$changed
+dr_close_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_compare]{dataraft.lake::dr_compare()}}
 }

@@ -24,6 +24,10 @@ results return a compact table with \code{step}, \code{status} and \code{success
 \description{
 Inspect execution status across R and dbt workflows
 }
+\examples{
+orders <- dr_product("orders", data.frame(id = 1:3))
+dr_status(dr_run(orders))
+}
 \seealso{
 \code{\link[dataraft.core:dr_status]{dataraft.core::dr_status()}}
 }

@@ -20,6 +20,10 @@ manifest nodes. Dependencies describe SQL builds, not primary/foreign keys
 or column-level lineage. No database connection or dbt installation is
 needed.
 }
+\examples{
+artifacts <- system.file("extdata", "dbt-artifacts", package = "dataraft.dbt")
+dr_dbt_lineage(artifacts)
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_lineage]{dataraft.dbt::dr_dbt_lineage()}}
 }

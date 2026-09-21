@@ -6,9 +6,15 @@ result <- tryCatch(
       hold <- function() {
         lake <- dr_open_lake(job$config)
         on.exit(dr_close_lake(lake), add = TRUE)
-        dataraft.lake:::assert_writable(lake)
+        dataraft.lake::dr_internal_acquire_lake_writer(
+          lake,
+          environment(),
+          job$asset
+        )
         file.create(job$ready)
-        Sys.sleep(30)
+        repeat {
+          Sys.sleep(1)
+        }
       }
       hold()
       list(status = "held")
@@ -19,12 +25,38 @@ result <- tryCatch(
         approved = TRUE,
         code_version = "v1"
       )
+      set.seed(101)
       values <- dr_measure(job$previous, metrics = metrics, by = character())
       dr_report_release(values, "same-report", code_version = "v1")
       list(status = "reported")
     } else {
+      product <- dr_product(job$asset, data.frame(id = job$value))
+      if (!is.null(job$ready)) {
+        barrier <- function(ready, proceed) {
+          force(ready)
+          force(proceed)
+          function(data) {
+            if (!file.create(ready)) {
+              stop("Cannot signal preparation barrier")
+            }
+            deadline <- Sys.time() + 90
+            while (!file.exists(proceed) && Sys.time() < deadline) {
+              Sys.sleep(0.05)
+            }
+            if (!file.exists(proceed)) {
+              stop("Preparation barrier timed out")
+            }
+            data
+          }
+        }
+        product <- dr_add_recipe(
+          product,
+          dr_recipe() |>
+            dr_step_transform(barrier(job$ready, job$proceed))
+        )
+      }
       result <- dr_publish(
-        dr_product(job$asset, data.frame(id = job$value)),
+        product,
         to = job$config,
         previous = job$previous
       )

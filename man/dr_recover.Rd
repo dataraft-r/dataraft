@@ -44,6 +44,15 @@ for abandoned candidate tables. Run recovery with one coordinated writer.
 Database changes are transactional; staging removal happens afterwards and
 is reported separately, so an incomplete filesystem cleanup can be retried.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-")
+lake <- dr_open_lake(root)
+dr_recover(lake)
+dr_close_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_recover]{dataraft.lake::dr_recover()}}
 }

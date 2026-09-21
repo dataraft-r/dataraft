@@ -26,6 +26,13 @@ writes without this metadata requires an explicit \code{version}; no order is
 guessed. Board credentials are excluded from inspection. Pin contents must be
 a data frame or tibble.
 }
+\examples{
+\dontshow{if (requireNamespace("pins", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+board <- pins::board_temp(versioned = TRUE)
+pins::pin_write(board, data.frame(id = 1:2), "orders", type = "rds")
+dataraft.core::dr_read_source(dr_source_pins(board, "orders"))
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_source_pins]{dataraft.adapters::dr_source_pins()}}
 }

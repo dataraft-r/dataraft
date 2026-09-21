@@ -21,6 +21,11 @@ and closure environments are omitted. This is descriptive metadata, not a
 portable executable serialization. Save project R code for reproducibility.
 Extension packages may implement \code{dr_inspect()} to provide safe descriptors.
 }
+\examples{
+orders <- dr_product("orders") |> dr_add_source(data.frame(id = 1:2))
+dr_inspect(orders)
+dr_plan(orders)
+}
 \seealso{
 \code{\link[dataraft.core:dr_inspect]{dataraft.core::dr_inspect()}}
 }

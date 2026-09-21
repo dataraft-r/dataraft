@@ -268,7 +268,7 @@ test_that("custom metric groups are unique and repeated lineage is deduplicated"
 })
 
 
-test_that("group order cannot change the identity of identical metric results", {
+test_that("group order preserves values while closure changes require a new definition", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
   dr_run(f$pipeline, f$lake)
@@ -286,6 +286,12 @@ test_that("group order cannot change the identity of identical metric results", 
   )
   first <- dr_measure(f$lake, metric, by = "company")
   reverse <- TRUE
+  expect_error(
+    dr_measure(f$lake, metric, by = "company"),
+    class = "dr_definition_changed"
+  )
+  metric$version <- "2.0.0"
+  metric$code_version <- "v2"
   second <- dr_measure(f$lake, metric, by = "company")
   expect_equal(first$company, c("a", "b"))
   expect_identical(
@@ -296,7 +302,25 @@ test_that("group order cannot change the identity of identical metric results", 
   expect_no_error(dr_report_release(
     f$lake,
     "ordered-report",
-    list(total = second),
+    list(total = first),
     "v1"
   ))
+  expect_error(
+    dr_report_release(f$lake, "ordered-report", list(total = second), "v1"),
+    "different content",
+    class = "dataraft_error_metrics"
+  )
+  expect_no_error(dr_report_release(
+    f$lake,
+    "ordered-report-v2",
+    list(total = second),
+    "v2"
+  ))
+  expect_identical(
+    dr_report_read(
+      f$lake,
+      "ordered-report"
+    )$measures$total$manifest$metric_version,
+    "1.0.0"
+  )
 })

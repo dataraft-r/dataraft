@@ -17,6 +17,30 @@ A lazy dbplyr table.
 \description{
 Query a published immutable data release
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dr_lake_config(
+  dr_registry_duckdb(file.path(root, "lake.db")),
+  dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+lake <- dr_connect_lake(config)
+path <- file.path(root, "orders.csv")
+utils::write.csv(data.frame(order_id = 1:2, amount = c(25, 75)), path,
+  row.names = FALSE)
+source <- dataraft.core::dr_source_file("orders.file", path, reader = utils::read.csv)
+contract <- dataraft.core::dr_contract(
+  "orders", "1.0.0", "Analytics", "Order amounts", "One order",
+  c(order_id = "integer", amount = "numeric"), key = "order_id"
+)
+release <- dataraft.core::dr_product("orders", contract = contract, code_version = "v1") |>
+  dataraft.core::dr_add_source(source) |> dataraft.core::dr_publish(to = lake)
+dr_tbl(lake, "orders", release$release_id) |> dplyr::collect()
+dr_disconnect_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_tbl]{dataraft.lake::dr_tbl()}}
 }
