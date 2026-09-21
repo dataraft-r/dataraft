@@ -39,6 +39,11 @@ covr::to_cobertura(
 print(coverage)
 
 percent <- covr::percent_coverage(coverage)
+# Every component has exercised code. A zero result here indicates broken
+# instrumentation, not a meaningful coverage measurement.
+if (!is.finite(percent) || percent == 0) {
+  stop("Coverage instrumentation recorded no executed component code.")
+}
 summary <- sprintf(
   "| %s | %.1f%% | %s |\n",
   component,
