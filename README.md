@@ -65,7 +65,7 @@ Start with twelve functions: `dr_product()`, `dr_contract()`,
 specialized components as your workflow grows.
 
 <figure>
-<img src="vignettes/figures/composition-architecture.svg"
+<img src="man/figures/composition-architecture.svg"
 alt="Products define requirements; recipes define preparation; workflows connect them to a delivery and execution." />
 <figcaption aria-hidden="true">Products define requirements; recipes
 define preparation; workflows connect them to a delivery and

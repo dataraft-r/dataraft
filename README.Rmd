@@ -56,7 +56,7 @@ Start with twelve functions: `dr_product()`, `dr_contract()`,
 `dr_workflow()`, `dr_add_product()`, `dr_add_recipe()`, `dr_trial()`,
 `dr_collect()` and `dr_publish()`. Add specialized components as your workflow grows.
 
-![Products define requirements; recipes define preparation; workflows connect them to a delivery and execution.](vignettes/figures/composition-architecture.svg)
+![Products define requirements; recipes define preparation; workflows connect them to a delivery and execution.](man/figures/composition-architecture.svg)
 
 | Your goal | Function |
 |-----------|----------|
