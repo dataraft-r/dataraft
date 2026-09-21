@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = FALSE)
 library(dataraft)
 ```
 
@@ -71,7 +71,7 @@ Select only policy attributes for the payment lookup. The premium stays in the
 policy product because it is a monthly amount, not a payment-level measure.
 
 ```{r}
-attributes <- policies |>
+attributes <- dr_product("payment_policy_attributes", policy_result) |>
   dplyr::select(policy_id, month, company, broker_id, policy_status = status)
 recipe <- dr_recipe() |>
   dr_step_lookup(attributes, by = dplyr::join_by(policy_id, month)) |>
@@ -116,9 +116,10 @@ cohort <- dplyr::left_join(opening, closing, by = "policy_id", relationship = "o
 stopifnot(!anyNA(cohort$status))
 cohort$lapsed <- cohort$status == "lapsed"
 rate <- dr_metric("monthly_lapse_rate", "cohort", expr = mean(lapsed),
-  dimensions = "company", unit = "proportion", owner = "Risk",
+  unit = "proportion", owner = "Risk",
   description = "Lapses among policies active at the start of February")
-measured <- dr_measure(cohort, rate)
+cohort_result <- dr_trial(dr_product("cohort", cohort))
+measured <- dr_measure(cohort_result, rate)
 stopifnot(isTRUE(all.equal(measured$value, 1 / 5)))
 measured
 ```
@@ -136,7 +137,8 @@ release <- dr_product("cohort", cohort) |>
   dr_set_target(dr_target_rds(file.path(root, "cohort"))) |>
   dr_publish()
 pinned <- dr_source_rds(file.path(root, "cohort"), release$outputs$version)
-report <- dr_product("lapse_report", dr_measure(dr_read_source(pinned), rate)) |>
+pinned_result <- dr_trial(dr_product("cohort", pinned))
+report <- dr_product("lapse_report", dr_measure(pinned_result, rate)) |>
   dr_set_target(dr_target_rds(file.path(root, "report"))) |>
   dr_publish()
 corrected <- cohort
@@ -145,7 +147,7 @@ later <- dr_product("cohort", corrected) |>
   dr_set_target(dr_target_rds(file.path(root, "cohort"))) |>
   dr_publish()
 stopifnot(!identical(release$outputs$version, later$outputs$version))
-stopifnot(isTRUE(all.equal(dr_measure(dr_read_source(pinned), rate)$value, 1 / 5)))
+stopifnot(isTRUE(all.equal(dr_measure(dr_trial(dr_product("cohort", pinned)), rate)$value, 1 / 5)))
 dr_read_source(dr_source_rds(file.path(root, "report"), report$outputs$version))
 unlink(root, recursive = TRUE)
 ```
