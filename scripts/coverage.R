@@ -37,3 +37,28 @@ covr::to_cobertura(
   filename = file.path("coverage", paste0(component, ".xml"))
 )
 print(coverage)
+
+percent <- covr::percent_coverage(coverage)
+# Every component has exercised code. A zero result here indicates broken
+# instrumentation, not a meaningful coverage measurement.
+if (!is.finite(percent) || percent == 0) {
+  stop("Coverage instrumentation recorded no executed component code.")
+}
+summary <- sprintf(
+  "| %s | %.1f%% | %s |\n",
+  component,
+  percent,
+  withr::with_dir(
+    file.path("packages", paste0("dataraft.", component)),
+    system2("git", c("rev-parse", "HEAD"), stdout = TRUE)
+  )
+)
+cat(summary, file = file.path("coverage", paste0(component, "-summary.md")))
+if (nzchar(Sys.getenv("GITHUB_STEP_SUMMARY"))) {
+  cat(
+    "| Component | Line coverage | Commit |\n|---|---:|---|\n",
+    summary,
+    file = Sys.getenv("GITHUB_STEP_SUMMARY"),
+    append = TRUE
+  )
+}

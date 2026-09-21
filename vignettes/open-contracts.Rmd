@@ -1,0 +1,115 @@
+---
+title: "Review contracts as files and retain delivery evidence"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Review contracts as files and retain delivery evidence}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+A reproducible report needs more than a saved total: retain the input release
+identifiers, the metric definition and the checks made against those inputs.
+`dr_report_release()` in dataraft.metrics freezes that evidence for lake-backed
+reports. The compiler-free example below first establishes a checked, versioned
+delivery; it does not claim that an RDS delivery is itself a report release.
+
+```{r}
+library(dataraft)
+contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric"),
+  key = "id", owner = "Reporting",
+  governance = list(steward = "Data operations", retention = "P7Y",
+    tags = c("Finance.Reporting")),
+  column_metadata = list(amount = list(description = "Order value in EUR")))
+file <- tempfile(fileext = ".json")
+dr_contract_odcs(contract, file)
+reviewed <- dr_contract_from_odcs(file)
+reviewed
+```
+
+This is ODCS 3.2.0, validated against the upstream JSON Schema in CI. Exported
+metadata includes roles, SLAs and classifications when supplied. Policies are
+metadata, not automatic enforcement: setting retention does not schedule deletion
+and identifying a steward does not grant access.
+
+The importer executes flat R-compatible types, required columns, primary keys,
+`nullValues` and `rowCount` library checks with simple numeric comparisons, and
+DataRaft custom predicates. It rejects unsupported executable constraints,
+relationships and engines. It does not execute SQL or R strings from contracts.
+DataRaft predicates allow column names, scalar literals, arithmetic, comparisons,
+logical operators, `is.na()` and literal membership via `%in%` and `c()`.
+Other engines must implement that custom rule type before executing it.
+
+```{r}
+root <- tempfile("orders-")
+product <- dr_product("orders", data.frame(id = 1:3, amount = c(25, -75, 50))) |>
+  dr_add_contract(reviewed) |>
+  dr_add_quality(~ amount >= 0, action = "quarantine", dimension = "conformity") |>
+  dr_set_target(dr_target_rds(root))
+result <- dr_run(product)
+dr_collect(result)
+dr_quarantine_rows(result)
+dr_quality_report(result)
+```
+
+Quarantine is for native table row predicates. It removes all rejected rows
+before publication, even if a threshold would otherwise tolerate them. Remaining
+rows must still pass schema, type, key and required-column checks. Exceptions
+block execution. Quarantine rows stay local; decide explicitly where sensitive
+rejected rows may be stored. Model-level or aggregate checks cannot automatically
+partition member tables.
+
+For warning and blocking rules, `threshold = .02` permits up to two percent
+failures. Existing `severity` and `max_failure` remain supported.
+
+```{r}
+before <- dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, 75, 50)), "input-v1")
+after <- dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, NA, 50)), "input-v2")
+dr_profile_compare(before, after)
+profile_path <- tempfile("profiles-")
+profile_release <- dr_product("orders.profile", after) |>
+  dr_set_target(dr_target_rds(profile_path)) |>
+  dr_run()
+profile_release$outputs$version
+```
+
+Profiles carry an observation timestamp and explicit input version. Store each
+profile as a versioned release and compare a chosen baseline, rather than silently
+replacing it. Missingness changes are deterministic alerts, not a calibrated
+statistical anomaly detector. Exact profiles can still expose sensitive counts.
+
+```{r}
+recipe <- dr_recipe() |>
+  dr_step_mutate(net = amount / 1.19) |>
+  dr_step_select(id, net)
+dr_column_lineage(recipe, c("id", "amount"))
+```
+
+The direct-value map handles simple mutation, selection and rename. An opaque
+function or dynamic selector marks the analysis incomplete. Successful single-input
+runs publish complete maps through OpenLineage column facets. This does not infer
+row influence, joins, historical graphs or arbitrary R side effects.
+
+For a file-first project, place `project.yaml`, an ODCS contract and a CSV source
+in one directory. `dr_project_yaml("project.yaml") |> dr_run()` reads this manifest:
+
+```yaml
+id: orders
+contract: orders.odcs.json
+source: delivery.csv
+target: releases/orders
+```
+
+All paths stay inside the project directory. Review the files in Git. Add custom
+R transformations explicitly in trusted project code when the declarative grammar
+is insufficient.
+
+Iceberg is an experimental alternative: `dr_source_iceberg()` reads a metadata
+location with an optional snapshot ID; `dr_target_iceberg()` writes to an already
+attached DuckDB Iceberg REST catalog. Authentication and catalog attachment stay
+outside definitions. The backend must support transactional candidate validation;
+no fallback, retention guarantee or branch/merge behavior is implied. See
+[DuckDB's Iceberg catalog documentation](https://duckdb.org/docs/current/core_extensions/iceberg/catalogs).
+
+```{r, include=FALSE}
+unlink(c(root, profile_path, file), recursive = TRUE)
+```

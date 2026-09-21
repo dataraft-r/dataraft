@@ -167,6 +167,18 @@ reference:
       - dr_catalog_openmetadata
       - dr_catalog_openmetadata_dbt
       - dr_freshness
+  - title: Open contracts and observability
+    contents:
+    - dr_quarantine_rows
+    - dr_profile_snapshot
+    - dr_profile_compare
+    - dr_column_lineage
+    - dr_contract_odcs
+    - dr_contract_from_odcs
+    - dr_project_yaml
+    - dr_source_iceberg
+    - dr_target_iceberg
+
 articles:
   - title: DataRaft
-    contents: [why-dataraft, get-started, integrations, guarantees, relational-insurance]
+    contents: [why-dataraft, get-started, integrations, guarantees, relational-insurance, open-contracts]

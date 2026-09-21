@@ -27,3 +27,8 @@ renv/library/
 renv/staging/
 
 /packages/
+
+node_modules/
+accessibility-artifacts/
+accessibility-server.log
+accessibility-http.log
