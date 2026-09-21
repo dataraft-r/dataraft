@@ -2,7 +2,7 @@ Package: dataraft
 Title: Modular Workflows for Checked Data Products
 Version: 0.1.0.9000
 Authors@R: person("Jan-Hendrik", "Weinert", role = c("aut", "cre"), email = "65009403+JanWein@users.noreply.github.com")
-Description: Installs a family of independently usable packages for checked data
+Description: Installs a family of cooperating packages for checked data
     products. Product specifications define requirements, recipes define ordered
     preparation steps and workflows bind them to sources and destinations.
     Optional components provide lake storage, adapters, dbt, catalogs and metrics.

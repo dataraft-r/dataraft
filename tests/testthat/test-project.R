@@ -5,7 +5,11 @@ test_that("a minimal project runs without optional infrastructure", {
   expect_equal(created, normalizePath(path, winslash = "/", mustWork = TRUE))
   withr::local_dir(path)
   environment <- new.env(parent = globalenv())
-  sys.source("run.R", envir = environment)
+  expect_output(
+    sys.source("run.R", envir = environment),
+    "orders completed",
+    fixed = TRUE
+  )
   expect_equal(readRDS("output.rds")$amount, c(50, 150, 100))
   expect_equal(environment$result$status, "completed")
   expect_equal(nrow(dr_run_history(".dataraft/evidence")), 1L)

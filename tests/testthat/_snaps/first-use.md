@@ -45,7 +45,7 @@
     Condition
       Error in `dplyr::collect()`:
       ! payments is blocked; no successful output is available. 1 check requiring attention: nonnegative: failed (1 of 3 checks failed).
-      i Save result <- dr_trial(...) before collecting, then inspect dr_quality_report(result) and dr_quality_rows(result).
+      i Use result <- dr_last_failure(), then inspect dr_quality_report(result) and dr_quality_rows(result).
       i Inspect dr_quality_errors(result) for locally retained rule exceptions.
 
 ---

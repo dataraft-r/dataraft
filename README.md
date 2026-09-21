@@ -87,20 +87,20 @@ introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html).
 
 ## Packages
 
-| Package             | Responsibility                                                |
-|---------------------|---------------------------------------------------------------|
-| `dataraft`          | Metapackage and shared introduction                           |
-| `dataraft.core`     | Products, contracts, recipes, workflows and quality           |
-| `dataraft.lake`     | Lake storage, releases, coordinated publication and recovery  |
-| `dataraft.adapters` | Database, API, Parquet and pins adapters; targets integration |
-| `dataraft.dbt`      | dbt execution and artifacts                                   |
-| `dataraft.catalog`  | Catalog applications and metadata publication                 |
-| `dataraft.metrics`  | Metrics and frozen report evidence                            |
+| Package             | Responsibility                                                     |
+|---------------------|--------------------------------------------------------------------|
+| `dataraft`          | Metapackage and shared introduction                                |
+| `dataraft.core`     | Products, contracts, recipes, workflows and quality                |
+| `dataraft.lake`     | Lake storage, releases, coordinated publication and recovery       |
+| `dataraft.adapters` | Database, API, RDS, Parquet and pins adapters; targets integration |
+| `dataraft.dbt`      | dbt execution and artifacts                                        |
+| `dataraft.catalog`  | Catalog applications and metadata publication                      |
+| `dataraft.metrics`  | Metrics and frozen report evidence                                 |
 
 Use `library(dataraft.core)` for in-memory work without the extensions.
-Each extension is independently installable with its declared
-dependencies. The metapackage re-exports the public family API; its own
-R code contains no engine.
+Each extension can be installed with its declared dependencies. The
+metapackage re-exports the public family API; its own R code contains no
+engine.
 
 Install the development version:
 
@@ -124,3 +124,9 @@ See the
 guide](https://dataraft-r.github.io/dataraft/articles/integrations.html)
 and [guarantees and
 limits](https://dataraft-r.github.io/dataraft/articles/guarantees.html).
+
+For persistence without an optional storage engine, use
+`dr_publish(flow, data = delivery, to = dr_target_rds("data/orders"))`.
+The result’s `outputs$version` pins that delivery for `dr_source_rds()`.
+After a failed pipe, `dr_last_failure()` retrieves the failed result for
+diagnosis.

@@ -44,3 +44,25 @@ Public S3 protocols are supported extension interfaces. Exported helpers marked
 `@keywords internal` are family implementation interfaces, not a separate user API;
 do not remove them while another component imports or calls them. Changes to
 these helpers need tests in their consumers as well as the defining component.
+
+
+## Family implementation boundaries
+
+Public user verbs and extension protocols use `dr_`. Names beginning with
+`dr_internal_` are family implementation interfaces, not extension APIs.
+Stateless helpers are private copies of
+`dataraft.core/inst/standalone/standalone-dataraft.R`; run
+`Rscript scripts/sync-standalone.R` from this repository to update all checkouts.
+Execution state, connections and publication logic must not be copied.
+
+Each component owns its unit and backend tests. Cross-component scenarios remain
+here. The canonical lake fixture is `dataraft.lake/inst/test-fixtures/lake.R`;
+other tests load it only when lake is installed. Changes to that fixture should
+also update its local `tests/testthat/helper-fixture.R` copy.
+
+Component CI runs its own check, the metapackage integration suite against that
+component commit, and a separate job installing only hard dependencies. Same-name
+branches support coordinated pre-merge changes; otherwise siblings use main.
+The downstream check runs on every component push to main and pull request,
+without a cross-repository dispatch token. The metapackage's full matrix remains
+the cross-platform and PostgreSQL/DuckLake gate.

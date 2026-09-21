@@ -1,5 +1,5 @@
 test_that("configuration and plans do not perform IO", {
-  root <- tempfile("dataloom-config-")
+  root <- tempfile("dataraft-config-")
   config <- dr_lake_config(
     dr_registry_duckdb(file.path(root, "meta.duckdb")),
     dr_storage_local(file.path(root, "data")),
