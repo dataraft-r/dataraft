@@ -711,6 +711,7 @@ dataraft.core::dr_status
 dataraft.core::dr_step_arrange
 
 #' @rdname dr_step_distinct
+#' @param .keep_all Arguments with their dplyr meanings.
 #' @inherit dataraft.core::dr_step_distinct title description details return params sections
 #' @seealso [dataraft.core::dr_step_distinct()]
 #' @importFrom dataraft.core dr_step_distinct
@@ -718,6 +719,7 @@ dataraft.core::dr_step_arrange
 dataraft.core::dr_step_distinct
 
 #' @rdname dr_step_filter
+#' @param .by,.preserve Arguments with their dplyr meanings.
 #' @inherit dataraft.core::dr_step_filter title description details return params sections
 #' @seealso [dataraft.core::dr_step_filter()]
 #' @importFrom dataraft.core dr_step_filter
@@ -753,6 +755,7 @@ dataraft.core::dr_step_rename
 dataraft.core::dr_step_select
 
 #' @rdname dr_step_summarise
+#' @param .by,.groups Arguments with their dplyr meanings.
 #' @inherit dataraft.core::dr_step_summarise title description details return params sections
 #' @seealso [dataraft.core::dr_step_summarise()]
 #' @importFrom dataraft.core dr_step_summarise

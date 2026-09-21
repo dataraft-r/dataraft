@@ -44,5 +44,8 @@ const fs = require('node:fs');
     fs.writeFileSync('accessibility-artifacts/axe.json', JSON.stringify(results, null, 2));
     await browser.close();
   }
-  if (failed) throw new Error('Accessibility violations found; inspect axe.json');
+  if (failed) {
+    console.error(JSON.stringify(results.filter(x => x.violations.length).map(x => ({name: x.name, violations: x.violations.map(v => ({id: v.id, nodes: v.nodes.map(n => ({target: n.target, summary: n.failureSummary}))}))})), null, 2));
+    throw new Error('Accessibility violations found; inspect axe.json');
+  }
 })().catch(error => {console.error(error); process.exitCode = 1;});

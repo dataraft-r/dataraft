@@ -10,6 +10,8 @@ dr_step_summarise(x, ..., .by = NULL, .groups = NULL)
 \item{x}{A \code{\link[dataraft.core:dr_recipe]{dr_recipe()}} specification.}
 
 \item{...}{Arguments passed to the corresponding dplyr verb at execution.}
+
+\item{.by, .groups}{Arguments with their dplyr meanings.}
 }
 \value{
 An updated recipe. The original is unchanged.

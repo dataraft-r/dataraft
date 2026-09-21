@@ -43,7 +43,10 @@ summary <- sprintf(
   "| %s | %.1f%% | %s |\n",
   component,
   percent,
-  Sys.getenv("GITHUB_SHA", "local")
+  withr::with_dir(
+    file.path("packages", paste0("dataraft.", component)),
+    system2("git", c("rev-parse", "HEAD"), stdout = TRUE)
+  )
 )
 cat(summary, file = file.path("coverage", paste0(component, "-summary.md")))
 if (nzchar(Sys.getenv("GITHUB_STEP_SUMMARY"))) {
