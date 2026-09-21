@@ -86,7 +86,7 @@ test_that("empty data and formula failures block a writer", {
     dr_add_quality(~ amount >= 0)
   result <- dr_run(product, stop_on_failure = FALSE)
   expect_equal(result$status, "blocked")
-  check <- result$quality[result$quality$rule == "quality_1", ]
+  check <- result$quality[result$quality$rule == "amount >= 0", ]
   expect_equal(check$n_failed, 2)
   expect_equal(check$n_total, 3)
   expect_equal(

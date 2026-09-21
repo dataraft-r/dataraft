@@ -27,3 +27,20 @@ and PostgreSQL coordination. Coverage artifacts are reported per component.
 Keep the three shared guides focused. Generate README.md from README.Rmd.
 Before 1.0 there are no compatibility aliases, migration guides or stored-format
 upgrades. Remove obsolete behavior and documentation with its replacement.
+
+
+## Test the owning component
+
+Run `testthat::test_local()` in the component you changed. Core tests cover
+contracts, recipes and diagnostics without a lake. Adapter and integration tests
+skip explicitly when their optional engine is unavailable. Keep tests that span
+lake publication, measurement and catalogs in the metapackage.
+
+The metapackage CI uses matching component branches on pull requests when they
+exist, otherwise `main`. This allows coordinated family changes to be reviewed
+before merging. Component CI remains responsible for independent checks.
+
+Public S3 protocols are supported extension interfaces. Exported helpers marked
+`@keywords internal` are family implementation interfaces, not a separate user API;
+do not remove them while another component imports or calls them. Changes to
+these helpers need tests in their consumers as well as the defining component.

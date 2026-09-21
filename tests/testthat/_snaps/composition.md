@@ -38,7 +38,11 @@
       dr_collect(result)
     Condition
       Error in `dplyr::collect()`:
-      ! orders failed during execution; no successful output is available. Inspect dr_quality_report(result) for checks and dr_quality_rows(result) for affected rows.
+      ! orders failed during execution; no successful output is available.
+      i Save result <- dr_trial(...) before collecting, then inspect dr_quality_report(result) and dr_quality_rows(result).
+      i Inspect dr_quality_errors(result) for locally retained rule exceptions.
+      Caused by error:
+      ! An execution error was retained in condition$result$error for local inspection.
 
 # contract prototypes, anonymous contracts and rule names normalize consistently
 

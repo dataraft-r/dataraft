@@ -1,4 +1,5 @@
 test_that("the minimal workflow survives closing and reopening", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root)
   withr::defer(dr_close_lake(lake))
@@ -23,6 +24,7 @@ test_that("the minimal workflow survives closing and reopening", {
 })
 
 test_that("changed and empty deliveries cannot replace a successful schema", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   orders <- data.frame(id = 1:2)
@@ -40,6 +42,7 @@ test_that("changed and empty deliveries cannot replace a successful schema", {
 })
 
 test_that("a failed first delivery does not lock the future schema", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   result <- dr_write_data(
@@ -57,6 +60,7 @@ test_that("a failed first delivery does not lock the future schema", {
 })
 
 test_that("writing an older payload makes it current again", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   first <- dr_write_data(lake, data.frame(id = 1L), "orders")
@@ -76,6 +80,7 @@ test_that("writing an older payload makes it current again", {
 })
 
 test_that("file defaults preserve original bytes and support CSV TSV and RDS", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(file.path(root, "lake"))
   withr::defer(dr_close_lake(lake))
@@ -105,6 +110,7 @@ test_that("file defaults preserve original bytes and support CSV TSV and RDS", {
 })
 
 test_that("explicit contracts can add rules but cannot be silently dropped", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   data <- data.frame(id = 1:2)
@@ -130,6 +136,7 @@ test_that("explicit contracts can add rules but cannot be silently dropped", {
 })
 
 test_that("custom rule closures are re-evaluated unless explicitly versioned", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   allowed <- TRUE
@@ -182,6 +189,7 @@ test_that("custom rule closures are re-evaluated unless explicitly versioned", {
 })
 
 test_that("custom file readers use archived bytes and changing captured values", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(file.path(root, "lake"))
   withr::defer(dr_close_lake(lake))
@@ -199,6 +207,7 @@ test_that("custom file readers use archived bytes and changing captured values",
 })
 
 test_that("reopening refuses an accidental backend switch", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root)
   dr_close_lake(lake)
@@ -206,12 +215,14 @@ test_that("reopening refuses an accidental backend switch", {
 })
 
 test_that("existing unmarked catalogs are not adopted implicitly", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   dir.create(file.path(root, "landing"))
   expect_snapshot(error = TRUE, dr_open_lake(root))
 })
 
 test_that("arbitrary nonempty folders are left untouched", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   writeLines("existing custom catalog", file.path(root, "custom.db"))
   expect_snapshot(error = TRUE, dr_open_lake(root))
@@ -223,6 +234,7 @@ test_that("arbitrary nonempty folders are left untouched", {
 })
 
 test_that("a blocked first contracted run still requires a contract after reopen", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root)
   withr::defer(dr_close_lake(lake))
@@ -249,6 +261,7 @@ test_that("a blocked first contracted run still requires a contract after reopen
 })
 
 test_that("a blocked contract upgrade cannot fall back to the automatic schema", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   dr_write_data(lake, data.frame(id = 1L), "orders")
@@ -269,12 +282,14 @@ test_that("a blocked contract upgrade cannot fall back to the automatic schema",
 })
 
 test_that("a data expression needs a deliberate asset name", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   expect_snapshot(error = TRUE, dr_write_data(lake, data.frame(id = 1L)))
 })
 
 test_that("contract drafts keep review explicit with optional metadata", {
+  skip_if_not_installed("duckdb")
   draft <- dr_contract_from(data.frame(id = 1:2), "orders")
   contract <- dr_contract_confirm(draft)
   expect_equal(contract$owner, "")

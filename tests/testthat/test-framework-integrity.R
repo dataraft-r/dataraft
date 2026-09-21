@@ -129,6 +129,7 @@ test_that("custom metric input declarations are optional and validated", {
 })
 
 test_that("read-only attachments protect data and metadata while supporting analyses", {
+  skip_if_not_installed("duckdb")
   root <- tempfile("dataraft-read-only-")
   lake <- dr_open_lake(
     root,

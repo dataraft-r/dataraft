@@ -26,6 +26,7 @@ test_that("starter profiles attach the configured catalog", {
 })
 
 test_that("starter refuses to overwrite existing files", {
+  skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   writeLines("keep", file.path(root, "important.txt"))
   expect_snapshot(
@@ -103,6 +104,7 @@ test_that("real dbt builds and tests the starter project", {
 })
 
 test_that("RAW starter binds ingestion releases without creating dbt seeds", {
+  skip_if_not_installed("duckdb")
   skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   config <- dr_lake_config(

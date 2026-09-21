@@ -1,6 +1,12 @@
 #' DataRaft: modular checked data products
 #'
 #' Install the family together, or use each component package independently.
+#' @section Choose an execution path:
+#' Use [dr_trial()] to check a delivery without configured writers, [dr_run()]
+#' to execute the configured target, or [dr_publish()] to save output with a
+#' local lake as the default target. [dr_ingest()] delivers data into a lake.
+#' Save `result <- dr_trial(...)` and inspect [dr_quality_report()] before
+#' calling [dr_collect()]. [dr_quality_errors()] exposes local rule exceptions.
 #' @keywords internal
 "_PACKAGE"
 

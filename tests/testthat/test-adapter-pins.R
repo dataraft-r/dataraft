@@ -1,34 +1,3 @@
-test_that("pins targets expose readable version references without board credentials", {
-  skip_if_not_installed("pins")
-  board <- pins::board_temp(versioned = TRUE)
-  old <- data.frame(id = 1L)
-  target <- dr_target_pins(board, "orders")
-  output <- dr_write_target(
-    target,
-    old,
-    list(product = "orders", run_id = "r1")
-  )
-  expect_true(nzchar(output$version))
-  dr_write_target(
-    target,
-    data.frame(id = 2L),
-    list(product = "orders", run_id = "r2")
-  )
-  expect_equal(
-    dr_read_source(dr_source_pins(board, "orders", output$version))$id,
-    1L
-  )
-  expect_equal(dr_read_source(dr_source_pins(board, "orders"))$id, 2L)
-  expect_null(dr_inspect(target)$board)
-  expect_false(dr_capabilities(target)$immutable)
-  expect_false(dr_capabilities(target)$transactions)
-  expect_error(
-    dr_check_component(dr_source_pins(list(token = "secret"), "orders")),
-    "configured pins board"
-  )
-  expect_error(dr_target_pins(board, "orders", metadata = list()), "reserved")
-})
-
 test_that("same-second pins publications identify their exact version and latest data", {
   skip_if_not_installed("pins")
   # Freeze only pins' timestamp allocation. Serialization, boards, storage and

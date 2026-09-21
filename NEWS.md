@@ -1,5 +1,7 @@
 # dataraft 0.1.0.9000
 
+* Add a guided API reference, motivation vignette, execution-path guide and local pins example. Move component unit tests to their owners and support matching component branches in pull-request CI.
+
 * Start the DataRaft package family with the `dr_` API.
 * Separate core definitions and execution from lake, adapters, dbt, catalogs
   and metrics. The `dataraft` package is the shared installation and API entry.

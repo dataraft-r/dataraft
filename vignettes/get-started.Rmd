@@ -50,3 +50,47 @@ retained failing rows. Set a destination with `dr_set_target()` and execute with
 Recipes own preparation in modular workflows. Products added with
 `dr_add_product()` must not carry embedded transformations. Recipe steps run in
 the order added, followed by output contract checks and quality rules.
+
+## Inspect a failed rule
+
+Keep the result before collecting it. Failed predicates and errors while evaluating
+predicates are different: the latter have original R conditions for local inspection.
+
+```{r diagnose}
+broken <- dr_product("orders", next_delivery) |> dr_add_quality(~ amont >= 0)
+result <- dr_trial(broken)
+dr_quality_report(result)
+lapply(dr_quality_errors(result), conditionMessage)
+```
+
+When catching an error from `dr_run()` or `dr_collect()`, its `result` field also
+retains the diagnosis. `dr_quality_errors(error)` accepts that condition directly.
+Raw exception text is not included in exported HTML or JSON quality reports.
+
+## Save locally without DuckDB
+
+The existing pins adapter can write RDS files to a local versioned board. This
+needs `pins` and `dataraft.adapters`, but does not need DuckDB. Use
+`install.packages("pins")` to install the optional engine.
+
+```{r local-pins, eval=requireNamespace("pins", quietly=TRUE)}
+folder <- tempfile("dataraft-board-")
+board <- pins::board_folder(folder, versioned = TRUE)
+target <- dr_target_pins(board, "orders", type = "rds")
+saved <- dr_publish(flow, data = next_delivery, to = target)
+reference <- saved$outputs$version
+restored <- dr_read_source(dr_source_pins(board, "orders", version = reference))
+stopifnot(sum(restored$amount) == 150)
+unlink(folder, recursive = TRUE)
+```
+
+Pins versions are board versions. They do not provide the lake's coordinated
+publication, relational transactions or frozen-report registry. Use
+`dataraft.lake` and `dataraft.metrics` when those guarantees are required.
+
+## Inspect a definition before execution
+
+`dr_plan()` shows planned work; `dr_validate()` checks configuration without
+reading sources when given a definition. `dr_inspect()` describes an object;
+`dr_status()` summarizes the outcome of an execution. None substitutes for checking
+a real delivery with `dr_trial()`.

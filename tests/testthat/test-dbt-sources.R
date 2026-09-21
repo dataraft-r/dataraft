@@ -9,6 +9,7 @@ dbt_source_config <- function(root) {
 }
 
 test_that("explicit dbt sources pin registry relations and preserve other names", {
+  skip_if_not_installed("duckdb")
   skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   writeLines("name: example", file.path(root, "dbt_project.yml"))
@@ -45,6 +46,7 @@ test_that("explicit dbt sources pin registry relations and preserve other names"
 })
 
 test_that("invalid source identity preserves the previous source file", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   writeLines("name: example", file.path(root, "dbt_project.yml"))
   project <- dr_dbt_project(root)
@@ -81,6 +83,7 @@ test_that("invalid source identity preserves the previous source file", {
 })
 
 test_that("dbt sources protect handwritten YAML and catalog identity", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   writeLines("name: example", file.path(root, "dbt_project.yml"))
   dir.create(file.path(root, "models"))
