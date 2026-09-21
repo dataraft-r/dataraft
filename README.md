@@ -19,17 +19,20 @@ component and commit in the [Coverage workflow
 summaries](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml).
 
 DataRaft is under development. The hardening focus is `dataraft.core`,
-`dataraft.lake` and `dataraft.adapters`. The dbt, catalog and metrics integrations
-are experimental and can change independently. Metrics provides governed,
-frozen metric results; it is not a general-purpose semantic modeling engine.
-No stable public release is claimed by the development compatibility lock.
+`dataraft.lake` and `dataraft.adapters`. The dbt, catalog and metrics
+integrations are experimental and can change independently. Metrics
+provides governed, frozen metric results; it is not a general-purpose
+semantic modeling engine. No stable public release is claimed by the
+development compatibility lock.
 
 Start without a database: `library(dataraft); demo <- dr_demo()`.
 Inspect `dr_quality_rows(demo$blocked)` and `dr_collect(demo$passed)`.
-See the [insurance walkthrough](examples/insurance-delivery.md) and the
-[family compatibility policy](FAMILY_COMPATIBILITY.md).
-The [review implementation status](docs/review-hardening.md) records changes
-and the remaining scope boundaries.
+See the [insurance
+walkthrough](https://github.com/dataraft-r/dataraft/blob/main/examples/insurance-delivery.md)
+and the [family compatibility policy](FAMILY_COMPATIBILITY.md). The
+[review implementation
+status](https://github.com/dataraft-r/dataraft/blob/main/docs/review-hardening.md)
+records changes and the remaining scope boundaries.
 
 ``` r
 library(dataraft)

@@ -22,10 +22,14 @@ missing <- setdiff(
   c(family_names, rownames(installed.packages()))
 )
 if (length(missing)) {
-  install.packages(
-    missing,
-    repos = "https://packagemanager.posit.co/cran/2026-09-18"
-  )
+  # Respect setup-r's dated platform-specific repository, including Linux
+  # binaries. Fall back to the same source snapshot only outside configured CI.
+  repos <- getOption("repos")
+  repos <- repos[!is.na(repos) & nzchar(repos) & repos != "@CRAN@"]
+  if (!length(repos)) {
+    repos <- c(CRAN = "https://packagemanager.posit.co/cran/2026-09-18")
+  }
+  install.packages(missing, repos = repos)
 }
 for (path in paths) {
   status <- system2(

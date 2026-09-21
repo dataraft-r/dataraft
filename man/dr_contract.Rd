@@ -98,6 +98,10 @@ contract <- dr_contract(
   c(order_id = "integer", amount = "numeric"), key = "order_id"
 )
 contract
+dr_contract(columns = c(amount = "numeric", status = "character"),
+  constraints = list(amount = list(min = 0, precision = 2),
+    status = list(enum = c("active", "paid"))),
+  column_metadata = list(amount = list(unit = "EUR")))
 }
 \seealso{
 \code{\link[dataraft.core:dr_contract]{dataraft.core::dr_contract()}}

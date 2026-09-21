@@ -31,6 +31,7 @@ errors retain their original classes.
 }
 \description{
 Checks preflight, descriptive metadata and the six standard capabilities.
+\code{NA} capability values are allowed as undeclared; they do not trigger I/O.
 Source adapters are read and compared with \code{expected} when provided. Target
 adapters are written only when \code{data} and an explicit \code{context$contract} are
 supplied. Use a disposable target: this helper performs real I/O. A

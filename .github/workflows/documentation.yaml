@@ -24,7 +24,8 @@ jobs:
         with:
           r-version: '4.5.1'
           use-public-rspm: false
-          cran: 'https://packagemanager.posit.co/cran/2026-09-18'
+          # Same immutable snapshot; Ubuntu 24.04 needs the noble binary endpoint.
+          cran: ${{ runner.os == 'Linux' && 'https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18' || 'https://packagemanager.posit.co/cran/2026-09-18' }}
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           extra-packages: |
