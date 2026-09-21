@@ -285,6 +285,7 @@ test_that("source-free managed projects initialize their lake before dbt", {
 })
 
 test_that("failed managed source replacement retains the previous file", {
+  skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   destination <- file.path(root, "sources.yml")
   writeLines("previous bindings", destination)

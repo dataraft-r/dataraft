@@ -26,6 +26,7 @@ test_that("starter profiles attach the configured catalog", {
 })
 
 test_that("starter refuses to overwrite existing files", {
+  skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   writeLines("keep", file.path(root, "important.txt"))
   expect_snapshot(
