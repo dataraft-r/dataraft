@@ -1,3 +1,4 @@
+stopifnot(!requireNamespace("duckdb", quietly = TRUE))
 library(dataraft.core)
 family_extensions <- paste0(
   "dataraft.",

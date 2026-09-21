@@ -54,6 +54,7 @@ test_that("quality rows identify predicate, required, duplicate and lookup failu
 })
 
 test_that("published result comparison uses exact releases and owns its connection", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   definition <- dr_product("orders", data.frame(id = 1L, amount = 10)) |>
     dr_add_contract(dr_contract(
@@ -77,6 +78,7 @@ test_that("published result comparison uses exact releases and owns its connecti
 })
 
 test_that("failed lake candidates support explicit row diagnosis after owned connection closes", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   definition <- dr_product("orders", data.frame(amount = c(10, -2))) |>
     dr_add_quality(list(positive = ~ amount >= 0))
@@ -86,6 +88,7 @@ test_that("failed lake candidates support explicit row diagnosis after owned con
 
 
 test_that("row diagnostics and comparisons borrow a live caller connection", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root)
   on.exit(dr_close_lake(lake))

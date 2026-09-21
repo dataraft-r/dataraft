@@ -67,6 +67,7 @@ test_that("managed project creation, updates and inspection are deferred", {
 })
 
 test_that("managed execution resolves any layer, owns files and closes its handle", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   f <- managed_dbt_fixture(root)
   accepted <- dr_ingest(data.frame(id = 1L), to = f$config, name = "orders")
@@ -145,6 +146,7 @@ test_that("managed execution resolves any layer, owns files and closes its handl
 })
 
 test_that("managed preflight validates all groups before touching files", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   f <- managed_dbt_fixture(root)
   accepted <- dr_ingest(data.frame(id = 1L), to = f$config, name = "orders")
@@ -209,6 +211,7 @@ test_that("managed source groups reject another catalog without IO", {
 })
 
 test_that("managed publication infers the lake and verifies artifact provenance", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   f <- managed_dbt_fixture(root)
   accepted <- dr_ingest(data.frame(id = 1L), to = f$config, name = "orders")
@@ -258,6 +261,7 @@ test_that("managed publication infers the lake and verifies artifact provenance"
 })
 
 test_that("source-free managed projects initialize their lake before dbt", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   f <- managed_dbt_fixture(root)
   config <- dr_lake_config(path = file.path(root, "fresh"), backend = "duckdb")

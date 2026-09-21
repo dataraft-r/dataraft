@@ -123,6 +123,7 @@ test_that("measurement sets retain pinned inputs and report evidence", {
 })
 
 test_that("managed report connections close on success and failure", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root)
   on.exit(if (DBI::dbIsValid(lake$con)) dr_close_lake(lake), add = TRUE)
@@ -173,6 +174,7 @@ test_that("batch measurement rejects ambiguous labels and grouping columns", {
 })
 
 test_that("batch calculation manages one owned connection and preserves closed result pins", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   dates <- as.Date(c("2026-08-31", "2026-09-30"))
   original <- dr_product(

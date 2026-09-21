@@ -1,4 +1,5 @@
 test_that("custom layers survive folder reopening and permit another publication", {
+  skip_if_not_installed("duckdb")
   root <- file.path(withr::local_tempdir(), "lake")
   layers <- c("raw", "staging", "core", "marts")
   lake <- dr_connect_lake(dr_lake_config(path = root, layers = layers))
@@ -27,6 +28,7 @@ test_that("custom layers survive folder reopening and permit another publication
 })
 
 test_that("both folder entry points retain named roles and read-only opens do not write", {
+  skip_if_not_installed("duckdb")
   root <- file.path(withr::local_tempdir(), "lake")
   layers <- c(
     raw = "raw",
@@ -60,6 +62,7 @@ test_that("both folder entry points retain named roles and read-only opens do no
 })
 
 test_that("a single layer is preserved without JSON scalar conversion", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(root, layers = "raw")
   dr_close_lake(lake)
@@ -67,6 +70,7 @@ test_that("a single layer is preserved without JSON scalar conversion", {
 })
 
 test_that("saved configuration cannot be bypassed by an older definition", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   stale <- dr_lake_config(path = root)
   lake <- dr_open_lake(root, layers = c("raw", "core"))

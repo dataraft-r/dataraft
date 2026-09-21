@@ -1,4 +1,5 @@
 test_that("minimal ingestion publishes an exact raw reference and schema", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   orders <- data.frame(id = 1:2, amount = c(25, 75))
@@ -24,6 +25,7 @@ test_that("minimal ingestion publishes an exact raw reference and schema", {
 })
 
 test_that("native input failures never write raw and keep accepted releases", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   checks <- list(nonnegative = ~ amount >= 0)
@@ -69,6 +71,7 @@ test_that("native input failures never write raw and keep accepted releases", {
 })
 
 test_that("file readers and callbacks run once against retained original bytes", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(file.path(root, "lake"))
   withr::defer(dr_close_lake(lake))
@@ -109,6 +112,7 @@ test_that("file readers and callbacks run once against retained original bytes",
 })
 
 test_that("inferred schema failures are blocked before raw without locking a failed first schema", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   accepted <- dr_ingest(data.frame(id = 1:2), lake, "orders")
@@ -142,6 +146,7 @@ test_that("inferred schema failures are blocked before raw without locking a fai
 })
 
 test_that("source functions are acquired once and default runs reevaluate captured state", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   calls <- checks <- 0L
@@ -176,6 +181,7 @@ test_that("source functions are acquired once and default runs reevaluate captur
 })
 
 test_that("explicit contracts retain keys and nonnull rules and accept concise types", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   specification <- dr_contract(
@@ -224,6 +230,7 @@ test_that("explicit contracts retain keys and nonnull rules and accept concise t
 })
 
 test_that("warning-only input checks accept data and are not rerun on the candidate", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   calls <- 0L
@@ -244,6 +251,7 @@ test_that("warning-only input checks accept data and are not rerun on the candid
 })
 
 test_that("config ownership and exact result collection survive later releases", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   config <- dr_lake_config(
     dr_registry_duckdb(file.path(root, "lake.db")),
@@ -263,6 +271,7 @@ test_that("config ownership and exact result collection survive later releases",
 })
 
 test_that("database source factories open once and close before returning", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   calls <- 0L
@@ -316,6 +325,7 @@ test_that("pointblank builds and checks once before any raw write", {
 })
 
 test_that("cache is explicit and returns original checked contract evidence", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   calls <- 0L
@@ -350,6 +360,7 @@ test_that("cache is explicit and returns original checked contract evidence", {
 })
 
 test_that("reader failure retains one durable run and immutable original", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(file.path(root, "lake"))
   withr::defer(dr_close_lake(lake))
@@ -372,6 +383,7 @@ test_that("reader failure retains one durable run and immutable original", {
 })
 
 test_that("pinned release sources retain their exact lineage in ingestion", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   original <- dr_ingest(data.frame(id = 1L), lake, "original")
@@ -418,6 +430,7 @@ test_that("single local Parquet input keeps original bytes before checking", {
 })
 
 test_that("ingestion refuses invalid execution options and approved asset reuse", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   data <- data.frame(id = 1L)
@@ -429,6 +442,7 @@ test_that("ingestion refuses invalid execution options and approved asset reuse"
 })
 
 test_that("product ingestion retains its input contract and quality before RAW", {
+  skip_if_not_installed("duckdb")
   config <- dr_lake_config(path = file.path(withr::local_tempdir(), "lake"))
   orders <- data.frame(id = 1L, amount = 10)
   specification <- dr_product("orders", orders, code_version = "delivery-v1") |>
@@ -501,6 +515,7 @@ test_that("unsupported product ingestion fails before source or destination I/O"
 })
 
 test_that("data-first ingestion has a local default and checks before creating it", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   withr::local_dir(root)
   orders <- data.frame(id = 1L)

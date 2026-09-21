@@ -48,6 +48,27 @@ defines preparation in step order. A **workflow** binds these definitions to
 sources and a target. Definitions do no I/O. `dr_trial()` checks without writing;
 `dr_run()` executes the configured target. `dr_collect()` retrieves the output.
 
+
+## Start with the essentials
+
+Start with twelve functions: `dr_product()`, `dr_contract()`,
+`dr_add_contract()`, `dr_add_quality()`, `dr_recipe()`, `dr_step_mutate()`,
+`dr_workflow()`, `dr_add_product()`, `dr_add_recipe()`, `dr_trial()`,
+`dr_collect()` and `dr_publish()`. Add specialized components as your workflow grows.
+
+![Products define requirements; recipes define preparation; workflows connect them to a delivery and execution.](vignettes/figures/composition-architecture.svg)
+
+| Your goal | Function |
+|-----------|----------|
+| Check a delivery without framework writers | `dr_trial()` |
+| Execute the configured sources, checks and destination | `dr_run()` |
+| Save checked output, using a local lake if no target is set | `dr_publish()` |
+| Deliver data directly into an existing lake | `dr_ingest()` from `dataraft.lake` |
+| Retrieve output after a successful run | `dr_collect()` |
+
+Start with [why DataRaft](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html)
+and the [guided introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html).
+
 ## Packages
 
 | Package | Responsibility |

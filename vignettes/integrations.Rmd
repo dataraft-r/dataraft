@@ -31,3 +31,15 @@ Conditions inherit from `dataraft_error` and a subsystem class, such as
 `dataraft_error_contract` or `dataraft_error_lake`. More specific conditions can
 carry a parent condition or execution result. Inspect those fields before
 retrying; a failed contract is not a transient connection failure.
+
+
+Missing optional packages raise `dataraft_error_dependency`, with `package` and
+`purpose` fields and an installation hint. Known storage connection and writer-lock
+failures additionally inherit from `dataraft_error_backend`; existing subsystem
+classes remain available. These classes describe the failure, not a promise that
+retrying is safe. Unknown extension errors retain their original conditions.
+
+A blocked `dr_collect()` carries `condition$result` and `condition$checks`, just
+like a failed run. Pass the condition or result to `dr_quality_errors()` to obtain
+locally retained rule exceptions. This also works for upstream failures and model
+members. Persisted quality reports contain diagnostic guidance, not raw exceptions.

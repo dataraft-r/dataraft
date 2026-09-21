@@ -103,6 +103,7 @@ test_that("real dbt builds and tests the starter project", {
 })
 
 test_that("RAW starter binds ingestion releases without creating dbt seeds", {
+  skip_if_not_installed("duckdb")
   skip_if_not_installed("yaml")
   root <- withr::local_tempdir()
   config <- dr_lake_config(

@@ -1,4 +1,5 @@
 test_that("config release sources read approved dbt output without registry changes", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   lake <- dr_open_lake(file.path(root, "lake"))
   withr::defer(dr_close_lake(lake))
@@ -65,6 +66,7 @@ test_that("config release sources read approved dbt output without registry chan
 })
 
 test_that("config source pins remain unchanged after later publications", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   config <- lake$config
@@ -82,6 +84,7 @@ test_that("config source pins remain unchanged after later publications", {
 })
 
 test_that("latest is resolved once and records that release on both source forms", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   accepted <- dr_ingest(data.frame(id = 1L), lake, "orders")
@@ -115,6 +118,7 @@ test_that("latest is resolved once and records that release on both source forms
 })
 
 test_that("config source provenance survives publication into a different lake", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   original <- dr_open_lake(file.path(root, "source"))
   withr::defer(dr_close_lake(original))
@@ -137,6 +141,7 @@ test_that("config source provenance survives publication into a different lake",
 })
 
 test_that("construction and validation create no storage and reject invalid inputs", {
+  skip_if_not_installed("duckdb")
   root <- file.path(withr::local_tempdir(), "absent")
   config <- dr_lake_config(
     dr_registry_duckdb(file.path(root, "lake.db")),
@@ -172,6 +177,7 @@ test_that("construction and validation create no storage and reject invalid inpu
 })
 
 test_that("read-only failures preserve existing files and release handles close", {
+  skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   path <- file.path(root, "empty.db")
   con <- DBI::dbConnect(duckdb::duckdb(), path)
@@ -213,6 +219,7 @@ test_that("read-only failures preserve existing files and release handles close"
 })
 
 test_that("config sources reuse the same publication lake without a second attachment", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   config <- lake$config
@@ -250,6 +257,7 @@ test_that("config sources reuse the same publication lake without a second attac
 })
 
 test_that("release-source subclasses keep their custom read method", {
+  skip_if_not_installed("duckdb")
   lake <- dr_open_lake(withr::local_tempdir())
   withr::defer(dr_close_lake(lake))
   source <- dr_source_release(lake$config, "custom")

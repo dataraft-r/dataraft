@@ -80,6 +80,7 @@ test_that("catalog exports only metadata and constructs a read-only app", {
 })
 
 test_that("identifiers cannot inject SQL", {
+  skip_if_not_installed("duckdb")
   expect_error(
     dr_contract(
       "bad; DROP TABLE",
