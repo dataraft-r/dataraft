@@ -59,6 +59,7 @@ reference:
       - dr_extract_recipe
       - dr_incidents
       - dr_inspect
+      - dr_last_failure
       - dr_lineage
       - dr_lookup_spec
       - dr_model
@@ -134,6 +135,8 @@ reference:
       - dr_sql_transform
       - dr_target_database
       - dr_target_parquet
+      - dr_target_rds
+      - dr_source_rds
       - dr_target_pins
   - title: Metrics and frozen reports
     contents:
@@ -166,4 +169,4 @@ reference:
       - dr_freshness
 articles:
   - title: DataRaft
-    contents: [why-dataraft, get-started, integrations, guarantees]
+    contents: [why-dataraft, get-started, integrations, guarantees, relational-insurance]

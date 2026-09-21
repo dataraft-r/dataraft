@@ -1,5 +1,7 @@
 # dataraft 0.1.0.9000
 
+* Re-export session failure diagnostics and versioned RDS storage. Restore the relational insurance guide; keep component tests with their implementations.
+
 * Add a guided API reference, motivation vignette, execution-path guide and local pins example. Move component unit tests to their owners and support matching component branches in pull-request CI.
 
 * Start the DataRaft package family with the `dr_` API.

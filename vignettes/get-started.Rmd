@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = FALSE)
 ```
 
 ```{r failure}
@@ -69,24 +69,25 @@ Raw exception text is not included in exported HTML or JSON quality reports.
 
 ## Save locally without DuckDB
 
-The existing pins adapter can write RDS files to a local versioned board. This
-needs `pins` and `dataraft.adapters`, but does not need DuckDB. Use
-`install.packages("pins")` to install the optional engine.
+`dr_target_rds()` writes versioned RDS releases using only R and the hard
+DataRaft dependencies. Keep the returned version to reproduce a delivery.
 
-```{r local-pins, eval=requireNamespace("pins", quietly=TRUE)}
-folder <- tempfile("dataraft-board-")
-board <- pins::board_folder(folder, versioned = TRUE)
-target <- dr_target_pins(board, "orders", type = "rds")
-saved <- dr_publish(flow, data = next_delivery, to = target)
+```{r local-rds}
+folder <- tempfile("dataraft-rds-")
+saved <- dr_publish(flow, data = next_delivery, to = dr_target_rds(folder))
 reference <- saved$outputs$version
-restored <- dr_read_source(dr_source_pins(board, "orders", version = reference))
+restored <- dr_read_source(dr_source_rds(folder, version = reference))
 stopifnot(sum(restored$amount) == 150)
 unlink(folder, recursive = TRUE)
 ```
 
-Pins versions are board versions. They do not provide the lake's coordinated
-publication, relational transactions or frozen-report registry. Use
-`dataraft.lake` and `dataraft.metrics` when those guarantees are required.
+The adapter serializes local writers with a directory lock and never overwrites
+an existing version. It does not provide lake transactions across tables or a
+frozen-report registry. Use `dataraft.lake` when those guarantees are required.
+
+After a failed pipe, use `result <- dr_last_failure()` to recover its checks
+without repeating source reads. Clear the retained reference with
+`dr_last_failure(clear = TRUE)` when you are done.
 
 ## Inspect a definition before execution
 

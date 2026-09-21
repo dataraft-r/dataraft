@@ -12,7 +12,7 @@ dir.create("coverage", showWarnings = FALSE)
 coverage <- tryCatch(
   covr::package_coverage(
     path = file.path("packages", paste0("dataraft.", component)),
-    type = "none",
+    type = "all",
     code = code,
     quiet = FALSE,
     clean = FALSE,

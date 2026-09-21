@@ -6,7 +6,7 @@
 \alias{dataraft-package}
 \title{DataRaft: modular checked data products}
 \description{
-Install the family together, or use each component package independently.
+Install the family together, or install a component with its declared dependencies.
 }
 \section{Choose an execution path}{
 

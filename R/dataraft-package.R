@@ -1,6 +1,6 @@
 #' DataRaft: modular checked data products
 #'
-#' Install the family together, or use each component package independently.
+#' Install the family together, or install a component with its declared dependencies.
 #' @section Choose an execution path:
 #' Use [dr_trial()] to check a delivery without configured writers, [dr_run()]
 #' to execute the configured target, or [dr_publish()] to save output with a
@@ -501,3 +501,15 @@ dataraft.lake::dr_write_data
 #' @importFrom dataraft.core dr_write_target
 #' @export
 dataraft.core::dr_write_target
+
+#' @importFrom dataraft.core dr_last_failure
+#' @export
+dataraft.core::dr_last_failure
+
+#' @importFrom dataraft.adapters dr_target_rds
+#' @export
+dataraft.adapters::dr_target_rds
+
+#' @importFrom dataraft.adapters dr_source_rds
+#' @export
+dataraft.adapters::dr_source_rds
