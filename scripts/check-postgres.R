@@ -2,10 +2,31 @@
 # The database must be empty; never point this script at an existing lake.
 library(dataraft)
 stopifnot(nzchar(Sys.getenv("DATARAFT_TEST_PG_CONNECTION")))
-root <- normalizePath("check", mustWork = FALSE)
+root <- normalizePath("check/postgres", mustWork = FALSE)
 dir.create(root, recursive = TRUE, showWarnings = FALSE)
-root <- tempfile("postgres-", tmpdir = normalizePath(root))
+root <- tempfile("run-", tmpdir = normalizePath(root))
 dir.create(root)
+publication_number <- 0L
+publish <- function(...) {
+  args <- list(...)
+  publication_number <<- publication_number + 1L
+  label <- paste("Publication", publication_number, "asset", args[[1]]$id)
+  cat(label, "\n")
+  tryCatch(do.call(dataraft::dr_publish, args), error = function(e) {
+    condition <- e$result$error
+    if (is.null(condition)) {
+      condition <- e
+    }
+    details <- list(
+      phase = label,
+      error_class = class(condition),
+      message = conditionMessage(condition)
+    )
+    print(details)
+    saveRDS(details, file.path(root, "main-error.rds"))
+    stop(e)
+  })
+}
 config <- dr_lake_config(
   dr_registry_postgres("DATARAFT_TEST_PG_CONNECTION", lock_timeout = 30),
   dr_storage_local(file.path(root, "data")),
@@ -88,12 +109,11 @@ dr_close_lake(lake)
 # Nested publication must not wait on a lock already owned by this process.
 upstream <- dr_product("upstream", data.frame(id = 1L)) |> dr_set_target(config)
 stopifnot(
-  dr_publish(dr_product("downstream", upstream), to = config)$status ==
-    "published"
+  publish(dr_product("downstream", upstream), to = config)$status == "published"
 )
 # Force a stale correction AFTER its initial previous check and BEFORE candidate
 # construction: checking only the later candidate parent would accept this write.
-first <- dr_publish(dr_product("shared", data.frame(id = 1L)), to = config)
+first <- publish(dr_product("shared", data.frame(id = 1L)), to = config)
 stale_ready <- file.path(root, "stale-ready")
 stale_go <- file.path(root, "stale-go")
 a <- launch(
@@ -108,7 +128,7 @@ a <- launch(
   3
 )
 await_ready(stale_ready)
-newer <- dr_publish(
+newer <- publish(
   dr_product("shared", data.frame(id = 3L)),
   to = config,
   previous = first
@@ -142,7 +162,7 @@ while (!file.exists(ready) && Sys.time() < deadline) {
 stopifnot(file.exists(ready))
 # A held asset lock allows another asset to finish, not just to open a connection.
 stopifnot(
-  dr_publish(
+  publish(
     dr_product("unrelated", data.frame(id = 1L)),
     to = config
   )$status ==
@@ -151,7 +171,7 @@ stopifnot(
 short_wait <- config
 short_wait$catalog$lock_timeout <- 0
 busy <- tryCatch(
-  dr_publish(dr_product("busy", data.frame(id = 1L)), to = short_wait),
+  publish(dr_product("busy", data.frame(id = 1L)), to = short_wait),
   error = identity
 )
 stopifnot(inherits(busy$result$error, "dr_writer_busy"))
@@ -161,7 +181,7 @@ dr_close_lake(reader)
 holder$process$kill()
 holder$process$wait(timeout = 10000)
 stopifnot(
-  dr_publish(
+  publish(
     dr_product("busy", data.frame(id = 1L)),
     to = config
   )$status ==
@@ -180,8 +200,8 @@ model <- dm::dm(
 ) |>
   dm::dm_add_pk(customers, id) |>
   dm::dm_add_fk(policies, id, customers)
-original <- dr_publish(dr_product("portfolio", model), to = lake)
-blocked <- dr_publish(
+original <- publish(dr_product("portfolio", model), to = lake)
+blocked <- publish(
   dr_product("portfolio", model),
   to = lake,
   sources = list(customers = data.frame(id = 1L)),

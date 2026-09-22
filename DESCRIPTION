@@ -20,8 +20,8 @@ Config/Needs/website: pkgdown
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
-Remotes: dataraft-r/dataraft.core@66ba763ce6700704ee5c07e01e431f731c244e83,
-    dataraft-r/dataraft.lake@d0adbfc7325e9ea142e4798e84837314a71f0d9d,
+Remotes: dataraft-r/dataraft.core@0a3de2afc0990cfb98df7240dd3486d44916a0ad,
+    dataraft-r/dataraft.lake@1f8dc679f4265231f69cad8db4c0dcf0a3bdf0fa,
     dataraft-r/dataraft.adapters@2c770354c67476919e534c6bfe82682e51c1bf51,
     dataraft-r/dataraft.metrics@8e632707df88da72fef7f459d87eb71ec367c22b,
     dataraft-r/dataraft.dbt@c83d9195693a30f99e1429e5df12f9f04cbdcb75,
