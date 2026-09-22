@@ -39,7 +39,7 @@ lake publication, measurement and catalogs in the metapackage.
 The metapackage CI checks immutable component commits in `family-lock.json`.
 The nightly workflow separately checks sibling `main` branches. Publish reviewed
 component commits before updating the compatibility set; see
-[pin maintenance](docs/pin-maintenance.md). Component CI remains responsible for
+[pin maintenance](https://github.com/dataraft-r/dataraft/blob/main/docs/pin-maintenance.md). Component CI remains responsible for
 independent checks.
 
 Public S3 protocols are supported extension interfaces. Exported helpers marked
