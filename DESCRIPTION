@@ -25,7 +25,7 @@ Remotes: dataraft-r/dataraft.core@6edadf92d570742bcb428bef5aa83f0c6d7b0198,
     dataraft-r/dataraft.adapters@2c770354c67476919e534c6bfe82682e51c1bf51,
     dataraft-r/dataraft.metrics@8e632707df88da72fef7f459d87eb71ec367c22b,
     dataraft-r/dataraft.dbt@c83d9195693a30f99e1429e5df12f9f04cbdcb75,
-    dataraft-r/dataraft.catalog@278d904b881c862e442ac744e78c2a77139285dd
+    dataraft-r/dataraft.catalog@11c1f5f3705f83d609250a6c954012a2b430ad75
 URL: https://dataraft-r.github.io/dataraft/,
     https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues
