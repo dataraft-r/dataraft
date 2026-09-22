@@ -1,6 +1,7 @@
 test_that("reviewing a blocked delivery never writes its RDS target", {
   target <- withr::local_tempfile()
   product <- dr_product("policies", data.frame(premium = c(-2, 10))) |>
+    dr_add_contract(c(premium = "numeric")) |>
     dr_add_quality(list(nonnegative = ~ premium >= 0)) |>
     dr_set_target(dr_target_rds(target))
   result <- dr_trial(product, stop_on_failure = FALSE)

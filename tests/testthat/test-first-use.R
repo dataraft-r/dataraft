@@ -7,6 +7,10 @@ test_that("delivery names survive simultaneous corrections without changing defi
   ) |>
     dr_add_lookup(policies, by = "policy") |>
     dr_add_lookup(brokers, by = "company") |>
+    dr_add_contract(c(
+      policy = "integer", amount = "numeric",
+      company = "character", channel = "character"
+    )) |>
     dr_add_quality(~ amount >= 0)
   original <- definition
   expect_snapshot(
@@ -47,7 +51,8 @@ test_that("lookup names can be explicit and cannot silently select another deliv
       data.frame(id = 1L, value = 10),
       by = "id",
       name = "contracts"
-    )
+    ) |>
+    dr_add_contract(c(id = "integer", value = "numeric"))
   expect_equal(
     dr_collect(dr_trial(
       definition,
@@ -81,6 +86,7 @@ test_that("trial retains a failed result and row diagnostics select a single rul
     "payments",
     data.frame(id = 1:3, amount = c(100, 200, -50))
   ) |>
+    dr_add_contract(c(id = "integer", amount = "numeric")) |>
     dr_add_quality(~ amount >= 0, name = "nonnegative")
   result <- dr_trial(definition)
   expect_identical(result$status, "blocked")
@@ -94,9 +100,11 @@ test_that("trial retains a failed result and row diagnostics select a single rul
 })
 
 test_that("a shared product keeps one delivery name and updates every reference", {
-  source <- dr_product("input", data.frame(id = 1L, amount = 10))
+  source <- dr_product("input", data.frame(id = 1L, amount = 10)) |>
+    dr_add_contract(c(id = "integer", amount = "numeric"))
   definition <- dr_product("joined", source) |>
-    dr_add_lookup(source, by = "id")
+    dr_add_lookup(source, by = "id") |>
+    dr_add_contract(c(id = "integer", amount.x = "numeric", amount.y = "numeric"))
   expect_output(dr_explain(definition), "Deliveries: input")
   result <- dr_trial(
     definition,
@@ -110,7 +118,7 @@ test_that("overall and grouped measurements make the requested layout clear", {
   result <- dr_trial(dr_product(
     "payments",
     data.frame(company = c("North", "South"), amount = c(100, 50))
-  ))
+  ) |> dr_add_contract(c(company = "character", amount = "numeric")))
   definitions <- dr_metric_set(
     "payments",
     total = sum(amount),
@@ -126,4 +134,21 @@ test_that("overall and grouped measurements make the requested layout clear", {
     metrics = definitions,
     by = character()
   )))
+})
+
+test_that("contract-free exploration is collectable without claiming validation", {
+  data <- data.frame(id = 1L, amount = 10)
+  written <- FALSE
+  product <- dr_product("exploration", data) |>
+    dr_set_target(function(data, context) {
+      written <<- TRUE
+      list()
+    })
+  result <- dr_trial(product)
+  expect_identical(result$status, "unvalidated")
+  expect_equal(dr_collect(result), data)
+  expect_false(written)
+  attempted <- dr_run(product, stop_on_failure = FALSE)
+  expect_identical(attempted$status, "unvalidated")
+  expect_false(written)
 })

@@ -1041,3 +1041,24 @@ dataraft.core::dr_remove_source
 #' @importFrom dataraft.core dr_update_source
 #' @export
 dataraft.core::dr_update_source
+
+#' @rdname dr_verify_releases
+#' @inherit dataraft.lake::dr_verify_releases title description details return params sections examples
+#' @seealso [dataraft.lake::dr_verify_releases()]
+#' @importFrom dataraft.lake dr_verify_releases
+#' @export
+dataraft.lake::dr_verify_releases
+
+#' @rdname dr_contract_policy
+#' @inherit dataraft.core::dr_contract_policy title description details return params sections examples
+#' @seealso [dataraft.core::dr_contract_policy()]
+#' @importFrom dataraft.core dr_contract_policy
+#' @export
+dataraft.core::dr_contract_policy
+
+#' @rdname dr_contract_meta
+#' @inherit dataraft.core::dr_contract_meta title description details return params sections examples
+#' @seealso [dataraft.core::dr_contract_meta()]
+#' @importFrom dataraft.core dr_contract_meta
+#' @export
+dataraft.core::dr_contract_meta

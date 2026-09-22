@@ -8,10 +8,24 @@ vignette: >
 ---
 
 
-A successful in-memory trial proves that its retained input passed the configured
-checks. It does not reserve a future source version or promise that a later run
-will see the same external data. Definition construction does not read or write
+A passed in-memory trial establishes that its retained input passed the declared
+contract and configured checks. Without a contract, the result is `unvalidated`:
+retained data can be collected for exploration, but the write gate refuses
+publication. A schema inferred from the same data is descriptive, not independent
+validation. Existing scripts that publish contract-free products must add explicit
+contracts before publication.
+
+A trial does not reserve a future source version, check target permissions or
+capacity, or rule out publication conflicts. A later run can see different
+external data. Within generic lazy execution, quality checks and the writer use
+the same materialized candidate. Definition construction does not read or write
 sources. Execution can do both.
+
+Recognized random and time-dependent quality predicates require an explicit
+volatility declaration. Volatile evidence is not reproducible approval or reusable
+cache evidence. Static analysis detects known calls; it cannot prove determinism
+of arbitrary closures, hidden dependencies or external services. Two identical
+evaluations would not establish that proof either.
 
 Lake releases preserve published versions during ordinary publication. Publication
 coordinates registry state and storage, but a process crash can leave intermediate
@@ -35,3 +49,16 @@ undeletable storage. Operators must define retention for data, registry metadata
 quality evidence, frozen reports, backups and downstream catalogs. Deleting one
 release does not erase its copies. Resolve deletion requests across those stores;
 DataRaft does not provide a universal subject-erasure operation.
+
+Use `dr_verify_releases(lake, release_ids = NULL)` to compare stored releases
+with their recorded row counts and content fingerprints. Row ordering does not
+affect the fingerprint. Older releases migrated without an original fingerprint
+are explicitly `unverified`; migration cannot retroactively prove their history.
+Verification scans selected data and keeps one digest per row in memory. The
+fingerprint uses the DBI representation and is not guaranteed portable across R
+or driver serialization changes.
+
+This detects accidental mutation relative to the registry. An administrator able
+to change both data and registry can also change the recorded fingerprint. It is
+not an independent authenticity proof. Direct database clients must be quiescent
+during verification; library coordination cannot constrain arbitrary SQL clients.

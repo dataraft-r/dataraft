@@ -62,6 +62,10 @@ jobs:
           echo "DATARAFT_DBT_EXECUTABLE=$RUNNER_TEMP/dataraft-dbt/bin/dbt" >> "$GITHUB_ENV"
       - name: Validate compatible family versions
         run: python scripts/check-family.py
+      - name: Test immutable dependency reference generation
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python scripts/test-sync-family-remotes.py
       - name: Require every declared optional dependency
         run: Rscript scripts/check-optional.R
       - name: Check package

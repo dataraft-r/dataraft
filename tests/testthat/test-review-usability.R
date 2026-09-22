@@ -5,12 +5,14 @@ test_that("trial disables writers and catalogs throughout dependencies", {
     list()
   }
   upstream <- dr_product("input", data.frame(amount = c(10, 20))) |>
+    dr_add_contract(c(amount = "numeric")) |>
     dr_set_target(target)
   product <- dr_product(
     "orders",
     upstream,
     execution = dr_execution_config(to = tempfile())
   ) |>
+    dr_add_contract(c(amount = "numeric")) |>
     dr_add_quality(list(positive = ~ amount >= 0))
   before <- product
   result <- dr_trial(product)
@@ -48,6 +50,7 @@ test_that("quality rows identify predicate, required, duplicate and lookup failu
   expect_equal(dr_quality_rows(failed, "not_null:amount")$id, 3L)
   expect_equal(dr_quality_rows(failed, "unique_key")$id, c(1L, 1L))
   lookup <- dr_product("orders", data.frame(customer = c("a", "missing"))) |>
+    dr_add_contract(c(customer = "character")) |>
     dr_add_lookup(data.frame(customer = "a"), by = "customer")
   failed <- dr_trial(lookup, stop_on_failure = FALSE)
   expect_equal(dr_quality_rows(failed, "lookup")$customer, "missing")
@@ -81,6 +84,7 @@ test_that("failed lake candidates support explicit row diagnosis after owned con
   skip_if_not_installed("duckdb")
   root <- withr::local_tempdir()
   definition <- dr_product("orders", data.frame(amount = c(10, -2))) |>
+    dr_add_contract(c(amount = "numeric")) |>
     dr_add_quality(list(positive = ~ amount >= 0))
   failed <- dr_publish(definition, to = root, stop_on_failure = FALSE)
   expect_equal(dr_quality_rows(failed, "positive")$amount, -2)

@@ -46,7 +46,10 @@ test_that("full formulas distinguish metric definitions", {
 test_that("all supported data pronouns enforce the missing-value policy", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
-  dr_write_data(f$lake, data.frame(amount = c(10, NA)), "nullable")
+  dr_write_data(
+    f$lake, data.frame(amount = c(10, NA)), "nullable",
+    contract = dr_contract(columns = c(amount = "numeric"), required = character())
+  )
   expressions <- list(
     rlang::expr(sum(amount, na.rm = TRUE)),
     rlang::expr(sum(.data$amount, na.rm = TRUE)),
@@ -107,7 +110,11 @@ test_that("custom metric input declarations are optional and validated", {
   dr_write_data(
     f$lake,
     data.frame(amount = 10, optional = NA_character_),
-    "nullable"
+    "nullable",
+    contract = dr_contract(
+      columns = c(amount = "numeric", optional = "character"),
+      required = "amount"
+    )
   )
   metric <- dr_metric(
     "custom",
@@ -139,7 +146,10 @@ test_that("read-only attachments protect data and metadata while supporting anal
     dr_close_lake(lake)
     unlink(root, recursive = TRUE)
   })
-  dr_write_data(lake, data.frame(id = 1L, amount = 10), "orders")
+  dr_write_data(
+    lake, data.frame(id = 1L, amount = 10), "orders",
+    contract = dr_contract(columns = c(id = "integer", amount = "numeric"))
+  )
   metric <- dr_metric(
     "total",
     "orders",

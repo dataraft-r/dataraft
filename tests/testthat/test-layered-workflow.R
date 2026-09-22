@@ -95,12 +95,17 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
     customer_id = c(101L, 101L, 102L),
     amount = c(10.25, 20.5, 30.25)
   )
+  raw_contract <- dr_contract(
+    columns = c(order_id = "integer", customer_id = "integer", amount = "numeric"),
+    key = "order_id"
+  )
   csv <- file.path(directory, "orders.csv")
   utils::write.csv(first_data, csv, row.names = FALSE)
   first_raw <- dr_ingest(
     csv,
     config,
     "orders",
+    contract = raw_contract,
     quality = list(nonnegative = ~ amount >= 0),
     business_date = as.Date("2026-09-01")
   )
@@ -159,7 +164,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
   if (!layered_expect_build(first_build, first_raw)) {
     return(invisible(NULL))
   }
-  first <- dr_dbt_publish(config, first_build, "customer_revenue")
+  first <- dr_dbt_publish(config, first_build, "customer_revenue", contract = mart_contract)
   expect_identical(first$status, "published")
   expect_null(first$output_lake)
   expect_identical(first$outputs$schema, "marts")
@@ -198,6 +203,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
     config,
     "orders",
     reader = prepared_excel,
+    contract = raw_contract,
     quality = list(nonnegative = ~ amount >= 0),
     business_date = as.Date("2026-09-02")
   )
@@ -212,7 +218,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
   if (!layered_expect_build(second_build, second_raw)) {
     return(invisible(NULL))
   }
-  second <- dr_dbt_publish(config, second_build, "customer_revenue")
+  second <- dr_dbt_publish(config, second_build, "customer_revenue", contract = mart_contract)
   expect_identical(second$status, "published")
   expect_false(identical(first$release_id, second$release_id))
   second_values <- dr_collect(second) |> dplyr::arrange(customer_id)
@@ -231,6 +237,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
     invalid_csv,
     config,
     "orders",
+    contract = raw_contract,
     quality = list(nonnegative = ~ amount >= 0),
     stop_on_failure = FALSE
   )
@@ -238,6 +245,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
     invalid,
     config,
     "orders",
+    contract = raw_contract,
     quality = dr_pointblank_checks("nonnegative", function(data) {
       pointblank::create_agent(data) |>
         pointblank::col_vals_gte("amount", 0)
@@ -303,6 +311,7 @@ test_that("CSV, Excel and API deliveries retain approved outputs across layered 
     dr_source_api(request),
     config,
     "orders",
+    contract = raw_contract,
     quality = list(nonnegative = ~ amount >= 0),
     business_date = as.Date("2026-09-03")
   )

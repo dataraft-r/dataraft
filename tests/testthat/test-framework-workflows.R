@@ -6,6 +6,7 @@ test_that("simple partition writes retain months and delivery evidence", {
       f$lake,
       data.frame(month = as.Date(date), amount = amount),
       "monthly",
+      contract = dr_contract(columns = c(month = "Date", amount = "numeric")),
       partition_by = "month",
       business_date = date
     )
@@ -44,6 +45,7 @@ test_that("simple partition writes retain months and delivery evidence", {
     f$lake,
     data.frame(month = as.Date("2026-08-31"), amount = 375),
     "monthly",
+    contract = dr_contract(columns = c(month = "Date", amount = "numeric")),
     business_date = "2026-08-31"
   )
   expect_equal(check()$status, "missing")
@@ -54,12 +56,12 @@ test_that("simple partition writes retain months and delivery evidence", {
   )
 })
 
-test_that("automatic numeric schemas widen without weakening explicit integer contracts", {
+test_that("declared numeric schemas allow widening without weakening integer contracts", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
-  previous <- automatic_schema(
+  previous <- dr_contract(
     "previous",
-    c(id = "integer", amount = "integer")
+    columns = c(id = "integer", amount = "numeric")
   )
   first <- dr_ingest_data(
     f$lake,
@@ -72,7 +74,8 @@ test_that("automatic numeric schemas widen without weakening explicit integer co
   second <- dr_write_data(
     f$lake,
     data.frame(id = 1L, amount = 10.5),
-    "previous"
+    "previous",
+    contract = previous
   )
   expect_equal(second$status, "published")
   expect_equal(
@@ -140,8 +143,11 @@ test_that("release comparisons count all differences while bounding previews", {
     id = c(1L, 3L, 4L, 6L, 7L),
     amount = c(11, NA, 41, 60, 70)
   )
-  a <- dr_write_data(f$lake, before, "orders")
-  b <- dr_write_data(f$lake, after, "orders")
+  contract <- dr_contract(
+    columns = c(id = "integer", amount = "numeric"), required = "id"
+  )
+  a <- dr_write_data(f$lake, before, "orders", contract = contract)
+  b <- dr_write_data(f$lake, after, "orders", contract = contract)
   diff <- dr_compare(f$lake, "orders", key = "id", limit = 1)
   expect_equal(
     diff$counts,
@@ -182,9 +188,13 @@ test_that("comparisons reject ambiguous keys and report schema changes", {
   a <- dr_write_data(
     f$lake,
     data.frame(id = c(1L, 1L), amount = 1:2),
-    "duplicates"
+    "duplicates",
+    contract = dr_contract(columns = c(id = "integer", amount = "integer"))
   )
-  b <- dr_write_data(f$lake, data.frame(id = 1:2, amount = 1:2), "duplicates")
+  b <- dr_write_data(
+    f$lake, data.frame(id = 1:2, amount = 1:2), "duplicates",
+    contract = dr_contract(columns = c(id = "integer", amount = "integer"))
+  )
   expect_error(
     dr_compare(f$lake, "duplicates", key = "id"),
     "unique, non-missing"
@@ -222,9 +232,10 @@ test_that("source functions fetch once and archive the received data", {
     calls <<- calls + 1L
     data.frame(id = 1L, amount = calls)
   }
-  first <- dr_write_data(f$lake, fetch, "api_orders")
+  contract <- dr_contract(columns = c(id = "integer", amount = "integer"))
+  first <- dr_write_data(f$lake, fetch, "api_orders", contract = contract)
   expect_equal(calls, 1)
-  dr_write_data(f$lake, fetch, "api_orders")
+  dr_write_data(f$lake, fetch, "api_orders", contract = contract)
   expect_equal(calls, 2)
   expect_equal(dr_read_release(f$lake, "api_orders")$amount, 2)
   expect_equal(
@@ -319,12 +330,13 @@ test_that("recovery previews and protects live writers", {
 test_that("staging recovery enables retry while preserving published releases", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
-  published <- dr_write_data(f$lake, data.frame(id = 1L), "orders")
+  contract <- dr_contract(columns = c(id = "integer"))
+  published <- dr_write_data(f$lake, data.frame(id = 1L), "orders", contract = contract)
   slot <- file.path(f$lake$config$landing, ".dataraft-staging", "orders")
   dir.create(slot, recursive = TRUE)
   writeLines("orphan", file.path(slot, "delivery.rds"))
   expect_error(
-    dr_write_data(f$lake, data.frame(id = 2L), "orders"),
+    dr_write_data(f$lake, data.frame(id = 2L), "orders", contract = contract),
     "Staging already exists"
   )
   expect_equal(dr_recover(f$lake, staging_assets = "orders")$writer, "unknown")
@@ -338,7 +350,7 @@ test_that("staging recovery enables retry while preserving published releases", 
     "removed_staging"
   )
   expect_equal(
-    dr_write_data(f$lake, data.frame(id = 2L), "orders")$status,
+    dr_write_data(f$lake, data.frame(id = 2L), "orders", contract = contract)$status,
     "published"
   )
   expect_equal(dr_read_release(f$lake, "orders", published$release_id)$id, 1L)
@@ -382,6 +394,7 @@ test_that("mutable source factories cannot authorize cached publications", {
     function() state$data,
     code_version = "source-v1"
   ) |>
+    dr_add_contract(c(amount = "numeric")) |>
     dr_set_target(f$lake)
   blocked <- dr_run(product, cache = TRUE, stop_on_failure = FALSE)
   expect_identical(blocked$status, "error")

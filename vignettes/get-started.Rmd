@@ -47,6 +47,27 @@ and quality failures are available in the result; `dr_quality_rows()` exposes
 retained failing rows. Set a destination with `dr_set_target()` and execute with
 `dr_run()` once the trial passes. Quality gates run before the destination writer.
 
+Without an explicit contract, an exploratory result is `unvalidated`. You can
+collect its retained data, but it is not a passed validation and no target is
+written. Add a declared contract, as above, before publishing. Inferred column
+types describe the current delivery; they do not independently check it.
+
+A passed trial checks its retained delivery. It does not check destination
+permissions, capacity or a future publication conflict, and a later run can read
+a different external delivery. Treat trial and publication outcomes separately.
+
+For a reusable contract, declare its schema first and add policy and ownership
+in small steps. These constructors perform no I/O:
+
+```{r contract-composition}
+contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric")) |>
+  dr_contract_policy(allow_extra = FALSE) |>
+  dr_contract_meta(owner = "Analytics")
+```
+
+When revising an already registered contract, use `dr_update_contract()` and an
+explicit new version; construction helpers do not replace version review.
+
 Recipes own preparation in modular workflows. Products added with
 `dr_add_product()` must not carry embedded transformations. Recipe steps run in
 the order added, followed by output contract checks and quality rules.

@@ -40,6 +40,8 @@ reference:
       - dr_test_adapter
       - dr_product
       - dr_contract
+      - dr_contract_meta
+      - dr_contract_policy
       - dr_add_contract
       - dr_add_quality
       - dr_recipe
@@ -127,6 +129,7 @@ reference:
       - dr_open_lake
       - dr_read_release
       - dr_recover
+      - dr_verify_releases
       - dr_register
       - dr_registry
       - dr_registry_duckdb

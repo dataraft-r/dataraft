@@ -29,3 +29,28 @@ Do not replace SHAs with moving branches to make updates easier.
 The extension owns its desktop runtime pin. The umbrella owns the supported
 family compatibility set. Each component owns its independent test baseline.
 They serve different boundaries; an update does not imply every pin must move.
+
+## Generate dependency references from the reviewed lock
+
+After recording reviewed, published component SHAs and versions in the umbrella's
+`family-lock.json`, generate existing family `Remotes` and dependency minimum
+versions rather than editing each DESCRIPTION by hand:
+
+```sh
+python scripts/sync-family-remotes.py --check . ../dataraft.ide
+python scripts/sync-family-remotes.py . ../dataraft.ide
+python scripts/sync-family-remotes.py --check . ../dataraft.ide
+python scripts/test-sync-family-remotes.py
+```
+
+Pass each intended repository explicitly. With no paths, only this umbrella is
+checked or updated. `--check` reports drift without writing. The command preserves
+external remotes and package versions, adds no dependencies, and never fetches or
+resolves a moving branch. It validates all selected descriptions before writing.
+Inspect and commit the resulting diffs, then run the compatibility checks above.
+
+Component lock snapshots and the extension runtime manifest remain separately
+reviewed inputs. The generator does not replace an umbrella `self` reference with
+its own future commit hash: that would create a circular pin. A component needing
+an umbrella test baseline must select an already published immutable commit in
+its separate test configuration.

@@ -6,6 +6,9 @@ root <- normalizePath("check/postgres", mustWork = FALSE)
 dir.create(root, recursive = TRUE, showWarnings = FALSE)
 root <- tempfile("run-", tmpdir = normalizePath(root))
 dir.create(root)
+id_product <- function(id, data) {
+  dr_product(id, data) |> dr_add_contract(c(id = "integer"))
+}
 publication_number <- 0L
 publish <- function(...) {
   args <- list(...)
@@ -107,13 +110,13 @@ stopifnot(
 )
 dr_close_lake(lake)
 # Nested publication must not wait on a lock already owned by this process.
-upstream <- dr_product("upstream", data.frame(id = 1L)) |> dr_set_target(config)
+upstream <- id_product("upstream", data.frame(id = 1L)) |> dr_set_target(config)
 stopifnot(
-  publish(dr_product("downstream", upstream), to = config)$status == "published"
+  publish(id_product("downstream", upstream), to = config)$status == "published"
 )
 # Force a stale correction AFTER its initial previous check and BEFORE candidate
 # construction: checking only the later candidate parent would accept this write.
-first <- publish(dr_product("shared", data.frame(id = 1L)), to = config)
+first <- publish(id_product("shared", data.frame(id = 1L)), to = config)
 stale_ready <- file.path(root, "stale-ready")
 stale_go <- file.path(root, "stale-go")
 a <- launch(
@@ -129,7 +132,7 @@ a <- launch(
 )
 await_ready(stale_ready)
 newer <- publish(
-  dr_product("shared", data.frame(id = 3L)),
+  id_product("shared", data.frame(id = 3L)),
   to = config,
   previous = first
 )
@@ -163,7 +166,7 @@ stopifnot(file.exists(ready))
 # A held asset lock allows another asset to finish, not just to open a connection.
 stopifnot(
   publish(
-    dr_product("unrelated", data.frame(id = 1L)),
+    id_product("unrelated", data.frame(id = 1L)),
     to = config
   )$status ==
     "published"
@@ -171,7 +174,7 @@ stopifnot(
 short_wait <- config
 short_wait$catalog$lock_timeout <- 0
 busy <- tryCatch(
-  publish(dr_product("busy", data.frame(id = 1L)), to = short_wait),
+  publish(id_product("busy", data.frame(id = 1L)), to = short_wait),
   error = identity
 )
 stopifnot(inherits(busy$result$error, "dr_writer_busy"))
@@ -182,7 +185,7 @@ holder$process$kill()
 holder$process$wait(timeout = 10000)
 stopifnot(
   publish(
-    dr_product("busy", data.frame(id = 1L)),
+    id_product("busy", data.frame(id = 1L)),
     to = config
   )$status ==
     "published"
@@ -200,9 +203,15 @@ model <- dm::dm(
 ) |>
   dm::dm_add_pk(customers, id) |>
   dm::dm_add_fk(policies, id, customers)
-original <- publish(dr_product("portfolio", model), to = lake)
+model_contracts <- list(
+  customers = dr_contract(columns = c(id = "integer"), key = "id"),
+  policies = dr_contract(columns = c(id = "integer"), key = "id")
+)
+original <- publish(
+  dr_product("portfolio", model, contracts = model_contracts), to = lake
+)
 blocked <- publish(
-  dr_product("portfolio", model),
+  dr_product("portfolio", model, contracts = model_contracts),
   to = lake,
   sources = list(customers = data.frame(id = 1L)),
   stop_on_failure = FALSE
@@ -216,3 +225,33 @@ dr_close_lake(lake)
 cat(
   "PostgreSQL/DuckLake: overlapping preparation, ordered commits, stale correction, report identity, asset lock recovery and model gate passed.\n"
 )
+
+# Exercise the actual server locks from independent PostgreSQL sessions.
+# Shared preparation admits another publisher but excludes maintenance; the
+# exclusive side rejects publishers until its session releases the lock.
+local({
+  parameters <- dataraft.lake:::postgres_parameters(Sys.getenv("DATARAFT_TEST_PG_CONNECTION"))
+  contender <- do.call(DBI::dbConnect, c(list(drv = RPostgres::Postgres()), parameters))
+  on.exit(DBI::dbDisconnect(contender), add = TRUE)
+  test_lake <- dr_open_lake(config)
+  on.exit(dr_close_lake(test_lake), add = TRUE)
+  held <- function(exclusive) {
+    dataraft.lake:::acquire_maintenance_gate(test_lake, environment(), exclusive = exclusive)
+    opposite <- if (exclusive) "pg_try_advisory_lock_shared" else "pg_try_advisory_lock"
+    stopifnot(!DBI::dbGetQuery(contender, paste0("SELECT ", opposite, "(1953981815, 1) AS locked"))$locked[[1]])
+    if (!exclusive) {
+      stopifnot(DBI::dbGetQuery(contender, "SELECT pg_try_advisory_lock_shared(1953981815, 1) AS locked")$locked[[1]])
+      DBI::dbGetQuery(contender, "SELECT pg_advisory_unlock_shared(1953981815, 1)")
+    }
+  }
+  held(FALSE)
+  held(TRUE)
+  # A real external shared holder makes the maintenance API fail before DROP.
+  DBI::dbGetQuery(contender, "SELECT pg_advisory_lock_shared(1953981815, 1)")
+  test_lake$config$catalog$lock_timeout <- 0
+  busy <- tryCatch(dr_cleanup(test_lake, dry_run = FALSE), error = identity)
+  stopifnot(inherits(busy, "dr_writer_busy"))
+  DBI::dbGetQuery(contender, "SELECT pg_advisory_unlock_shared(1953981815, 1)")
+  stopifnot(is.data.frame(dr_cleanup(test_lake, dry_run = FALSE)))
+})
+cat("PostgreSQL maintenance gates: shared concurrency and exclusive exclusion passed.\n")

@@ -49,7 +49,9 @@ contract makes that typo visible after preparation.
 ```{r typo}
 preparation <- dr_recipe() |> dr_step_mutate(amont = round(amount, 2))
 unchecked <- dr_product("orders", first) |> dr_add_recipe(preparation)
-names(dr_collect(dr_trial(unchecked)))
+explored <- dr_trial(unchecked)
+stopifnot(identical(explored$status, "unvalidated"))
+names(dr_collect(explored))
 checked <- orders |> dr_add_source(first) |> dr_add_recipe(preparation)
 dr_quality_report(dr_trial(checked))
 ```

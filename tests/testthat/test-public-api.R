@@ -4,13 +4,14 @@ test_that("public functions use a package prefix without masking other grammars"
   expect_contains(exports, c(
     "dr_product", "dr_recipe", "dr_workflow",
     "dr_update_contract", "dr_extract_contract", "dr_remove_contract",
-    "dr_update_source", "dr_extract_source", "dr_remove_source"
+    "dr_update_source", "dr_extract_source", "dr_remove_source",
+    "dr_verify_releases", "dr_contract_policy", "dr_contract_meta"
   ))
 })
 
 test_that("collection preserves dplyr dispatch and ordinary result fields", {
   flow <- dr_workflow() |>
-    dr_add_product(dr_product("orders")) |>
+    dr_add_product(dr_product("orders") |> dr_add_contract(c(amount = "numeric"))) |>
     dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = amount * 2))
   result <- dr_trial(flow, data = data.frame(amount = c(10, 20)))
   expect_identical(result$status, "completed")

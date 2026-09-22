@@ -30,7 +30,8 @@ result <- tryCatch(
       dr_report_release(values, "same-report", code_version = "v1")
       list(status = "reported")
     } else {
-      product <- dr_product(job$asset, data.frame(id = job$value))
+      product <- dr_product(job$asset, data.frame(id = job$value)) |>
+        dr_add_contract(c(id = "integer"))
       if (!is.null(job$ready)) {
         barrier <- function(ready, proceed) {
           force(ready)
