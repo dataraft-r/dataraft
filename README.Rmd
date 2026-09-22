@@ -102,6 +102,7 @@ and the [guided introduction](https://dataraft-r.github.io/dataraft/articles/get
 | `dataraft.dbt` | dbt execution and artifacts |
 | `dataraft.catalog` | Catalog applications and metadata publication |
 | `dataraft.metrics` | Metrics and frozen report evidence |
+| `dataraft.ide` | Optional Positron metadata bridge and contract editor requests |
 
 Use `library(dataraft.core)` for in-memory work without the extensions. Each
 extension can be installed with its declared dependencies. The

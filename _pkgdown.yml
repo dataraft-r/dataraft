@@ -23,6 +23,8 @@ navbar:
           href: components/dataraft.metrics/reference/index.html
         - text: dataraft.dbt
           href: components/dataraft.dbt/reference/index.html
+        - text: dataraft.ide
+          href: components/dataraft.ide/reference/index.html
         - text: dataraft.catalog
           href: components/dataraft.catalog/reference/index.html
 reference:

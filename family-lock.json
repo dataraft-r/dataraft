@@ -29,6 +29,11 @@
       "ref": "c83d9195693a30f99e1429e5df12f9f04cbdcb75",
       "version": "0.1.0.9000"
     },
+    "dataraft.ide": {
+      "repository": "dataraft-r/dataraft.ide",
+      "ref": "ef05f9e5657b088bcd801efb33beffe40fe0219b",
+      "version": "0.1.0.9000"
+    },
     "dataraft.lake": {
       "repository": "dataraft-r/dataraft.lake",
       "ref": "1d74de9f4f5a03f2a624e5088e73d23fdcac7dd8",

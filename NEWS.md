@@ -1,5 +1,7 @@
 # dataraft 0.1.0.9000
 
+* The optional `dataraft.ide` bridge joins the immutable family lock, full checks, minimal dependency checks, coverage and reference site.
+
 * `dr_review()`, `dr_catalog_pane()` and `dr_refresh_connection()` expose IDE diagnostics, a foreground catalog viewer and live connection refresh.
 
 * Family CI uses immutable sibling references and a dated CRAN snapshot; nightly checks exercise current sibling branches separately.
