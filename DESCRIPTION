@@ -21,7 +21,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Remotes: dataraft-r/dataraft.core@0a3de2afc0990cfb98df7240dd3486d44916a0ad,
-    dataraft-r/dataraft.lake@1f8dc679f4265231f69cad8db4c0dcf0a3bdf0fa,
+    dataraft-r/dataraft.lake@3221a58a8269a23cf9b86ecea46923a93662a89e,
     dataraft-r/dataraft.adapters@2c770354c67476919e534c6bfe82682e51c1bf51,
     dataraft-r/dataraft.metrics@8e632707df88da72fef7f459d87eb71ec367c22b,
     dataraft-r/dataraft.dbt@c83d9195693a30f99e1429e5df12f9f04cbdcb75,
