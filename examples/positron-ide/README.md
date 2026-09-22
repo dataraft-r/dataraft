@@ -122,7 +122,7 @@ The reviewed phase 0 metapackage and its pinned family dependencies provide
 command is recorded below using the published immutable review commit:
 
 ```r
-pak::pkg_install("dataraft-r/dataraft@4089f27bed089f7a5daff2731e6e74fc4c03a4ca")
+pak::pkg_install("dataraft-r/dataraft@9df6d47dd2ebcfbedef368b2bbfa7fbddb404ac7")
 ```
 
 Run [demo.R](demo.R) for a blocked in-memory delivery, bounded failure inspection
