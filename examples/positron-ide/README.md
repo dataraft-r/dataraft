@@ -6,8 +6,9 @@ The deliverables are `dataraft.ide_0.1.0.9000.tar.gz`,
 available from its published immutable review commit. Install the extension
 from the supplied VSIX; no marketplace listing is required.
 
-Automated tests do not replace the manual checks below. No real Positron GUI
-session or graphical extension-host test has been run in the build environment.
+Automated tests do not replace the manual checks below. Hosted extension CI,
+including the graphical extension-host smoke test, passed. A real Positron GUI
+manual acceptance session remains unrun.
 
 ## Install the R bridge and VSIX
 
