@@ -89,7 +89,9 @@ interface. The interactive manual acceptance item in the
 
 Static checks confirmed the six new exports, inherited help topics, reference
 index entries, component pins and minimum versions agree. Local R checks were
-not run because this workspace has no R executable. The bridge component CI
+not run because this workspace has no R executable. The response-write boundary baseline at `39df7dc` passed bridge component CI
 [run 35729701012](https://github.com/dataraft-r/dataraft.ide/actions/runs/35729701012)
-passed all three jobs, including Windows. The exact compatibility set must pass the family merge gate above.
+in all three jobs, including Windows. The subsequent R lineage bounds change is
+pinned separately in the compatibility manifest. The exact compatibility set
+must pass the family merge gate above.
 Consult its pull request checks for the current result.

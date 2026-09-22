@@ -20,7 +20,7 @@ imports; `yaml` and the adapters package enable the ODCS editor workflow.
 ```r
 install.packages("pak", repos = "https://cloud.r-project.org")
 pak::pkg_install(c(
-  "dataraft-r/dataraft.core@8a79d1bf97f801a5bffb2a988f489950f0229194",
+  "dataraft-r/dataraft.core@871982715c6000c8f1018456576e6cd517a5b7a6",
   "dataraft-r/dataraft.adapters@11de81f09e5ce05d55379a7e4670527f1717e411",
   "fs", "jsonlite", "rlang", "yaml"
 ), dependencies = NA)
@@ -37,7 +37,7 @@ local archive, install the same reviewed bridge from GitHub:
 
 ```r
 pak::pkg_install(
-  "dataraft-r/dataraft.ide@39df7dc39ba3055e25f83f64057af1fce13332d2",
+  "dataraft-r/dataraft.ide@dc34be1c9bd94d52f619a010ee577cf45ee7381a",
   dependencies = NA
 )
 ```
