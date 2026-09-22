@@ -999,3 +999,45 @@ dataraft.catalog::dr_catalog_pane
 #' @importFrom dataraft.lake dr_refresh_connection
 #' @export
 dataraft.lake::dr_refresh_connection
+
+#' @rdname dr_extract_contract
+#' @inherit dataraft.core::dr_extract_contract title description details return params sections examples
+#' @seealso [dataraft.core::dr_extract_contract()]
+#' @importFrom dataraft.core dr_extract_contract
+#' @export
+dataraft.core::dr_extract_contract
+
+#' @rdname dr_remove_contract
+#' @inherit dataraft.core::dr_remove_contract title description details return params sections examples
+#' @seealso [dataraft.core::dr_remove_contract()]
+#' @importFrom dataraft.core dr_remove_contract
+#' @export
+dataraft.core::dr_remove_contract
+
+#' @rdname dr_update_contract
+#' @inherit dataraft.core::dr_update_contract title description details return params sections examples
+#' @seealso [dataraft.core::dr_update_contract()]
+#' @importFrom dataraft.core dr_update_contract
+#' @export
+dataraft.core::dr_update_contract
+
+#' @rdname dr_extract_source
+#' @inherit dataraft.core::dr_extract_source title description details return params sections examples
+#' @seealso [dataraft.core::dr_extract_source()]
+#' @importFrom dataraft.core dr_extract_source
+#' @export
+dataraft.core::dr_extract_source
+
+#' @rdname dr_remove_source
+#' @inherit dataraft.core::dr_remove_source title description details return params sections examples
+#' @seealso [dataraft.core::dr_remove_source()]
+#' @importFrom dataraft.core dr_remove_source
+#' @export
+dataraft.core::dr_remove_source
+
+#' @rdname dr_update_source
+#' @inherit dataraft.core::dr_update_source title description details return params sections examples
+#' @seealso [dataraft.core::dr_update_source()]
+#' @importFrom dataraft.core dr_update_source
+#' @export
+dataraft.core::dr_update_source

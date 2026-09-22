@@ -1,6 +1,6 @@
 # Install and manually check DataRaft in Positron
 
-The deliverables are `dataraft.ide_0.1.0.9002.tar.gz`,
+The deliverables are `dataraft.ide_0.1.0.9003.tar.gz`,
 `dataraft-positron.vsix` and `dataraft-ide-source.zip`. The ZIP contains the
 `dataraft.ide` and `dataraft-positron` source folders. The R bridge is also
 available from its published immutable review commit. Install the extension
@@ -14,18 +14,18 @@ manual acceptance session remains unrun.
 
 Use R 4.2 or newer; the automated family checks use R 4.5.1. Run the following in
 the R installation used by your Positron console. The two GitHub references are
-verified merged component commits. `fs`, `jsonlite` and `rlang` are bridge
+immutable component review commits. `fs`, `jsonlite` and `rlang` are bridge
 imports; `yaml` and the adapters package enable the ODCS editor workflow.
 
 ```r
 install.packages("pak", repos = "https://cloud.r-project.org")
 pak::pkg_install(c(
-  "dataraft-r/dataraft.core@6fca8a7f5882ae13f14613739f9adaf586a7d105",
+  "dataraft-r/dataraft.core@871982715c6000c8f1018456576e6cd517a5b7a6",
   "dataraft-r/dataraft.adapters@11de81f09e5ce05d55379a7e4670527f1717e411",
   "fs", "jsonlite", "rlang", "yaml"
 ), dependencies = NA)
 install.packages(
-  "/path/to/dataraft.ide_0.1.0.9002.tar.gz",
+  "/path/to/dataraft.ide_0.1.0.9003.tar.gz",
   repos = NULL,
   type = "source"
 )
@@ -37,7 +37,7 @@ local archive, install the same reviewed bridge from GitHub:
 
 ```r
 pak::pkg_install(
-  "dataraft-r/dataraft.ide@8f35777b0785c6dc6aa16882204391919902bade",
+  "dataraft-r/dataraft.ide@dc34be1c9bd94d52f619a010ee577cf45ee7381a",
   dependencies = NA
 )
 ```

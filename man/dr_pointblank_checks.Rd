@@ -18,9 +18,14 @@ formula rules use their expression as a label. Explicit names stay unchanged.}
 
 \item{build}{Function creating a pointblank agent from a lazy table.}
 
-\item{severity}{error blocks publication; warning permits publication.}
+\item{severity}{Compatibility argument: \code{"error"} corresponds to
+\code{action = "block"}, \code{"warning"} to \code{action = "warn"}. Prefer \code{action}
+for new \code{dr_quality_rule()} definitions. Supplying both is an error.
+\code{dr_pointblank_checks()} continues to use \code{severity}.}
 
-\item{max_failure}{Fraction of permitted failed test units.}
+\item{max_failure}{Compatibility argument for \code{threshold}. Prefer \code{threshold}
+for new \code{dr_quality_rule()} definitions. Supplying both is an error.
+\code{dr_pointblank_checks()} continues to use \code{max_failure}.}
 
 \item{policy}{\code{"rule"} preserves the explicit \code{severity} / \code{max_failure}
 gate. \code{"agent"} uses pointblank's per-step action levels: warnings permit
