@@ -152,7 +152,7 @@ jobs:
         run: Rscript scripts/check-core.R
       - name: Install the family and minimal test tooling
         run: |
-          Rscript -e 'install.packages(c("testthat", "pkgload"))'
+          Rscript -e 'install.packages(c("testthat", "pkgload", "yaml"))'
           Rscript scripts/install-family.R
       - name: Run family tests without optional engines
         run: Rscript -e 'stopifnot(!requireNamespace("duckdb", quietly = TRUE)); testthat::test_local("packages/dataraft.ide", stop_on_failure = TRUE); testthat::test_local(stop_on_failure = TRUE)'
