@@ -1,6 +1,6 @@
 # Contributing to DataRaft
 
-This repository is the `dataraft` metapackage. Implementations live in the six
+This repository is the `dataraft` metapackage. Implementations live in the seven
 component repositories under https://github.com/dataraft-r. The installation script
 clones them into `packages/` when needed. Add behavior to its owning component;
 keep the umbrella package free of engines. Use explicit namespace references
@@ -36,9 +36,11 @@ contracts, recipes and diagnostics without a lake. Adapter and integration tests
 skip explicitly when their optional engine is unavailable. Keep tests that span
 lake publication, measurement and catalogs in the metapackage.
 
-The metapackage CI uses matching component branches on pull requests when they
-exist, otherwise `main`. This allows coordinated family changes to be reviewed
-before merging. Component CI remains responsible for independent checks.
+The metapackage CI checks immutable component commits in `family-lock.json`.
+The nightly workflow separately checks sibling `main` branches. Publish reviewed
+component commits before updating the compatibility set; see
+[pin maintenance](docs/pin-maintenance.md). Component CI remains responsible for
+independent checks.
 
 Public S3 protocols are supported extension interfaces. Exported helpers marked
 `@keywords internal` are family implementation interfaces, not a separate user API;
@@ -61,8 +63,7 @@ other tests load it only when lake is installed. Changes to that fixture should
 also update its local `tests/testthat/helper-fixture.R` copy.
 
 Component CI runs its own check, the metapackage integration suite against that
-component commit, and a separate job installing only hard dependencies. Same-name
-branches support coordinated pre-merge changes; otherwise siblings use main.
+component commit, and a separate job installing only hard dependencies. Sibling source is pinned in each component compatibility manifest.
 The downstream check runs on every component push to main and pull request,
 without a cross-repository dispatch token. The metapackage's full matrix remains
 the cross-platform and PostgreSQL/DuckLake gate.

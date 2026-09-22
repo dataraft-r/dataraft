@@ -30,7 +30,7 @@ optional IDE package does not make normal DataRaft use depend on an IDE.
 - [x] Phase 3 editor/profile tests recorded.
 - [x] Published phase 0 component SHAs recorded in the umbrella lock.
 - [x] Publish the IDE R bridge and configure immutable eight-package CI.
-- [ ] Confirm the first complete remote eight-package CI run.
+- [x] Confirm the first complete remote eight-package CI run (35694633104).
 - [ ] Interactive Positron manual acceptance checks.
 
 ## Architecture decisions
@@ -62,37 +62,44 @@ receive the duplicated standalone core implementation helpers.
 
 ## Current verification
 
+Evidence checked on 22 September 2026:
+
 | Scope | Recorded evidence | Boundary |
 | --- | --- | --- |
-| Core phase 0 | Full suite passed; 43 focused assertions | Data viewer behavior mocked, not a graphical session |
-| Lake phase 0 | 79 focused assertions at the initial checkpoint; 82 targeted assertions passed for the published Windows shared-engine fix `7462a326a1cb65280795cc89217d72b1b9a69d22` | Automated lifecycle tests; remote family rerun remains pending |
-| Catalog and umbrella | Seven pane assertions plus four review integration assertions passed; RDS demo and ODCS sample generation/import passed | No real browser or IDE session launched |
-| Existing component CI | Core, lake and catalog phase 0 PR #5 checks passed | Umbrella PR #5 checks were still running at this checkpoint |
-| R bridge phase 1 | Latest local suite: 76 assertions passed; R CMD check reported zero errors, warnings and notes; IDE PR #1 full and minimal CI passed at `4e0b1d1f20b5091f086a5a070819e5966b01c9e2` | Component checks do not replace the complete family CI gate |
-| R/TypeScript interoperability | Initial checkpoint: 20 real R responses passed strict JSON Schema and TypeScript validation; latest persistent-session integration validated 18 responses | Proves the file/protocol boundary, not Positron UI behavior |
-| Extension/editor | TypeScript build and 24 automated tests passed; hosted VS Code extension-host smoke test and VSIX packaging passed; selected profile columns, preview/apply, and failed-rule YAML AST diagnostics exercised | Manual Positron GUI acceptance remains unrun |
+| Eight-package integration | [Run 35694633104](https://github.com/dataraft-r/dataraft/actions/runs/35694633104), commit `08a6bfd58bc3ffd81ce1109e6f51ad490b8d2474`: all seven jobs passed | Includes both DuckDB/DuckLake jobs, PostgreSQL writers, Windows, macOS, R 4.2.3 and minimal installation; subsequent compatibility sets need their own run |
+| Native Positron | [Run 35707191483](https://github.com/dataraft-r/dataraft-positron/actions/runs/35707191483): all three jobs passed | Pinned Positron 2026.09.1-2, Ark R 4.5.1, eight automated user journeys, 43 extension tests and 28 persistent R responses; not a human usability study |
+| Lake baseline full component CI | [Job 106637797508](https://github.com/dataraft-r/dataraft.lake/actions/runs/35694284653/job/106637797508): 660 passed assertions, zero failures/warnings, three skipped test blocks | All three skips required the explicit DuckLake flag; this review enables it and requires zero skipped blocks in full CI |
+| Lake baseline minimal installation | [Job 106637797645](https://github.com/dataraft-r/dataraft.lake/actions/runs/35694284653/job/106637797645): 57 passed assertions, 99 skipped blocks | Deliberately has no optional engines; these counts do not describe full integration coverage |
+| Metrics baseline full component CI | [Job 106562069672](https://github.com/dataraft-r/dataraft.metrics/actions/runs/35669335282/job/106562069672): 175 passed assertions, zero failures/warnings/skips | The reported 55% skip figure does not describe this full run |
+| Metrics baseline minimal installation | [Job 106562070049](https://github.com/dataraft-r/dataraft.metrics/actions/runs/35669335282/job/106562070049): 29 passed assertions, 26 skipped blocks | Optional lake and other integration dependencies are deliberately absent |
+| Interactive manual acceptance | Not signed off | Human assessment of readable lineage, understandable blocked-run state and usable YAML editing remains required |
 
-These counts describe their respective test runs; they are not added into a
-single total because some suites overlap. Hosted graphical extension-host
-smoke testing has passed; a manual Positron GUI session remains unrun. Follow the
-[manual installation and acceptance guide](../../examples/positron-ide/README.md)
-to validate that remaining boundary. The R bridge is published in
-[dataraft.ide PR #1](https://github.com/dataraft-r/dataraft.ide/pull/1).
-The eight-package CI configuration now checks its actual immutable commit;
-the complete remote eight-package CI is rerunning and remains a separate
-acceptance gate.
+Passed assertions and skipped test blocks are different units. Do not derive a
+coverage percentage by dividing one by the other. Full lake and metrics checks
+write `test-summary.csv` and `test-skips.csv` alongside their test logs, including
+block names and reasons. `DATARAFT_REQUIRE_ALL_TESTS=true` makes skipped blocks
+fail these packages' full CI and the Linux eight-package integration jobs.
+Minimal dependency and portability jobs keep their explicit optional-backend
+boundaries. They are reported separately from full integration tests.
 
-## Publication and merge order
+The first remote family run is complete; the previous unchecked item was stale
+documentation. Follow the [manual acceptance guide](../../examples/positron-ide/README.md)
+for the remaining human gate. Automated GUI clicks and screenshots are useful
+evidence but cannot sign off a person's comprehension or usability assessment.
 
-The family lock and optional `Remotes` entry pin `dataraft.ide` to
-`4e0b1d1f20b5091f086a5a070819e5966b01c9e2`. Pinned checks can use this published
-review commit before merge. The former pending CI patch has been applied.
-No empty repository or moving branch is used as a compatibility pin.
+## Bridge and dependency policy
 
-Merge IDE PR #1 before the umbrella integration PR #5 so that the nightly
-compatibility workflow can resolve actual IDE source from `main` alongside the
-other seven packages. These changes do not merge either PR. The extension is
-published in [dataraft-positron PR #1](https://github.com/dataraft-r/dataraft-positron/pull/1)
-at immutable commit `4bb309248f9a3aa374d4432d7c3e739b93fc94c7`. Install it from
-the supplied VSIX; no marketplace release is claimed. Local source archives
-remain an alternative for review.
+The extension-facing R API consists of `ide_context()` and `ide_request()`.
+Operation implementations are private. Metadata and diagnostics have separately
+named schemas; the existing numeric wire versions remain unchanged. `ide_`
+marks the IDE bridge boundary; user-facing DataRaft verbs remain `dr_`.
+
+`dataraft.ide` intentionally remains in the metapackage's `Suggests`: ordinary
+DataRaft workflows must install and work without IDE support. Development
+versions are independent per package; `.9001` is not forced back to `.9000` to
+make a family look uniform. `family-lock.json` records the exact versions and
+commits that are checked together.
+
+See [pin maintenance](../pin-maintenance.md) for ownership, update cadence and
+the verification required before a compatibility set changes. The extension
+remains a separately packaged VSIX; no marketplace release is implied.
