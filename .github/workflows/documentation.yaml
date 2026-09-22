@@ -39,6 +39,7 @@ jobs:
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
             local::packages/dataraft.catalog
+            local::packages/dataraft.ide
             local::.
           needs: website
       - name: Check and build documentation
