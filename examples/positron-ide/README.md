@@ -37,7 +37,7 @@ local archive, install the same reviewed bridge from GitHub:
 
 ```r
 pak::pkg_install(
-  "dataraft-r/dataraft.ide@ef05f9e5657b088bcd801efb33beffe40fe0219b",
+  "dataraft-r/dataraft.ide@4e0b1d1f20b5091f086a5a070819e5966b01c9e2",
   dependencies = NA
 )
 ```
