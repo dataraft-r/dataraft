@@ -29,7 +29,8 @@ optional IDE package does not make normal DataRaft use depend on an IDE.
 - [x] Phase 2 TypeScript compile and extension tests recorded.
 - [x] Phase 3 editor/profile tests recorded.
 - [x] Published phase 0 component SHAs recorded in the umbrella lock.
-- [ ] Complete eight-package CI after new-repository publication.
+- [x] Publish the IDE R bridge and configure immutable eight-package CI.
+- [ ] Confirm the first complete remote eight-package CI run.
 - [ ] Interactive Positron manual acceptance checks.
 
 ## Architecture decisions
@@ -54,9 +55,9 @@ ownership. Profiling and quality results describe the explicit sample used,
 not an unexamined full dataset. The editor has no production publish, approval
 or schedule controls.
 
-The optional R package is planned as the seventh checked component, with the
-umbrella as the eighth package. Pinned family checks, full optional dependencies, minimal
-installation and coverage must include it. The lightweight IDE package does not
+The optional R package is the seventh checked component, with the umbrella as
+the eighth package. Pinned family checks, full optional dependencies, minimal
+installation and coverage include it. The lightweight IDE package does not
 receive the duplicated standalone core implementation helpers.
 
 ## Current verification
@@ -75,19 +76,20 @@ These counts describe their respective test runs; they are not added into a
 single total because some suites overlap. A real Positron GUI and graphical
 extension-host environment were unavailable. Follow the
 [manual installation and acceptance guide](../../examples/positron-ide/README.md)
-to validate that remaining boundary. The R bridge and TypeScript source are
-implemented; repository publication and the full eight-package CI remain blocked
-by new-repository access, not replaced by the existing seven-package checks.
+to validate that remaining boundary. The R bridge is published in
+[dataraft.ide PR #1](https://github.com/dataraft-r/dataraft.ide/pull/1).
+The eight-package CI configuration now checks its actual immutable commit;
+remote eight-package CI results remain a separate acceptance gate.
 
-## Publication and CI handoff
+## Publication and merge order
 
-GitHub App access currently permits the existing family repositories but not
-the newly created IDE repositories. The standalone R package and VSIX can be
-reviewed and installed from local deliverables. No empty repository or moving
-branch is used as a compatibility pin.
+The family lock and optional `Remotes` entry pin `dataraft.ide` to
+`ef05f9e5657b088bcd801efb33beffe40fe0219b`. Pinned checks can use this published
+review commit before merge. The former pending CI patch has been applied.
+No empty repository or moving branch is used as a compatibility pin.
 
-`maintenance/positron-ide-ci.pending.patch` contains the separate eight-package
-CI changes. Apply it only after `dataraft.ide` code has been published, add its
-actual immutable commit and version to `family-lock.json`, and add that exact
-commit to the umbrella's `Remotes`. Then run pinned family checks. The publishable
-phase 0 metapackage retains its existing seven-package checks in the meantime.
+Merge IDE PR #1 before the umbrella integration PR #5 so that the nightly
+compatibility workflow can resolve actual IDE source from `main` alongside the
+other seven packages. These changes do not merge either PR. The extension is
+installed from the supplied VSIX; no extension commit or marketplace release is
+claimed here. Local source archives remain an alternative for review.
