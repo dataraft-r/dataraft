@@ -24,11 +24,13 @@ optional IDE package does not make normal DataRaft use depend on an IDE.
 - [x] Catalog foreground execution and live connection lifetime are documented.
 - [x] Compiler-free RDS example distinguishes file releases from a real lake.
 - [x] Umbrella integration verifies that viewing a blocked delivery does not write its RDS target.
-- [ ] Phase 0 core and lake integration test results recorded.
-- [ ] Phase 1 R metadata and request transport tests recorded.
-- [ ] Phase 2 TypeScript compile and extension tests recorded.
-- [ ] Phase 3 editor/profile tests recorded.
-- [ ] Final component SHAs recorded and complete family checks run.
+- [x] Phase 0 core and lake integration test results recorded.
+- [x] Phase 1 R metadata and request transport tests recorded.
+- [x] Phase 2 TypeScript compile and extension tests recorded.
+- [x] Phase 3 editor/profile tests recorded.
+- [x] Published phase 0 component SHAs recorded in the umbrella lock.
+- [ ] Complete eight-package CI after new-repository publication.
+- [ ] Interactive Positron manual acceptance checks.
 
 ## Architecture decisions
 
@@ -59,12 +61,23 @@ receive the duplicated standalone core implementation helpers.
 
 ## Current verification
 
-Catalog pane: seven assertions passed, no failures, warnings or skips. Tests
-mock the Shiny launch lifecycle and viewer/browser callbacks; they do not claim
-an interactive Positron session was launched. The umbrella review integration
-adds four passing assertions with no skips or warnings, and the RDS demo ran
-successfully. Full runtime and extension evidence
-is recorded as the remaining phases finish.
+| Scope | Recorded evidence | Boundary |
+| --- | --- | --- |
+| Core phase 0 | Full suite passed; 43 focused assertions | Data viewer behavior mocked, not a graphical session |
+| Lake phase 0 | 79 focused assertions and regression tests passed | Automated lifecycle tests |
+| Catalog and umbrella | Seven pane assertions plus four review integration assertions passed; RDS demo and ODCS sample generation/import passed | No real browser or IDE session launched |
+| Existing component CI | Core, lake and catalog phase 0 PR #5 checks passed | Umbrella PR #5 checks were still running at this checkpoint |
+| R bridge phase 1 | 70 assertions and 16 operation fixtures passed | Final package check result is recorded separately when complete |
+| R/TypeScript interoperability | 20 real R responses passed strict JSON Schema and TypeScript validation: 15 workspace/lake operations plus five requests in one persistent R process | Proves the file/protocol boundary, not Positron UI behavior |
+| Extension/editor | TypeScript build and 23 automated tests passed at the phase 3 checkpoint; selected profile columns, preview/apply, and failed-rule YAML AST diagnostics exercised | Graphical extension-host checks remain unrun |
+
+These counts describe their respective test runs; they are not added into a
+single total because some suites overlap. A real Positron GUI and graphical
+extension-host environment were unavailable. Follow the
+[manual installation and acceptance guide](../../examples/positron-ide/README.md)
+to validate that remaining boundary. The R bridge and TypeScript source are
+implemented; repository publication and the full eight-package CI remain blocked
+by new-repository access, not replaced by the existing seven-package checks.
 
 ## Publication and CI handoff
 
