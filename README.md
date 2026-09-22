@@ -1,8 +1,8 @@
 
 # DataRaft
 
-For Positron, see the [IDE integration guide](examples/positron-ide/README.md)
-and [phase checklist](docs/plans/positron-ide.md). IDE metadata and the separate
+For Positron, see the [IDE integration guide](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/examples/positron-ide/README.md)
+and [phase checklist](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/docs/plans/positron-ide.md). IDE metadata and the separate
 extension are optional; existing R workflows remain usable without them.
 
 [![R-CMD-check](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml)

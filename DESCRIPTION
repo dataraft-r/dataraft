@@ -21,12 +21,12 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Remotes: dataraft-r/dataraft.core@6edadf92d570742bcb428bef5aa83f0c6d7b0198,
-    dataraft-r/dataraft.lake@1d74de9f4f5a03f2a624e5088e73d23fdcac7dd8,
+    dataraft-r/dataraft.lake@7462a326a1cb65280795cc89217d72b1b9a69d22,
     dataraft-r/dataraft.adapters@2c770354c67476919e534c6bfe82682e51c1bf51,
     dataraft-r/dataraft.metrics@8e632707df88da72fef7f459d87eb71ec367c22b,
     dataraft-r/dataraft.dbt@c83d9195693a30f99e1429e5df12f9f04cbdcb75,
     dataraft-r/dataraft.catalog@11c1f5f3705f83d609250a6c954012a2b430ad75,
-    dataraft-r/dataraft.ide@ef05f9e5657b088bcd801efb33beffe40fe0219b
+    dataraft-r/dataraft.ide@4e0b1d1f20b5091f086a5a070819e5966b01c9e2
 URL: https://dataraft-r.github.io/dataraft/,
     https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues
