@@ -32,6 +32,12 @@ It does not infer column lineage or reconstruct a single historical DAG.
 Run results expose only recorded inputs for that exact execution, without
 querying the latest lake state or inferring unrecorded upstream edges.
 }
+\examples{
+orders <- dr_product("orders", data.frame(id = 1:3))
+totals <- dr_product("totals", orders) |>
+  dr_add_recipe(dr_recipe() |> dr_step_summarise(n = dplyr::n()))
+dr_lineage(dr_run(totals))
+}
 \seealso{
 \code{\link[dataraft.core:dr_lineage]{dataraft.core::dr_lineage()}}
 }

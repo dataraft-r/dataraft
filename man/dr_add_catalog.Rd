@@ -20,6 +20,10 @@ An updated product definition.
 Catalog callbacks receive descriptive run metadata after execution. Delivery
 is outside the data transaction; retryable failures retain run evidence.
 }
+\examples{
+dr_product("orders") |>
+  dr_add_catalog(function(metadata) invisible(metadata), name = "audit")
+}
 \seealso{
 \code{\link[dataraft.core:dr_add_catalog]{dataraft.core::dr_add_catalog()}}
 }

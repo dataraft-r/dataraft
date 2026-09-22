@@ -18,6 +18,18 @@ serialized as runnable YAML.
 \description{
 Export the portable contract subset
 }
+\examples{
+\dontshow{if (requireNamespace("yaml", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+contract <- dataraft.core::dr_contract(
+  "orders", "1.0.0", "Analytics", "Order amounts", "One order",
+  c(order_id = "integer", amount = "numeric"), key = "order_id"
+)
+path <- tempfile(fileext = ".yml")
+dr_contract_yaml(contract, path)
+cat(readLines(path), sep = "\n")
+unlink(path)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_contract_yaml]{dataraft.adapters::dr_contract_yaml()}}
 }

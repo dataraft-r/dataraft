@@ -41,6 +41,11 @@ lineage with \code{PUT /api/v1/lineage}. Unmapped inputs are omitted; column-lev
 lineage is not inferred. Repeating table upserts and lineage edges is safe
 after an interrupted delivery. Only successful runs publish table metadata.
 }
+\examples{
+catalog <- dr_catalog_openmetadata("https://metadata.example",
+  database_schema = "warehouse.analytics.public")
+dataraft.core::dr_inspect(catalog)
+}
 \seealso{
 \code{\link[dataraft.catalog:dr_catalog_openmetadata]{dataraft.catalog::dr_catalog_openmetadata()}}
 }

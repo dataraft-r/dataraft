@@ -55,6 +55,19 @@ verify
 an appropriate profile yourself and use \code{\link[dataraft.dbt:dr_dbt_project]{dr_dbt_project()}}. The starter
 uses the dbt-duckdb profile format; it does not install dbt or adapters.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE) && requireNamespace("yaml", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dataraft.lake::dr_lake_config(
+  catalog = dataraft.lake::dr_registry_duckdb(file.path(root, "lake.duckdb")),
+  storage = dataraft.lake::dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+project <- dr_dbt_init(file.path(root, "dbt"), config)
+project
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_init]{dataraft.dbt::dr_dbt_init()}}
 }

@@ -44,6 +44,10 @@ Store paths and CLI settings without running dbt or opening a database.
 dbt remains responsible for SQL models, dependencies, tests and incremental
 strategies. Use \code{\link[dataraft.dbt:dr_dbt_build]{dr_dbt_build()}} or \code{\link[dataraft.core:dr_run]{dataraft.core::dr_run()}} to execute the project.
 }
+\examples{
+project <- dr_dbt_project("analytics", profiles_dir = "analytics")
+project
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_project]{dataraft.dbt::dr_dbt_project()}}
 }

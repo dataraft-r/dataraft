@@ -14,7 +14,7 @@ dr_registry_postgres(
 string.}
 
 \item{lock_timeout}{Seconds to wait for another PostgreSQL writer. Writes are
-coordinated per catalog database using optional RPostgres. All writers must
+coordinated per asset during publication using optional RPostgres. All writers must
 use this protocol; direct SQL and older clients are not coordinated.}
 }
 \value{
@@ -22,6 +22,11 @@ A serializable configuration object containing no credentials.
 }
 \description{
 Define metadata and storage configuration
+}
+\examples{
+dr_registry_duckdb(file.path(tempdir(), "lake.db"))
+dr_storage_local(file.path(tempdir(), "data"))
+dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
 }
 \seealso{
 \code{\link[dataraft.lake:dr_registry_duckdb]{dataraft.lake::dr_registry_postgres()}}

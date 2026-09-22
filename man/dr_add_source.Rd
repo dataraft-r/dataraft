@@ -25,6 +25,12 @@ Store a named primary input without reading it. A workflow can instead bind
 one delivery with \verb{data =} at execution. For several primary sources, use a
 transformation that combines their named list before table operations.
 }
+\examples{
+flow <- dr_workflow() |>
+  dr_add_product(dr_product("orders")) |>
+  dr_add_source(data.frame(id = 1:2, amount = c(25, 75)), name = "orders")
+dr_collect(dr_trial(flow))
+}
 \seealso{
 \code{\link[dataraft.core:dr_add_source]{dataraft.core::dr_add_source()}}
 }

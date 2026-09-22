@@ -21,6 +21,15 @@ These are data preparation instructions, not fitted preprocessing models.
 There is no training or implicit \code{prep()}/\code{bake()} phase. Use \code{\link[dataraft.core:dr_trial]{dr_trial()}} on
 the assembled workflow to inspect checked output, then \code{\link[dataraft.core:dr_publish]{dr_publish()}} to save it.
 }
+\examples{
+preparation <- dr_recipe() |>
+  dr_step_mutate(amount = round(amount, 2)) |>
+  dr_step_filter(amount >= 0)
+dr_product("orders", data.frame(amount = c(10.123, 20))) |>
+  dr_add_recipe(preparation) |>
+  dr_trial() |>
+  dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_recipe]{dataraft.core::dr_recipe()}}
 }

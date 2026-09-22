@@ -35,6 +35,14 @@ connection or a zero-argument factory. Only factory-created connections are
 closed by dataraft. SQL is passed to DBI unchanged; use \code{params} for values.
 Nothing is queried during construction or structural preflight.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+con <- DBI::dbConnect(duckdb::duckdb(), bigint = "integer64")
+DBI::dbWriteTable(con, "orders", data.frame(id = 1:2))
+dataraft.core::dr_read_source(dr_source_database(con, table = "orders"))
+DBI::dbDisconnect(con, shutdown = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_source_database]{dataraft.adapters::dr_source_database()}}
 }

@@ -22,6 +22,7 @@ dataraft.core::dr_quality_report(
 )
 jsonlite::write_json(
   list(
+    exported_at = "2026-01-01T00:00:00Z",
     assets = list(list(
       id = "orders",
       version = "1.0.0",
@@ -39,6 +40,7 @@ jsonlite::write_json(
     releases = list(list(
       asset = "orders",
       release_id = "release-1",
+      release_order = "1",
       published_at = "2026-01-01T00:00:00Z",
       quality = "passed",
       contract = "orders@1.0.0"

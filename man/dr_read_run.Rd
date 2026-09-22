@@ -30,6 +30,16 @@ recording evidence are separate operations; evidence errors never imply that
 published data was rolled back. A successful write followed by a process
 crash before recording evidence remains a reconciliation responsibility.
 }
+\examples{
+path <- tempfile("runs-")
+result <- dr_product("orders") |>
+  dr_add_source(data.frame(id = 1:2)) |>
+  dr_run(evidence = path)
+dr_run_history(path)
+dr_read_run(path, result$run_id)$status
+dr_incidents(path)
+unlink(path, recursive = TRUE)
+}
 \seealso{
 \code{\link[dataraft.core:dr_run_history]{dataraft.core::dr_read_run()}}
 }

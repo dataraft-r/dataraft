@@ -21,6 +21,10 @@ Capabilities describe behavior; they do not test remote permissions.
 Extension methods can use \code{\link[dataraft.core:dr_component_capabilities]{dr_component_capabilities()}} for a stable shape.
 An ordinary function may support lazy tables, but its body is not inspected.
 }
+\examples{
+dr_capabilities(data.frame(id = 1L))
+dr_capabilities(NULL)
+}
 \seealso{
 \code{\link[dataraft.core:dr_capabilities]{dataraft.core::dr_capabilities()}}
 }

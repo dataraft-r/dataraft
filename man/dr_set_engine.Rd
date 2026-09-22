@@ -24,6 +24,10 @@ optional engine. Missing dependencies are reported at execution preflight.
 These engines implement individual operations, not the whole data platform.
 Storage is configured separately with \code{\link[dataraft.core:dr_set_target]{dr_set_target()}} or \code{dr_publish(to = )}.
 }
+\examples{
+positive <- dr_quality_rule("positive", ~ amount > 0)
+positive |> dr_set_engine("pointblank")
+}
 \seealso{
 \code{\link[dataraft.core:dr_set_engine]{dataraft.core::dr_set_engine()}}
 }

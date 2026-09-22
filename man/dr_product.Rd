@@ -71,6 +71,12 @@ all tables in memory. Table contracts are supplied through contracts.
 
 }
 
+\examples{
+orders <- dr_product("orders", data.frame(id = 1:2, amount = c(25, 75))) |>
+  dplyr::mutate(amount = round(amount, 2)) |>
+  dr_add_quality(~ amount >= 0)
+orders |> dr_trial() |> dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_product]{dataraft.core::dr_product()}}
 }

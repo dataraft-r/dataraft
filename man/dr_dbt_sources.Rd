@@ -38,6 +38,24 @@ must attach the same catalog as \code{lake}. Both modes use the first literal
 Coordinate concurrent project writers and close caller-owned lake handles
 before dbt execution.
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE) && requireNamespace("yaml", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-dbt-sources-")
+config <- dataraft.lake::dr_lake_config(
+  dataraft.lake::dr_registry_duckdb(file.path(root, "lake.db")),
+  dataraft.lake::dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb",
+  layers = c("raw", "staging", "core", "marts")
+)
+accepted <- dataraft.lake::dr_ingest(data.frame(
+  order_id = 1:2, customer_id = c(1L, 1L), amount = c(10, 20)
+), name = "orders", to = config)
+project <- dr_dbt_init(file.path(root, "dbt"), config,
+  sources = list(orders = accepted))
+dr_dbt_sources(project, list(orders = accepted), name = "raw")
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.dbt:dr_dbt_sources]{dataraft.dbt::dr_dbt_sources()}}
 }

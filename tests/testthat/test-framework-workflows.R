@@ -344,7 +344,7 @@ test_that("staging recovery enables retry while preserving published releases", 
   expect_equal(dr_read_release(f$lake, "orders", published$release_id)$id, 1L)
 })
 
-test_that("product builders can explicitly bypass cached releases", {
+test_that("product builders cache unchanged captures and invalidate changed captures", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
   dr_run(f$pipeline, f$lake)
@@ -360,12 +360,44 @@ test_that("product builders can explicitly bypass cached releases", {
     }) |>
     dr_set_target(f$lake)
   first <- dr_run(product)
-  multiplier <- 2
   expect_equal(dr_run(product, cache = TRUE)$status, "cached")
+  multiplier <- 2
+  expect_equal(dr_run(product, cache = TRUE)$status, "published")
   expect_equal(dr_run(product, cache = FALSE)$status, "published")
   expect_equal(sum(dr_read_release(f$lake, "scaled")$reserve), 600)
   expect_equal(
     sum(dr_read_release(f$lake, "scaled", first$release_id)$reserve),
     300
+  )
+})
+
+
+test_that("mutable source factories cannot authorize cached publications", {
+  f <- fixture()
+  on.exit(fixture_cleanup(f))
+  state <- new.env(parent = emptyenv())
+  state$data <- data.frame(amount = 1)
+  product <- dr_product(
+    "dynamic_source",
+    function() state$data,
+    code_version = "source-v1"
+  ) |>
+    dr_set_target(f$lake)
+  blocked <- dr_run(product, cache = TRUE, stop_on_failure = FALSE)
+  expect_identical(blocked$status, "error")
+  expect_s3_class(blocked$error, "dr_dynamic_source_cache")
+  first <- dr_run(product, cache = FALSE)
+  state$data$amount <- 2
+  blocked <- dr_run(product, cache = TRUE, stop_on_failure = FALSE)
+  expect_identical(blocked$status, "error")
+  expect_s3_class(blocked$error, "dr_dynamic_source_cache")
+  second <- dr_run(product, cache = FALSE)
+  expect_equal(
+    dr_read_release(f$lake, "dynamic_source", first$release_id)$amount,
+    1
+  )
+  expect_equal(
+    dr_read_release(f$lake, "dynamic_source", second$release_id)$amount,
+    2
   )
 })

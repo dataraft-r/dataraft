@@ -34,6 +34,12 @@ Reads only a zero-row prototype for lazy tables. Required fields, keys,
 units and business rules are never inferred from sample values. The draft
 cannot be used for a quality gate or registered until explicitly confirmed.
 }
+\examples{
+draft <- dr_contract_from(data.frame(id = 1:2, amount = c(10, 20)),
+  "orders", "Analytics", "Order amounts", "One order", key = "id")
+contract <- dr_contract_confirm(draft)
+dr_validate(data.frame(id = 1L, amount = 10), contract)
+}
 \seealso{
 \code{\link[dataraft.core:dr_contract_from]{dataraft.core::dr_contract_from()}}
 }

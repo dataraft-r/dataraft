@@ -27,6 +27,11 @@ S3 or PostgreSQL catalog configuration, or reuse an open lake. Connections
 supplied by the caller remain caller-owned. The adapter compiles to the
 existing immutable landing, candidate and publication transaction.
 }
+\examples{
+dataraft.core::dr_product("orders") |>
+  dataraft.core::dr_add_source(data.frame(id = 1:2)) |>
+  dataraft.core::dr_set_target(dr_target_lake("reporting-lake"))
+}
 \seealso{
 \code{\link[dataraft.lake:dr_target_lake]{dataraft.lake::dr_target_lake()}}
 }

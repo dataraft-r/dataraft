@@ -51,6 +51,12 @@ backend marker are shared with \code{\link[dataraft.lake:dr_open_lake]{dr_open_l
 refused rather than interpreted as a new lake.
 Pass its result to \code{\link[dataraft.lake:dr_connect_lake]{dr_connect_lake()}} or \code{\link[dataraft.lake:dr_target_lake]{dr_target_lake()}} when ready to execute.
 }
+\examples{
+config <- dr_lake_config(backend = "duckdb")
+print(config)
+local <- dr_lake_config(path = file.path(tempdir(), "my-data-lake"))
+print(local)
+}
 \seealso{
 \code{\link[dataraft.lake:dr_lake_config]{dataraft.lake::dr_lake_config()}}
 }

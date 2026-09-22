@@ -25,6 +25,10 @@ the submitted batch, not the complete mutable destination. The run metadata
 distinguishes \code{submitted_rows} from output \code{rows}; candidate quality may
 describe the complete destination including previously stored rows.
 }
+\examples{
+dr_product("orders") |> dr_add_source(data.frame(id = 1:2)) |>
+  dr_run() |> dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:dr_collect]{dataraft.core::dr_collect()}}
 }

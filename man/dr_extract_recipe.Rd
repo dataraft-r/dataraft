@@ -32,6 +32,15 @@ product execution graph, retaining its quality gates, dependency sharing,
 lazy behavior and immutable release semantics. Use \verb{data =} at execution to
 bind a first primary input or replace the existing single primary delivery.
 }
+\examples{
+spec <- dr_product("orders") |>
+  dr_add_contract(c(id = "integer", amount = "numeric")) |>
+  dr_add_quality(~ amount >= 0)
+preparation <- dr_recipe() |> dr_step_mutate(amount = round(amount, 2))
+flow <- dr_workflow() |> dr_add_product(spec) |> dr_add_recipe(preparation)
+dr_trial(flow, data = data.frame(id = 1:2, amount = c(10.123, 20))) |>
+  dr_collect()
+}
 \seealso{
 \code{\link[dataraft.core:workflow-components]{dataraft.core::dr_extract_recipe()}}
 }

@@ -27,6 +27,11 @@ accepts a request but before local acknowledgement is saved. Consumers
 should deduplicate by run/event identity. Successful recorded deliveries
 are not resent. Use one coordinated writer for this directory.
 }
+\examples{
+# catalog <- dataraft.catalog::dr_catalog_openlineage(
+#   "https://lineage.example/api/v1/lineage")
+# dr_retry_catalogs("runs", list(catalog))
+}
 \seealso{
 \code{\link[dataraft.core:dr_retry_catalogs]{dataraft.core::dr_retry_catalogs()}}
 }

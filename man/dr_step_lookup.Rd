@@ -39,6 +39,11 @@ An updated recipe.
 Uses the same dependency resolution and relationship checks as \code{\link[dataraft.core:dr_lookup_spec]{dr_lookup_spec()}}.
 Reusable lookup specifications can instead be passed to \code{\link[dataraft.core:dr_step_transform]{dr_step_transform()}}.
 }
+\examples{
+dr_recipe() |>
+  dr_step_lookup(data.frame(id = 1:2, region = c("North", "South")),
+    by = "id", name = "customers")
+}
 \seealso{
 \code{\link[dataraft.core:dr_step_lookup]{dataraft.core::dr_step_lookup()}}
 }

@@ -15,6 +15,11 @@ A serializable configuration object containing no credentials.
 \description{
 Define metadata and storage configuration
 }
+\examples{
+dr_registry_duckdb(file.path(tempdir(), "lake.db"))
+dr_storage_local(file.path(tempdir(), "data"))
+dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
+}
 \seealso{
 \code{\link[dataraft.lake:dr_registry_duckdb]{dataraft.lake::dr_storage_local()}}
 }

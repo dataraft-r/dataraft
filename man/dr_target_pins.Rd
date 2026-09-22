@@ -33,6 +33,15 @@ after pins updates its metadata; do not use it to bypass timestamp collisions.
 The publication ID is verified after writing. Storage remains pins' responsibility.
 Extra arguments go to \code{\link[pins:pin_read]{pins::pin_write()}}.
 }
+\examples{
+\dontshow{if (requireNamespace("pins", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+board <- pins::board_temp(versioned = TRUE)
+dataraft.core::dr_product("orders") |>
+  dataraft.core::dr_add_source(data.frame(id = 1:2)) |>
+  dataraft.core::dr_set_target(dr_target_pins(board, "orders")) |>
+  dataraft.core::dr_run()
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_target_pins]{dataraft.adapters::dr_target_pins()}}
 }

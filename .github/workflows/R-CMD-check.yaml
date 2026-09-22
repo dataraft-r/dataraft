@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   check:
     runs-on: ubuntu-24.04
@@ -25,39 +28,17 @@ jobs:
       DO_NOT_TRACK: "1"
       NOT_CRAN: "true"
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.core
-          path: packages/dataraft.core
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.lake
-          path: packages/dataraft.lake
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.adapters
-          path: packages/dataraft.adapters
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.metrics
-          path: packages/dataraft.metrics
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.dbt
-          path: packages/dataraft.dbt
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.catalog
-          path: packages/dataraft.catalog
-      - name: Select matching component branches for coordinated pull requests
-        run: bash scripts/select-family-refs.sh
-      - uses: r-lib/actions/setup-pandoc@v2
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain pinned family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           r-version: '4.5.1'
-          use-public-rspm: true
-      - uses: r-lib/actions/setup-r-dependencies@v2
+          use-public-rspm: false
+          # Same immutable snapshot; Ubuntu 24.04 needs the noble binary endpoint.
+          cran: ${{ runner.os == 'Linux' && 'https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18' || 'https://packagemanager.posit.co/cran/2026-09-18' }}
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           extra-packages: |
             any::rcmdcheck
@@ -68,18 +49,24 @@ jobs:
             local::packages/dataraft.dbt
             local::packages/dataraft.catalog
           needs: check
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.13'
       - name: Install pinned dbt integration engine
         run: |
           python -m venv "$RUNNER_TEMP/dataraft-dbt"
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -m pip install dbt-core==1.12.5 dbt-duckdb==1.10.1 duckdb==1.5.5
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -c "import dbt.cli.main, duckdb"
           echo "DATARAFT_DBT_EXECUTABLE=$RUNNER_TEMP/dataraft-dbt/bin/dbt" >> "$GITHUB_ENV"
+      - name: Validate compatible family versions
+        run: python scripts/check-family.py
+      - name: Require every declared optional dependency
+        run: Rscript scripts/check-optional.R
       - name: Check package
         run: Rscript scripts/check.R
-      - uses: actions/upload-artifact@v4
+      - name: Benchmark smoke gate
+        run: Rscript scripts/benchmark-smoke.R
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: check-${{ matrix.backend }}
@@ -94,9 +81,9 @@ jobs:
           - os: ubuntu-24.04
             r: '4.2.3'
           - os: windows-latest
-            r: 'release'
+            r: '4.5.1'
           - os: macos-latest
-            r: 'release'
+            r: '4.5.1'
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: "yes"
@@ -105,39 +92,17 @@ jobs:
       _R_CHECK_FORCE_SUGGESTS_: "true"
       NOT_CRAN: "true"
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.core
-          path: packages/dataraft.core
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.lake
-          path: packages/dataraft.lake
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.adapters
-          path: packages/dataraft.adapters
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.metrics
-          path: packages/dataraft.metrics
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.dbt
-          path: packages/dataraft.dbt
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.catalog
-          path: packages/dataraft.catalog
-      - name: Select matching component branches for coordinated pull requests
-        run: bash scripts/select-family-refs.sh
-      - uses: r-lib/actions/setup-pandoc@v2
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain pinned family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           r-version: ${{ matrix.r }}
-          use-public-rspm: true
-      - uses: r-lib/actions/setup-r-dependencies@v2
+          use-public-rspm: false
+          # Same immutable snapshot; Ubuntu 24.04 needs the noble binary endpoint.
+          cran: ${{ runner.os == 'Linux' && 'https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18' || 'https://packagemanager.posit.co/cran/2026-09-18' }}
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           # Prefer CRAN source for macOS dependencies whose binary compression is incompatible with pak.
           extra-packages: |
@@ -154,7 +119,7 @@ jobs:
           needs: check
       - name: Check portable package behavior
         run: Rscript scripts/check.R
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: check-${{ matrix.os }}-${{ matrix.r }}
@@ -163,37 +128,20 @@ jobs:
     name: Core without optional integrations
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain pinned family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
-          repository: dataraft-r/dataraft.core
-          path: packages/dataraft.core
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.lake
-          path: packages/dataraft.lake
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.adapters
-          path: packages/dataraft.adapters
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.metrics
-          path: packages/dataraft.metrics
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.dbt
-          path: packages/dataraft.dbt
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.catalog
-          path: packages/dataraft.catalog
-      - name: Select matching component branches for coordinated pull requests
-        run: bash scripts/select-family-refs.sh
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: 'release'
-          use-public-rspm: true
+          r-version: '4.5.1'
+          use-public-rspm: false
+          # Same immutable snapshot; Ubuntu 24.04 needs the noble binary endpoint.
+          cran: ${{ runner.os == 'Linux' && 'https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18' || 'https://packagemanager.posit.co/cran/2026-09-18' }}
+      - name: Install system dependency for fs test tooling
+        # fs >= 2.1.0 uses libuv headers when built from source.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libuv1-dev
       - name: Install only hard dependencies
         run: Rscript -e 'install.packages(c("cli", "DBI", "dplyr", "dbplyr", "tibble", "rlang", "digest", "jsonlite", "withr"))'
       - name: Install core package
@@ -226,38 +174,16 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       DATARAFT_TEST_PG_CONNECTION: "host=localhost port=5432 dbname=dataraft_test user=dataraft password=test-only-password"
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.core
-          path: packages/dataraft.core
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.lake
-          path: packages/dataraft.lake
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.adapters
-          path: packages/dataraft.adapters
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.metrics
-          path: packages/dataraft.metrics
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.dbt
-          path: packages/dataraft.dbt
-      - uses: actions/checkout@v6
-        with:
-          repository: dataraft-r/dataraft.catalog
-          path: packages/dataraft.catalog
-      - name: Select matching component branches for coordinated pull requests
-        run: bash scripts/select-family-refs.sh
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain pinned family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           r-version: '4.5.1'
-          use-public-rspm: true
-      - uses: r-lib/actions/setup-r-dependencies@v2
+          use-public-rspm: false
+          # Same immutable snapshot; Ubuntu 24.04 needs the noble binary endpoint.
+          cran: ${{ runner.os == 'Linux' && 'https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18' || 'https://packagemanager.posit.co/cran/2026-09-18' }}
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           extra-packages: |
             any::RPostgres
@@ -273,7 +199,7 @@ jobs:
             local::.
       - name: Exercise independent writers on actual PostgreSQL and DuckLake
         run: Rscript scripts/check-postgres.R
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: postgres-worker-results

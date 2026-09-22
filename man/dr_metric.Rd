@@ -64,6 +64,14 @@ Define a reusable calculation, such as a total or cancellation rate, for a
 data product. Choose its grouping columns, unit and date behavior, then
 calculate it with \code{\link[dataraft.metrics:dr_measure]{dr_measure()}}.
 }
+\examples{
+metric <- dr_metric(
+  "orders.total", "orders", expr = sum(amount), time_behavior = "flow",
+  unit = "EUR", owner = "Analytics", description = "Total order value",
+  approved = TRUE, code_version = "v1"
+)
+metric
+}
 \seealso{
 \code{\link[dataraft.metrics:dr_metric]{dataraft.metrics::dr_metric()}}
 }

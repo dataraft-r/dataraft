@@ -29,6 +29,11 @@ for that exact published stand. Cached runs resolve to the original release's
 checks. These choices prevent an older successful run hiding a recent
 failure.
 }
+\examples{
+contract <- dr_contract("orders", "1", "Analytics", "Orders", "One order",
+  c(id = "integer"), key = "id")
+dr_quality(dr_validate(data.frame(id = c(1L, 1L)), contract))
+}
 \seealso{
 \code{\link[dataraft.core:dr_quality]{dataraft.core::dr_quality()}}
 }

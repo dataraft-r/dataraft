@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataraft-package.R
 \name{dr_target_iceberg}
 \alias{dr_target_iceberg}
-\title{Read an Iceberg snapshot or publish through a REST catalog}
+\title{Experimental Iceberg reads and ungoverned REST catalog writes}
 \usage{
 dr_target_iceberg(connection, table, mode = c("create", "append"))
 }
@@ -25,10 +25,16 @@ snapshot ID to reproduce a read; retention remains the catalog's policy.
 \details{
 Targets require DBI::Id(catalog=, schema=, table=) in an attached Iceberg
 REST catalog. Create fails if the table exists; append requires an existing
-table. The entire stored candidate is read and checked inside a transaction
+table. The stored candidate is checked lazily inside a transaction
 before commit. Catalogs must support staged writes and transactions; failures
 are propagated, with no nontransactional fallback. No replace, branch/merge,
 snapshot-retention or cross-table atomicity guarantee is made.
+
+This experimental adapter delegates to DuckDB's Iceberg extension. Writes
+are not DataRaft lake releases: no registry release, lineage edge or managed
+rollback is created. Use a managed lake target when release governance is
+required. Lazy validation avoids collecting the entire table by default;
+custom quality rules may still collect data.
 }
 \seealso{
 \code{\link[dataraft.adapters:dr_source_iceberg]{dataraft.adapters::dr_target_iceberg()}}

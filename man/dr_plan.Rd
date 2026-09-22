@@ -19,6 +19,12 @@ steps. No source is read and no callback is called. A materialization value
 of \code{NA} means the component has not declared its lazy behavior; ordinary
 functions may support either lazy or in-memory tables.
 }
+\examples{
+dr_product("orders") |>
+  dr_add_source(data.frame(id = 1:2)) |>
+  dr_add_recipe(dr_recipe() |> dr_step_transform(function(data) dplyr::filter(data, id > 1))) |>
+  dr_plan()
+}
 \seealso{
 \code{\link[dataraft.core:dr_plan]{dataraft.core::dr_plan()}}
 }

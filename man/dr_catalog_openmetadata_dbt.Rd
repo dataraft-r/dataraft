@@ -78,6 +78,15 @@ An interruption after remote ingestion but before
 the receipt is saved can cause a repeated delivery: this is at-least-once,
 not an exactly-once transaction.
 }
+\examples{
+catalog <- dr_catalog_openmetadata_dbt(
+  "https://metadata.example", service = "warehouse"
+)
+dataraft.core::dr_inspect(catalog)
+# After configuring the external service, CLI and token environment:
+# result <- dataraft.dbt::dr_dbt_build(project, catalog = catalog, stop_on_failure = FALSE)
+# delivery <- dataraft.core::dr_publish_metadata(catalog, result)
+}
 \seealso{
 \code{\link[dataraft.catalog:dr_catalog_openmetadata_dbt]{dataraft.catalog::dr_catalog_openmetadata_dbt()}}
 }

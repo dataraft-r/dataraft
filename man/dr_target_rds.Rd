@@ -22,6 +22,14 @@ After a crashed writer, inspect the directory before manually removing \code{.lo
 and abandoned \verb{.staging-*} directories. Network filesystems must provide the
 same directory creation and rename semantics to use this adapter safely.
 }
+\examples{
+path <- tempfile("orders-")
+result <- dataraft.core::dr_product("orders", data.frame(id = 1:2)) |>
+  dataraft.core::dr_set_target(dr_target_rds(path)) |>
+  dataraft.core::dr_publish()
+dataraft.core::dr_read_source(dr_source_rds(path, result$outputs$version))
+unlink(path, recursive = TRUE)
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_target_rds]{dataraft.adapters::dr_target_rds()}}
 }

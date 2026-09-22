@@ -28,6 +28,10 @@ Source specification. Files are read only at execution time.
 \description{
 Define an input source
 }
+\examples{
+source <- dr_source_file("orders.file", "orders.csv", reader = utils::read.csv)
+source
+}
 \seealso{
 \code{\link[dataraft.core:dr_source_file]{dataraft.core::dr_source_file()}}
 }

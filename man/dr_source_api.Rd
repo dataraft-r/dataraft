@@ -39,6 +39,13 @@ rather than silently dropping rows. Repeated identical requests are rejected.
 Each page must have the same column names; incompatible types fail binding.
 Authentication and rate limiting remain httr2's responsibility.
 }
+\examples{
+\dontshow{if (requireNamespace("httr2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+# Construction does not send a request.
+api <- dr_source_api(httr2::request("https://example.org/orders"))
+dataraft.core::dr_inspect(api)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_source_api]{dataraft.adapters::dr_source_api()}}
 }

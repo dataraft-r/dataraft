@@ -34,6 +34,12 @@ Defines an enrichment independently of a product or recipe. Use \code{\link[data
 to choose native or dm constraint checks, then attach it with
 \code{\link[dataraft.core:dr_step_transform]{dr_step_transform()}}.
 }
+\examples{
+customers <- data.frame(id = 1:2, region = c("North", "South"))
+lookup <- dr_lookup_spec(customers, by = "id", name = "customers") |>
+  dr_set_engine("native")
+dr_recipe() |> dr_step_transform(lookup)
+}
 \seealso{
 \code{\link[dataraft.core:dr_lookup_spec]{dataraft.core::dr_lookup_spec()}}
 }

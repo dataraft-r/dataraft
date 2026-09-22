@@ -50,6 +50,12 @@ so their dependencies cannot safely be inferred. This review prevents silent
 inheritance of guarantees, but is not proof that revised rules are correct.
 Metadata for removed columns is discarded; other metadata is inherited.
 }
+\examples{
+orders <- dr_contract("orders", columns = c(id = "integer"), key = "id")
+enriched <- orders |>
+  dr_contract_update(id = "enriched_orders", columns = c(channel = "character"))
+dr_contract_diff(orders, enriched)
+}
 \seealso{
 \code{\link[dataraft.core:dr_contract_update]{dataraft.core::dr_contract_update()}}
 }

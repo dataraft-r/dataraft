@@ -20,6 +20,9 @@ With \code{version = NULL}, the latest committed version is resolved when readin
 A checksum detects changed data files before deserialization. Read only trusted
 RDS directories: checksums detect accidental changes, not malicious replacement.
 }
+\examples{
+dr_source_rds(tempfile("releases-"), version = "v000000000001")
+}
 \seealso{
 \code{\link[dataraft.adapters:dr_source_rds]{dataraft.adapters::dr_source_rds()}}
 }

@@ -35,6 +35,11 @@ failed dbt tests can still be delivered without changing the dbt outcome.
 \code{\link[dataraft.catalog:dr_catalog_openmetadata_dbt]{dataraft.catalog::dr_catalog_openmetadata_dbt()}} delegates to the existing OpenMetadata ingestion
 engine and returns a retryable, credential-free delivery receipt.
 }
+\examples{
+received <- NULL
+dr_publish_metadata(function(metadata) received <<- metadata,
+  list(product = "orders", rows = 2L))
+}
 \seealso{
 \code{\link[dataraft.core:dr_publish_metadata]{dataraft.core::dr_publish_metadata()}}
 }

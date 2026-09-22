@@ -18,6 +18,25 @@ errors.
 \description{
 Register a versioned definition
 }
+\examples{
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+root <- tempfile("dataraft-example-")
+config <- dr_lake_config(
+  dr_registry_duckdb(file.path(root, "lake.db")),
+  dr_storage_local(file.path(root, "data")),
+  landing = file.path(root, "landing"), backend = "duckdb"
+)
+lake <- dataraft.lake::dr_connect_lake(config)
+contract <- dataraft.core::dr_contract(
+  "orders", "1.0.0", "Analytics", "Order amounts", "One order",
+  c(order_id = "integer", amount = "numeric"), key = "order_id"
+)
+dr_register(lake, contract)
+dr_registry(lake, "assets")
+dataraft.lake::dr_disconnect_lake(lake)
+unlink(root, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[dataraft.lake:dr_register]{dataraft.lake::dr_register()}}
 }

@@ -34,6 +34,14 @@ A rule specification or counts object.
 \description{
 Define a quality rule
 }
+\examples{
+rule <- dr_quality_rule("positive", function(data) {
+  counts <- dplyr::summarise(data, failed = sum(amount <= 0), total = dplyr::n())
+  if (inherits(counts, "tbl_sql")) counts <- dplyr::collect(counts)
+  dr_quality_counts(counts$failed, counts$total)
+})
+rule$name
+}
 \seealso{
 \code{\link[dataraft.core:dr_quality_rule]{dataraft.core::dr_pointblank_checks()}}
 }
