@@ -1,6 +1,6 @@
 # Install and manually check DataRaft in Positron
 
-The deliverables are `dataraft.ide_0.1.0.9000.tar.gz`,
+The deliverables are `dataraft.ide_0.1.0.9002.tar.gz`,
 `dataraft-positron.vsix` and `dataraft-ide-source.zip`. The ZIP contains the
 `dataraft.ide` and `dataraft-positron` source folders. The R bridge is also
 available from its published immutable review commit. Install the extension
@@ -25,7 +25,7 @@ pak::pkg_install(c(
   "fs", "jsonlite", "rlang", "yaml"
 ), dependencies = NA)
 install.packages(
-  "/path/to/dataraft.ide_0.1.0.9000.tar.gz",
+  "/path/to/dataraft.ide_0.1.0.9002.tar.gz",
   repos = NULL,
   type = "source"
 )
@@ -37,7 +37,7 @@ local archive, install the same reviewed bridge from GitHub:
 
 ```r
 pak::pkg_install(
-  "dataraft-r/dataraft.ide@4e0b1d1f20b5091f086a5a070819e5966b01c9e2",
+  "dataraft-r/dataraft.ide@8f35777b0785c6dc6aa16882204391919902bade",
   dependencies = NA
 )
 ```
@@ -161,6 +161,6 @@ returns the app object; it does not start a background server.
 
 The [phase checklist](../../docs/plans/positron-ide.md) separates implemented
 features, automated evidence, unrun manual checks and the eight-package CI
-acceptance gate. IDE PR #1 must merge before the umbrella integration PR #5
-so nightly checks can resolve the IDE package from `main`. There are no production publish, approval or
-scheduling controls in the extension.
+acceptance gate. The first eight-package remote run and native Positron
+automation have passed; human usability sign-off remains separate. There are
+no production publish, approval or scheduling controls in the extension.
