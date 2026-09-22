@@ -30,6 +30,9 @@ reference:
     desc: Define a product, prepare a delivery, check it and collect or publish the result.
     contents:
       - dr_demo
+      - dr_review
+      - dr_catalog_pane
+      - dr_refresh_connection
       - dr_report_verify
       - dr_expire_snapshots
       - dr_test_adapter

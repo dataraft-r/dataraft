@@ -978,3 +978,24 @@ dataraft.lake::dr_expire_snapshots
 #' @importFrom dataraft.adapters dr_test_adapter
 #' @export
 dataraft.adapters::dr_test_adapter
+
+#' @rdname dr_review
+#' @inherit dataraft.core::dr_review title description details return params sections examples
+#' @seealso [dataraft.core::dr_review()]
+#' @importFrom dataraft.core dr_review
+#' @export
+dataraft.core::dr_review
+
+#' @rdname dr_catalog_pane
+#' @inherit dataraft.catalog::dr_catalog_pane title description details return params sections examples
+#' @seealso [dataraft.catalog::dr_catalog_pane()]
+#' @importFrom dataraft.catalog dr_catalog_pane
+#' @export
+dataraft.catalog::dr_catalog_pane
+
+#' @rdname dr_refresh_connection
+#' @inherit dataraft.lake::dr_refresh_connection title description details return params sections examples
+#' @seealso [dataraft.lake::dr_refresh_connection()]
+#' @importFrom dataraft.lake dr_refresh_connection
+#' @export
+dataraft.lake::dr_refresh_connection

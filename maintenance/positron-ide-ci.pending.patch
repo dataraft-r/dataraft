@@ -1,0 +1,191 @@
+diff --git a/.github/workflows/R-CMD-check.yaml b/.github/workflows/R-CMD-check.yaml
+index dc87b0a..1e61abd 100644
+--- a/.github/workflows/R-CMD-check.yaml
++++ b/.github/workflows/R-CMD-check.yaml
+@@ -48,6 +48,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+           needs: check
+       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+         with:
+@@ -113,6 +114,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+             ${{ runner.os == 'macOS' && 'knitr=?source' || '' }}
+             ${{ runner.os == 'macOS' && 'readxl=?source' || '' }}
+             ${{ runner.os == 'macOS' && 'xfun=?source' || '' }}
+@@ -196,6 +198,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+             local::.
+       - name: Exercise independent writers on actual PostgreSQL and DuckLake
+         run: Rscript scripts/check-postgres.R
+diff --git a/.github/workflows/coverage.yaml b/.github/workflows/coverage.yaml
+index 87232d5..8d77b63 100644
+--- a/.github/workflows/coverage.yaml
++++ b/.github/workflows/coverage.yaml
+@@ -15,7 +15,7 @@ jobs:
+     strategy:
+       fail-fast: false
+       matrix:
+-        package: [core, lake, adapters, metrics, dbt, catalog]
++        package: [core, lake, adapters, metrics, dbt, catalog, ide]
+     env:
+       NOT_CRAN: "true"
+       DATARAFT_TEST_DUCKLAKE: "false"
+@@ -42,6 +42,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+             local::.
+       - run: Rscript scripts/coverage.R
+       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+diff --git a/.github/workflows/documentation.yaml b/.github/workflows/documentation.yaml
+index 1b88a36..f19cd7d 100644
+--- a/.github/workflows/documentation.yaml
++++ b/.github/workflows/documentation.yaml
+@@ -39,6 +39,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+             local::.
+           needs: website
+       - name: Check and build documentation
+diff --git a/.github/workflows/family-head.yaml b/.github/workflows/family-head.yaml
+index e02681b..39da0b9 100644
+--- a/.github/workflows/family-head.yaml
++++ b/.github/workflows/family-head.yaml
+@@ -35,6 +35,7 @@ jobs:
+             local::packages/dataraft.metrics
+             local::packages/dataraft.dbt
+             local::packages/dataraft.catalog
++            local::packages/dataraft.ide
+       - run: Rscript scripts/check.R
+       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+         if: always()
+diff --git a/DESCRIPTION b/DESCRIPTION
+index 168c38d..fabd5f3 100644
+--- a/DESCRIPTION
++++ b/DESCRIPTION
+@@ -11,7 +11,7 @@ Encoding: UTF-8
+ Depends: R (>= 4.2.0)
+ Imports: dataraft.core (>= 0.1.0.9000), dataraft.lake (>= 0.1.0.9000), dataraft.adapters (>= 0.1.0.9000), dataraft.dbt (>= 0.1.0.9000),
+     dataraft.catalog (>= 0.1.0.9000), dataraft.metrics (>= 0.1.0.9000)
+-Suggests: hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
++Suggests: dataraft.ide (>= 0.1.0.9000), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
+     rlang, digest, jsonlite, withr, duckdb (>= 1.5.5), pointblank, dm, shiny,
+     bslib, yaml, readr, readxl, paws.storage, processx, RPostgres, arrow,
+     pins (>= 1.2.0), httr2, targets, renv, RSQLite, webfakes, bit64, covr
+diff --git a/FAMILY_COMPATIBILITY.md b/FAMILY_COMPATIBILITY.md
+index 8d1ad87..326122d 100644
+--- a/FAMILY_COMPATIBILITY.md
++++ b/FAMILY_COMPATIBILITY.md
+@@ -9,14 +9,14 @@ Ordinary CI obtains sibling sources with `scripts/checkout-family.py`. It never
+ selects a moving branch because the same branch name exists in another repo.
+ Component checks compare the current component against its recorded sibling
+ baseline. Those baselines need not describe mutually recursive commit sets.
+-The compatibility set is the containing umbrella commit plus six immutable
++The compatibility set is the containing umbrella commit plus seven immutable
+ component SHAs. Only the umbrella's own manifest entry uses `ref: "self"`,
+ because a commit cannot embed its own hash. Checkout and validation resolve it
+ to the actual umbrella HEAD in `check/resolved-family.json`. Component manifests
+ retain their immutable umbrella comparison baseline. `python scripts/check-family.py`
+-validates all six component checkout SHAs, the package set and version bounds.
++validates all seven component checkout SHAs, the package set and version bounds.
+ 
+-The separate nightly HEAD workflow intentionally fetches all six `main`
++The separate nightly HEAD workflow intentionally fetches all seven `main`
+ branches, then runs the family check. This discovers cross-repository breaking
+ changes without making ordinary checks depend on changing sibling branches.
+ All resolved commits are printed in the job log.
+diff --git a/scripts/build-site.R b/scripts/build-site.R
+index 2e26a99..ba1b1b9 100644
+--- a/scripts/build-site.R
++++ b/scripts/build-site.R
+@@ -4,7 +4,7 @@ site <- file.path(root, "site")
+ base_url <- "https://dataraft-r.github.io/dataraft/"
+ components <- paste0(
+   "dataraft.",
+-  c("core", "lake", "adapters", "metrics", "dbt", "catalog")
++  c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+ )
+ pkgdown::build_site(new_process = FALSE, install = FALSE)
+ for (component in components) {
+diff --git a/scripts/check-core.R b/scripts/check-core.R
+index 0f94e8b..ac90674 100644
+--- a/scripts/check-core.R
++++ b/scripts/check-core.R
+@@ -2,7 +2,7 @@ stopifnot(!requireNamespace("duckdb", quietly = TRUE))
+ library(dataraft.core)
+ family_extensions <- paste0(
+   "dataraft.",
+-  c("lake", "adapters", "dbt", "catalog", "metrics")
++  c("lake", "adapters", "dbt", "catalog", "metrics", "ide")
+ )
+ stopifnot(!any(family_extensions %in% loadedNamespaces()))
+ flow <- dr_workflow() |>
+diff --git a/scripts/check-family.py b/scripts/check-family.py
+index c820295..d6a5876 100644
+--- a/scripts/check-family.py
++++ b/scripts/check-family.py
+@@ -9,7 +9,7 @@ root = pathlib.Path(__file__).resolve().parents[1]
+ lock = json.loads((root / "family-lock.json").read_text())
+ mode = os.environ.get("DATARAFT_FAMILY_MODE", "pinned")
+ assert mode in ("pinned", "head"), "Unknown family mode"
+-expected = {"dataraft"} | {"dataraft." + x for x in ("core", "lake", "adapters", "metrics", "dbt", "catalog")}
++expected = {"dataraft"} | {"dataraft." + x for x in ("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")}
+ assert lock["schema_version"] == 1
+ assert set(lock["packages"]) == expected
+ assert re.fullmatch(r"\d+\.\d+\.\d+", lock["r_version"])
+diff --git a/scripts/coverage.R b/scripts/coverage.R
+index a20dfbc..7fa15e0 100644
+--- a/scripts/coverage.R
++++ b/scripts/coverage.R
+@@ -1,7 +1,8 @@
+ # Instrument one component while exercising the shared integration suite.
+ component <- Sys.getenv("DATARAFT_COVERAGE_PACKAGE", "core")
+ stopifnot(
+-  component %in% c("core", "lake", "adapters", "metrics", "dbt", "catalog")
++  component %in%
++    c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+ )
+ root <- normalizePath(".", winslash = "/")
+ code <- sprintf(
+diff --git a/scripts/install-component-hard.R b/scripts/install-component-hard.R
+index b3050c0..def27fb 100644
+--- a/scripts/install-component-hard.R
++++ b/scripts/install-component-hard.R
+@@ -9,12 +9,12 @@ paths <- c(
+       "family",
+       paste0(
+         "dataraft.",
+-        c("core", "lake", "adapters", "metrics", "dbt", "catalog")
++        c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+       )
+     ),
+     paste0(
+       "dataraft.",
+-      c("core", "lake", "adapters", "metrics", "dbt", "catalog")
++      c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+     )
+   )
+ )
+diff --git a/scripts/install-family.R b/scripts/install-family.R
+index c7891ca..14d2989 100644
+--- a/scripts/install-family.R
++++ b/scripts/install-family.R
+@@ -1,5 +1,5 @@
+ # Run from the repository root.
+-family <- c("core", "lake", "adapters", "metrics", "dbt", "catalog")
++family <- c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+ paths <- c(file.path("packages", paste0("dataraft.", family)), ".")
+ if (any(!file.exists(file.path(head(paths, -1L), "DESCRIPTION")))) {
+   status <- system2("python", "scripts/checkout-family.py")

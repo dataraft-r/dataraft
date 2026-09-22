@@ -4,6 +4,10 @@ output: github_document
 
 # DataRaft
 
+For Positron, see the [IDE integration guide](examples/positron-ide/README.md)
+and [phase checklist](docs/plans/positron-ide.md). IDE metadata and the separate
+extension are optional; existing R workflows remain usable without them.
+
 [![R-CMD-check](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml)
 [![Coverage](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)

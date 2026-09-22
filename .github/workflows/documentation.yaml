@@ -68,6 +68,8 @@ jobs:
           python -m pip install jsonschema==4.23.0
           python scripts/check-odcs-schema.py
           node scripts/accessibility/audit.cjs
+      - name: Run compiler-free IDE example
+        run: Rscript examples/positron-ide/demo.R
       - name: Run compiler-free example
         run: Rscript examples/checked-report/run.R
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

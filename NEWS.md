@@ -1,5 +1,7 @@
 # dataraft 0.1.0.9000
 
+* `dr_review()`, `dr_catalog_pane()` and `dr_refresh_connection()` expose IDE diagnostics, a foreground catalog viewer and live connection refresh.
+
 * Family CI uses immutable sibling references and a dated CRAN snapshot; nightly checks exercise current sibling branches separately.
 * The metapackage reference now includes inherited executable examples.
 
