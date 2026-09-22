@@ -2,9 +2,9 @@
 
 The deliverables are `dataraft.ide_0.1.0.9000.tar.gz`,
 `dataraft-positron.vsix` and `dataraft-ide-source.zip`. The ZIP contains the
-`dataraft.ide` and `dataraft-positron` source folders. New-repository publication
-still needs GitHub App access, so install these local deliverables rather than
-an empty GitHub repository or a marketplace listing.
+`dataraft.ide` and `dataraft-positron` source folders. The R bridge is also
+available from its published immutable review commit. Install the extension
+from the supplied VSIX; no marketplace listing is required.
 
 Automated tests do not replace the manual checks below. No real Positron GUI
 session or graphical extension-host test has been run in the build environment.
@@ -31,7 +31,17 @@ install.packages(
 stopifnot(requireNamespace("dataraft.ide", quietly = TRUE))
 ```
 
-Replace the archive path with its actual local path. Alternatively, after
+Replace the archive path with its actual local path. Instead of installing the
+local archive, install the same reviewed bridge from GitHub:
+
+```r
+pak::pkg_install(
+  "dataraft-r/dataraft.ide@ef05f9e5657b088bcd801efb33beffe40fe0219b",
+  dependencies = NA
+)
+```
+
+Alternatively, after
 installing the dependencies, run `R CMD INSTALL /path/to/dataraft.ide` against
 the extracted source folder. The bridge has no native code to compile, although
 some dependencies may need system libraries when installed from source.
@@ -149,6 +159,7 @@ stops. Keep a supplied live lake connection open throughout. `launch = FALSE`
 returns the app object; it does not start a background server.
 
 The [phase checklist](../../docs/plans/positron-ide.md) separates implemented
-features, automated evidence, unrun manual checks and the pending publication
-and eight-package CI handoff. There are no production publish, approval or
+features, automated evidence, unrun manual checks and the eight-package CI
+acceptance gate. IDE PR #1 must merge before the umbrella integration PR #5
+so nightly checks can resolve the IDE package from `main`. There are no production publish, approval or
 scheduling controls in the extension.
