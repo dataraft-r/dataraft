@@ -1,6 +1,10 @@
 
 # DataRaft
 
+For Positron, see the [IDE integration guide](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/examples/positron-ide/README.md)
+and [phase checklist](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/docs/plans/positron-ide.md). IDE metadata and the separate
+extension are optional; existing R workflows remain usable without them.
+
 [![R-CMD-check](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml)
 [![Coverage](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml)
 [![Lifecycle:
@@ -116,6 +120,7 @@ introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html).
 | `dataraft.dbt`      | dbt execution and artifacts                                        |
 | `dataraft.catalog`  | Catalog applications and metadata publication                      |
 | `dataraft.metrics`  | Metrics and frozen report evidence                                 |
+| `dataraft.ide` | Optional Positron metadata bridge and contract editor requests |
 
 Use `library(dataraft.core)` for in-memory work without the extensions.
 Each extension can be installed with its declared dependencies. The

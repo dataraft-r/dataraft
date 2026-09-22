@@ -2,7 +2,7 @@ stopifnot(!requireNamespace("duckdb", quietly = TRUE))
 library(dataraft.core)
 family_extensions <- paste0(
   "dataraft.",
-  c("lake", "adapters", "dbt", "catalog", "metrics")
+  c("lake", "adapters", "dbt", "catalog", "metrics", "ide")
 )
 stopifnot(!any(family_extensions %in% loadedNamespaces()))
 flow <- dr_workflow() |>

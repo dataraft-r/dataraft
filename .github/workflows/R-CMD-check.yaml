@@ -48,6 +48,7 @@ jobs:
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
             local::packages/dataraft.catalog
+            local::packages/dataraft.ide
           needs: check
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
@@ -113,6 +114,7 @@ jobs:
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
             local::packages/dataraft.catalog
+            local::packages/dataraft.ide
             ${{ runner.os == 'macOS' && 'knitr=?source' || '' }}
             ${{ runner.os == 'macOS' && 'readxl=?source' || '' }}
             ${{ runner.os == 'macOS' && 'xfun=?source' || '' }}
@@ -150,10 +152,10 @@ jobs:
         run: Rscript scripts/check-core.R
       - name: Install the family and minimal test tooling
         run: |
-          Rscript -e 'install.packages(c("testthat", "pkgload"))'
+          Rscript -e 'install.packages(c("testthat", "pkgload", "yaml"))'
           Rscript scripts/install-family.R
       - name: Run family tests without optional engines
-        run: Rscript -e 'stopifnot(!requireNamespace("duckdb", quietly = TRUE)); testthat::test_local(stop_on_failure = TRUE)'
+        run: Rscript -e 'stopifnot(!requireNamespace("duckdb", quietly = TRUE)); testthat::test_local("packages/dataraft.ide", stop_on_failure = TRUE); testthat::test_local(stop_on_failure = TRUE)'
   postgres:
     name: PostgreSQL / concurrent DuckLake writers
     runs-on: ubuntu-24.04
@@ -196,6 +198,7 @@ jobs:
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
             local::packages/dataraft.catalog
+            local::packages/dataraft.ide
             local::.
       - name: Exercise independent writers on actual PostgreSQL and DuckLake
         run: Rscript scripts/check-postgres.R

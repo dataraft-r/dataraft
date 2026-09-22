@@ -23,6 +23,8 @@ navbar:
           href: components/dataraft.metrics/reference/index.html
         - text: dataraft.dbt
           href: components/dataraft.dbt/reference/index.html
+        - text: dataraft.ide
+          href: components/dataraft.ide/reference/index.html
         - text: dataraft.catalog
           href: components/dataraft.catalog/reference/index.html
 reference:
@@ -30,6 +32,9 @@ reference:
     desc: Define a product, prepare a delivery, check it and collect or publish the result.
     contents:
       - dr_demo
+      - dr_review
+      - dr_catalog_pane
+      - dr_refresh_connection
       - dr_report_verify
       - dr_expire_snapshots
       - dr_test_adapter

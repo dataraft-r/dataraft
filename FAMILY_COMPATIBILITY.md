@@ -9,14 +9,14 @@ Ordinary CI obtains sibling sources with `scripts/checkout-family.py`. It never
 selects a moving branch because the same branch name exists in another repo.
 Component checks compare the current component against its recorded sibling
 baseline. Those baselines need not describe mutually recursive commit sets.
-The compatibility set is the containing umbrella commit plus six immutable
+The compatibility set is the containing umbrella commit plus seven immutable
 component SHAs. Only the umbrella's own manifest entry uses `ref: "self"`,
 because a commit cannot embed its own hash. Checkout and validation resolve it
 to the actual umbrella HEAD in `check/resolved-family.json`. Component manifests
 retain their immutable umbrella comparison baseline. `python scripts/check-family.py`
-validates all six component checkout SHAs, the package set and version bounds.
+validates all seven component checkout SHAs, the package set and version bounds.
 
-The separate nightly HEAD workflow intentionally fetches all six `main`
+The separate nightly HEAD workflow intentionally fetches all seven `main`
 branches, then runs the family check. This discovers cross-repository breaking
 changes without making ordinary checks depend on changing sibling branches.
 All resolved commits are printed in the job log.
