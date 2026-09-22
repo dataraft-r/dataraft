@@ -4,7 +4,7 @@ site <- file.path(root, "site")
 base_url <- "https://dataraft-r.github.io/dataraft/"
 components <- paste0(
   "dataraft.",
-  c("core", "lake", "adapters", "metrics", "dbt", "catalog")
+  c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
 )
 pkgdown::build_site(new_process = FALSE, install = FALSE)
 for (component in components) {

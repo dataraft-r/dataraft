@@ -1,7 +1,8 @@
 # Instrument one component while exercising the shared integration suite.
 component <- Sys.getenv("DATARAFT_COVERAGE_PACKAGE", "core")
 stopifnot(
-  component %in% c("core", "lake", "adapters", "metrics", "dbt", "catalog")
+  component %in%
+    c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
 )
 root <- normalizePath(".", winslash = "/")
 code <- sprintf(
