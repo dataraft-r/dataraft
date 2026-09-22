@@ -65,31 +65,34 @@ receive the duplicated standalone core implementation helpers.
 | Scope | Recorded evidence | Boundary |
 | --- | --- | --- |
 | Core phase 0 | Full suite passed; 43 focused assertions | Data viewer behavior mocked, not a graphical session |
-| Lake phase 0 | 79 focused assertions and regression tests passed | Automated lifecycle tests |
+| Lake phase 0 | 79 focused assertions at the initial checkpoint; 82 targeted assertions passed for the published Windows shared-engine fix `7462a326a1cb65280795cc89217d72b1b9a69d22` | Automated lifecycle tests; remote family rerun remains pending |
 | Catalog and umbrella | Seven pane assertions plus four review integration assertions passed; RDS demo and ODCS sample generation/import passed | No real browser or IDE session launched |
 | Existing component CI | Core, lake and catalog phase 0 PR #5 checks passed | Umbrella PR #5 checks were still running at this checkpoint |
-| R bridge phase 1 | 70 assertions and 16 operation fixtures passed | Final package check result is recorded separately when complete |
-| R/TypeScript interoperability | 20 real R responses passed strict JSON Schema and TypeScript validation: 15 workspace/lake operations plus five requests in one persistent R process | Proves the file/protocol boundary, not Positron UI behavior |
-| Extension/editor | TypeScript build and 23 automated tests passed at the phase 3 checkpoint; selected profile columns, preview/apply, and failed-rule YAML AST diagnostics exercised | Graphical extension-host checks remain unrun |
+| R bridge phase 1 | Latest local suite: 76 assertions passed; R CMD check reported zero errors, warnings and notes; IDE PR #1 full and minimal CI passed at `4e0b1d1f20b5091f086a5a070819e5966b01c9e2` | Component checks do not replace the complete family CI gate |
+| R/TypeScript interoperability | Initial checkpoint: 20 real R responses passed strict JSON Schema and TypeScript validation; latest persistent-session integration validated 18 responses | Proves the file/protocol boundary, not Positron UI behavior |
+| Extension/editor | TypeScript build and 24 automated tests passed; hosted VS Code extension-host smoke test and VSIX packaging passed; selected profile columns, preview/apply, and failed-rule YAML AST diagnostics exercised | Manual Positron GUI acceptance remains unrun |
 
 These counts describe their respective test runs; they are not added into a
-single total because some suites overlap. A real Positron GUI and graphical
-extension-host environment were unavailable. Follow the
+single total because some suites overlap. Hosted graphical extension-host
+smoke testing has passed; a manual Positron GUI session remains unrun. Follow the
 [manual installation and acceptance guide](../../examples/positron-ide/README.md)
 to validate that remaining boundary. The R bridge is published in
 [dataraft.ide PR #1](https://github.com/dataraft-r/dataraft.ide/pull/1).
 The eight-package CI configuration now checks its actual immutable commit;
-remote eight-package CI results remain a separate acceptance gate.
+the complete remote eight-package CI is rerunning and remains a separate
+acceptance gate.
 
 ## Publication and merge order
 
 The family lock and optional `Remotes` entry pin `dataraft.ide` to
-`ef05f9e5657b088bcd801efb33beffe40fe0219b`. Pinned checks can use this published
+`4e0b1d1f20b5091f086a5a070819e5966b01c9e2`. Pinned checks can use this published
 review commit before merge. The former pending CI patch has been applied.
 No empty repository or moving branch is used as a compatibility pin.
 
 Merge IDE PR #1 before the umbrella integration PR #5 so that the nightly
 compatibility workflow can resolve actual IDE source from `main` alongside the
 other seven packages. These changes do not merge either PR. The extension is
-installed from the supplied VSIX; no extension commit or marketplace release is
-claimed here. Local source archives remain an alternative for review.
+published in [dataraft-positron PR #1](https://github.com/dataraft-r/dataraft-positron/pull/1)
+at immutable commit `4bb309248f9a3aa374d4432d7c3e739b93fc94c7`. Install it from
+the supplied VSIX; no marketplace release is claimed. Local source archives
+remain an alternative for review.
