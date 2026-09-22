@@ -60,10 +60,14 @@ reference:
       - dr_contract_confirm
       - dr_contract_diff
       - dr_contract_from
+      - dr_update_contract
+      - dr_update_source
       - dr_contract_update
       - dr_execute_transform
       - dr_execution_config
       - dr_expect_quality
+      - dr_extract_contract
+      - dr_extract_source
       - dr_extract_product
       - dr_extract_recipe
       - dr_incidents
@@ -86,6 +90,8 @@ reference:
       - dr_quality_rule
       - dr_read_run
       - dr_read_source
+      - dr_remove_contract
+      - dr_remove_source
       - dr_remove_product
       - dr_remove_recipe
       - dr_replace_sources
