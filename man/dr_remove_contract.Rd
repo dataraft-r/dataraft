@@ -8,16 +8,18 @@ dr_remove_contract(x)
 }
 \arguments{
 \item{x}{A contract, product, or modular workflow for updating; a product or
-  modular workflow for extraction and removal.}
-
+modular workflow for extraction and removal.}
 }
-\value{An updated definition, or the extracted contract specification.}
+\value{
+An updated definition, or the extracted contract specification.
+}
 \description{
 For a standalone contract, supply named revision arguments in \code{...}, such as
 \code{version}, \code{columns} or \code{rules}. The identity/version and guarantee-review
 checks of \code{\link[dataraft.core:dr_contract_update]{dr_contract_update()}} apply. This is the preferred verb spelling;
 \code{dr_contract_update()} is a deprecated compatibility name.
-
+}
+\details{
 For a product or workflow, \code{contract} replaces its existing attached contract.
 To revise that specification instead, extract it, revise its version, then
 attach it. Removal is idempotent and restores automatic structure inference;
@@ -33,5 +35,5 @@ dr_extract_contract(product)
 dr_remove_contract(product)
 }
 \seealso{
-\code{\link[dataraft.core:dr_update_contract]{dataraft.core::dr_remove_contract()}}
+\code{\link[dataraft.core:dr_remove_contract]{dataraft.core::dr_remove_contract()}}
 }

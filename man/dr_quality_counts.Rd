@@ -24,5 +24,5 @@ rule <- dr_quality_rule("positive", function(data) {
 rule$name
 }
 \seealso{
-\code{\link[dataraft.core:dr_quality_rule]{dataraft.core::dr_quality_counts()}}
+\code{\link[dataraft.core:dr_quality_counts]{dataraft.core::dr_quality_counts()}}
 }

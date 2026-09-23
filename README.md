@@ -45,12 +45,11 @@ orders <- dr_product("orders") |>
   dr_add_contract(c(id = "integer", amount = "numeric")) |>
   dr_add_quality(~ amount >= 0)
 
-flow <- dr_workflow() |>
-  dr_add_product(orders) |>
+orders <- orders |>
   dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = round(amount, 2)))
 
 bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
-checked <- dr_trial(flow, data = bad_delivery)
+checked <- dr_run(orders, data = bad_delivery, write = FALSE, stop_on_failure = FALSE)
 checked$status
 #> [1] "blocked"
 dr_quality_rows(checked)
@@ -60,11 +59,11 @@ dr_quality_rows(checked)
 #> 1     2    -75
 ```
 
-Correct the delivery and reuse the same workflow:
+Correct the delivery and reuse the same product:
 
 ``` r
 next_delivery <- data.frame(id = 1:3, amount = c(25, 75, 50))
-result <- dr_trial(flow, data = next_delivery)
+result <- dr_run(orders, data = next_delivery, write = FALSE)
 dr_collect(result)
 #> # A tibble: 3 × 2
 #>      id amount
@@ -74,35 +73,23 @@ dr_collect(result)
 #> 3     3     50
 ```
 
-A **product** defines identity, contract and quality requirements. A
-**recipe** defines preparation in step order. A **workflow** binds these
-definitions to sources and a target. Definitions do no I/O. `dr_trial()`
-checks without writing; `dr_run()` executes the configured target.
-`dr_collect()` retrieves the output.
+A **product** contains the delivery, transformations, contract, checks and target.
+`dr_run(write = FALSE)` checks it without invoking framework writers;
+`dr_run()` executes its configured destination. `dr_collect()` retrieves checked
+output. Source reads and user callbacks still run in both modes.
 
 ## Start with the essentials
 
-Start with twelve functions: `dr_product()`, `dr_contract()`,
-`dr_add_contract()`, `dr_add_quality()`, `dr_recipe()`,
-`dr_step_mutate()`, `dr_workflow()`, `dr_add_product()`,
-`dr_add_recipe()`, `dr_trial()`, `dr_collect()` and `dr_publish()`. Add
-specialized components as your workflow grows.
+Use `dr_product()`, `dr_contract()`, `dr_add_source()`, `dr_add_quality()`,
+`dr_quality()`, `dr_set_target()`, `dr_run()` and `dr_collect()` first.
+Ordinary dplyr verbs and optional recipes prepare the delivery. Use
+`dr_contract_policy()` and `dr_contract_meta()` when more policy or metadata is
+needed. Legacy workflow/trial constructors remain compatibility entry points.
 
-<figure>
-<img src="man/figures/composition-architecture.svg"
-alt="Products define requirements; recipes define preparation; workflows connect them to a delivery and execution." />
-<figcaption aria-hidden="true">Products define requirements; recipes
-define preparation; workflows connect them to a delivery and
-execution.</figcaption>
-</figure>
-
-| Your goal                                                   | Function                           |
-|-------------------------------------------------------------|------------------------------------|
-| Check a delivery without framework writers                  | `dr_trial()`                       |
-| Execute the configured sources, checks and destination      | `dr_run()`                         |
-| Save checked output, using a local lake if no target is set | `dr_publish()`                     |
-| Deliver data directly into an existing lake                 | `dr_ingest()` from `dataraft.lake` |
-| Retrieve output after a successful run                      | `dr_collect()`                     |
+Without a declared contract, inferred schema checks and validation reports say
+`unvalidated`. Successful execution alone is not a validation guarantee.
+See the [deep review implementation](docs/plans/deep-review-implementation.md)
+for changed guarantees and explicit compatibility decisions.
 
 Start with [why
 DataRaft](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html)

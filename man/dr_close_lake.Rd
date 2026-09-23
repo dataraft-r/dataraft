@@ -26,7 +26,7 @@ custom remote or split-location configuration still open through
 Read-only opens never update the folder configuration.
 }
 \examples{
-\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("duckdb", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 root <- tempfile("dataraft-")
 lake <- dr_open_lake(root)
 dr_write_data(lake, data.frame(id = 1:2), "orders")
@@ -39,5 +39,5 @@ unlink(root, recursive = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[dataraft.lake:dr_open_lake]{dataraft.lake::dr_close_lake()}}
+\code{\link[dataraft.lake:dr_close_lake]{dataraft.lake::dr_close_lake()}}
 }

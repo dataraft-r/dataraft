@@ -22,5 +22,5 @@ stored. Persist the returned table through any checked DataRaft target;
 reading versioned RDS releases preserves a reproducible profile history.
 }
 \seealso{
-\code{\link[dataraft.core:dr_profile_snapshot]{dataraft.core::dr_profile_compare()}}
+\code{\link[dataraft.core:dr_profile_compare]{dataraft.core::dr_profile_compare()}}
 }

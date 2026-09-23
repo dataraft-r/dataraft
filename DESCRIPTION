@@ -1,6 +1,6 @@
 Package: dataraft
 Title: Modular Workflows for Checked Data Products
-Version: 0.1.0.9000
+Version: 0.1.0.9004
 Authors@R: person("Jan-Hendrik", "Weinert", role = c("aut", "cre"), email = "65009403+JanWein@users.noreply.github.com")
 Description: Installs a family of cooperating packages for checked data
     products. Product specifications define requirements, recipes define ordered
@@ -9,24 +9,23 @@ Description: Installs a family of cooperating packages for checked data
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.2.0)
-Imports: dataraft.core (>= 0.1.0.9001), dataraft.lake (>= 0.1.0.9000), dataraft.adapters (>= 0.1.0.9000), dataraft.dbt (>= 0.1.0.9000),
-    dataraft.catalog (>= 0.1.0.9000), dataraft.metrics (>= 0.1.0.9000)
-Suggests: dataraft.ide (>= 0.1.0.9003), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
+Imports: dataraft.core (>= 0.1.0.9004), dataraft.lake (>= 0.1.0.9004), dataraft.adapters (>= 0.1.0.9004), dataraft.dbt (>= 0.1.0.9004),
+    dataraft.metrics (>= 0.1.0.9004)
+Suggests: dataraft.ide (>= 0.1.0.9004), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
     rlang, digest, jsonlite, withr, duckdb (>= 1.5.5), pointblank, dm, shiny,
     bslib, yaml, readr, readxl, paws.storage, processx, RPostgres, arrow,
     pins (>= 1.2.0), httr2, targets, renv, RSQLite, webfakes, bit64, covr
 Config/testthat/edition: 3
 Config/Needs/website: pkgdown
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
 VignetteBuilder: knitr
-Remotes: dataraft-r/dataraft.core@871982715c6000c8f1018456576e6cd517a5b7a6,
-    dataraft-r/dataraft.lake@2f9d3847b0e137ec6b1006c876b955b3538724b0,
-    dataraft-r/dataraft.adapters@2c770354c67476919e534c6bfe82682e51c1bf51,
-    dataraft-r/dataraft.metrics@b57ab4805cc90881eb7d36944f721d99edff74b6,
-    dataraft-r/dataraft.dbt@c83d9195693a30f99e1429e5df12f9f04cbdcb75,
-    dataraft-r/dataraft.catalog@11c1f5f3705f83d609250a6c954012a2b430ad75,
-    dataraft-r/dataraft.ide@dc34be1c9bd94d52f619a010ee577cf45ee7381a
+Remotes: dataraft-r/dataraft.core@fix/deep-review,
+    dataraft-r/dataraft.lake@fix/deep-review,
+    dataraft-r/dataraft.adapters@fix/deep-review,
+    dataraft-r/dataraft.metrics@fix/deep-review,
+    dataraft-r/dataraft.dbt@fix/deep-review,
+    dataraft-r/dataraft.ide@fix/deep-review
 URL: https://dataraft-r.github.io/dataraft/,
     https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues
+Config/roxygen2/version: 8.1.0

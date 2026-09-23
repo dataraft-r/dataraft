@@ -48,5 +48,5 @@ rule <- dr_quality_rule("positive", function(data) {
 rule$name
 }
 \seealso{
-\code{\link[dataraft.core:dr_quality_rule]{dataraft.core::dr_pointblank_checks()}}
+\code{\link[dataraft.core:dr_pointblank_checks]{dataraft.core::dr_pointblank_checks()}}
 }

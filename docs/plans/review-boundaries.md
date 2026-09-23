@@ -1,3 +1,5 @@
+> Contract-read containment is now implemented by the [deep review change](deep-review-implementation.md); the earlier exclusion below is historical.
+
 # Bridge boundaries and API review
 
 This review covers response-file writes, large lineage graphs, panel lifetime and

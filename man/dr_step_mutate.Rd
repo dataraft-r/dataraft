@@ -43,5 +43,5 @@ dr_recipe() |>
   dr_step_select(id, net)
 }
 \seealso{
-\code{\link[dataraft.core:dr_step_transform]{dataraft.core::dr_step_mutate()}}
+\code{\link[dataraft.core:dr_step_mutate]{dataraft.core::dr_step_mutate()}}
 }

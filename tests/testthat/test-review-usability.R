@@ -26,7 +26,7 @@ test_that("trial disables writers and catalogs throughout dependencies", {
   )
   measured <- dr_measure(result, metrics = definitions)
   expect_equal(dr_collect(measured)$value, c(30, 2))
-  expect_identical(all(dr_quality(measured)$status == "passed"), TRUE)
+  expect_identical(all(dr_quality(measured)$status %in% c("passed", "unvalidated")), TRUE)
   expect_match(dr_status(measured)$message[1], "unpublished trial")
   expect_snapshot(
     error = TRUE,

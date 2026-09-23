@@ -29,31 +29,33 @@ navbar:
           href: components/dataraft.catalog/reference/index.html
 reference:
   - title: Start here
-    desc: Define a product, prepare a delivery, check it and collect or publish the result.
+    desc: Define a product, check with write = FALSE, then publish.
     contents:
-      - dr_demo
-      - dr_review
-      - dr_catalog_pane
-      - dr_refresh_connection
-      - dr_report_verify
-      - dr_expire_snapshots
-      - dr_test_adapter
       - dr_product
       - dr_contract
       - dr_add_contract
+      - dr_add_source
+      - dr_set_target
       - dr_add_quality
-      - dr_recipe
-      - dr_step_mutate
-      - dr_workflow
-      - dr_add_product
-      - dr_add_recipe
-      - dr_trial
-      - dr_collect
+      - dr_quality
+      - dr_run
       - dr_publish
+      - dr_collect
+      - dr_model
+      - dr_tbl
+      - dr_releases
+      - dr_lineage
+      - dr_inspect
+      - dr_last_failure
+      - dr_quality_report
   - title: Core specifications and diagnostics
     contents:
       - dr_add_catalog
-      - dr_add_source
+      - dr_demo
+      - dr_review
+      - dr_contract_policy
+      - dr_contract_meta
+      - dr_model_product
       - dr_capabilities
       - dr_check_component
       - dr_component_capabilities
@@ -71,21 +73,15 @@ reference:
       - dr_extract_product
       - dr_extract_recipe
       - dr_incidents
-      - dr_inspect
-      - dr_last_failure
-      - dr_lineage
       - dr_lookup_spec
-      - dr_model
       - dr_plan
       - dr_pointblank_checks
       - dr_pointblank_report
       - dr_profile_data
       - dr_publish_metadata
-      - dr_quality
       - dr_quality_counts
       - dr_quality_errors
       - dr_quality_reference
-      - dr_quality_report
       - dr_quality_rows
       - dr_quality_rule
       - dr_read_run
@@ -96,11 +92,9 @@ reference:
       - dr_remove_recipe
       - dr_replace_sources
       - dr_retry_catalogs
-      - dr_run
       - dr_run_history
       - dr_run_quality
       - dr_set_engine
-      - dr_set_target
       - dr_source_file
       - dr_status
       - dr_step_arrange
@@ -119,6 +113,9 @@ reference:
     contents:
       - dr_check_delivery
       - dr_cleanup
+      - dr_verify_releases
+      - dr_expire_snapshots
+      - dr_refresh_connection
       - dr_close_lake
       - dr_compare
       - dr_ingest
@@ -131,16 +128,15 @@ reference:
       - dr_registry
       - dr_registry_duckdb
       - dr_registry_postgres
-      - dr_releases
       - dr_source_release
       - dr_storage_local
       - dr_storage_s3
       - dr_target_lake
-      - dr_tbl
       - dr_write_data
   - title: Sources and storage adapters
     contents:
       - dr_as_targets
+      - dr_test_adapter
       - dr_contract_yaml
       - dr_init_project
       - dr_source_api
@@ -158,6 +154,7 @@ reference:
       - dr_commons_yaml
       - dr_measure
       - dr_metric
+      - dr_report_verify
       - dr_metric_set
       - dr_report_read
       - dr_report_release
@@ -165,6 +162,7 @@ reference:
     contents:
       - dr_dbt_build
       - dr_dbt_contract
+      - dr_dbt_contract_from_manifest
       - dr_dbt_init
       - dr_dbt_lineage
       - dr_dbt_model
@@ -177,6 +175,7 @@ reference:
   - title: Catalogs and metadata
     contents:
       - dr_catalog_app
+      - dr_catalog_pane
       - dr_catalog_export
       - dr_catalog_openlineage
       - dr_catalog_openmetadata
@@ -193,6 +192,16 @@ reference:
     - dr_project_yaml
     - dr_source_iceberg
     - dr_target_iceberg
+
+  - title: Compatibility, recipes and extended composition
+    desc: Existing saved definitions and reusable preparation remain supported.
+    contents:
+      - dr_recipe
+      - dr_step_mutate
+      - dr_workflow
+      - dr_add_product
+      - dr_add_recipe
+      - dr_trial
 
 articles:
   - title: DataRaft

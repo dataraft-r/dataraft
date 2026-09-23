@@ -29,5 +29,5 @@ dr_storage_local(file.path(tempdir(), "data"))
 dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
 }
 \seealso{
-\code{\link[dataraft.lake:dr_registry_duckdb]{dataraft.lake::dr_registry_postgres()}}
+\code{\link[dataraft.lake:dr_registry_postgres]{dataraft.lake::dr_registry_postgres()}}
 }

@@ -21,5 +21,5 @@ Native formula exports use a DataRaft custom engine; other ODCS engines need
 an implementation of that engine to execute these rules.
 }
 \seealso{
-\code{\link[dataraft.adapters:dr_contract_odcs]{dataraft.adapters::dr_contract_from_odcs()}}
+\code{\link[dataraft.adapters:dr_contract_from_odcs]{dataraft.adapters::dr_contract_from_odcs()}}
 }
