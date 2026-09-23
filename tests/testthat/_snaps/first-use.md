@@ -17,7 +17,8 @@
 ---
 
     Code
-      dr_trial(definition, data = policies, sources = list(payments = policies))
+      dr_run(write = FALSE, stop_on_failure = FALSE, definition, data = policies,
+        sources = list(payments = policies))
     Condition
       Error in `dr_run()`:
       ! Delivery 'payments' was supplied in both data and sources. Supply it once, not both.
@@ -51,7 +52,7 @@
 ---
 
     Code
-      dr_trial(definition, stop_on_failure = TRUE)
+      dr_run(write = FALSE, definition, stop_on_failure = TRUE)
     Condition
       Error in `dr_run()`:
       ! payments is blocked; no successful output is available. 1 check requiring attention: nonnegative: failed (1 of 3 checks failed). For diagnosis, rerun with stop_on_failure = FALSE and save the result. Inspect dr_quality_report(result) and dr_quality_rows(result).

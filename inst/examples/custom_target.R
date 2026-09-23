@@ -14,7 +14,7 @@ dr_inspect.guide_source <- function(x, ...) {
   list(type = "example reader", columns = names(x$data))
 }
 dr_capabilities.guide_source <- function(x, ...) {
-  dr_component_capabilities(
+  dataraft.core::dr_component_capabilities(
     read = TRUE,
     write = FALSE,
     lazy = FALSE,
@@ -48,7 +48,7 @@ dr_inspect.guide_target <- function(x, ...) {
   list(type = "new RDS directory", path = x$path)
 }
 dr_capabilities.guide_target <- function(x, ...) {
-  dr_component_capabilities(
+  dataraft.core::dr_component_capabilities(
     read = FALSE,
     write = TRUE,
     lazy = FALSE,
@@ -58,7 +58,7 @@ dr_capabilities.guide_target <- function(x, ...) {
   )
 }
 dr_write_target.guide_target <- function(target, data, context, ...) {
-  dr_check_component(target)
+  dataraft.core::dr_check_component(target)
   if (!dir.create(target$path, showWarnings = FALSE)) {
     stop("Could not create the new destination.")
   }
@@ -71,7 +71,7 @@ dr_write_target.guide_target <- function(target, data, context, ...) {
 }
 
 guide_quality <- function() {
-  rule <- dr_quality_rule("nonnegative", ~ amount >= 0)
+  rule <- dataraft.core::dr_quality_rule("nonnegative", ~ amount >= 0)
   class(rule) <- c("guide_quality", class(rule))
   rule
 }
@@ -79,13 +79,13 @@ dr_run_quality.guide_quality <- function(rule, data, ...) {
   # A real external engine would supply these aggregate counts.
   failed <- sum(is.na(data$amount) | data$amount < 0)
   total <- nrow(data)
-  native <- dr_quality_rule(
+  native <- dataraft.core::dr_quality_rule(
     rule$name,
-    function(data) dr_quality_counts(failed, total),
+    function(data) dataraft.core::dr_quality_counts(failed, total),
     severity = rule$severity,
     max_failure = rule$max_failure
   )
-  evidence <- dr_run_quality(native, data)
+  evidence <- dataraft.core::dr_run_quality(native, data)
   evidence$engine <- "example"
   evidence
 }
@@ -112,10 +112,12 @@ for (name in names(methods)) {
 
 guide_workflow <- function(source, target = NULL, check = ~ amount >= 0) {
   dr_product("orders") |>
-    dr_add_source(source) |>
-    dr_add_recipe(
-      dr_recipe() |>
-        dr_step_transform(function(data) transform(data, amount = amount * 2))
+    dataraft.core::dr_add_source(source) |>
+    dataraft.core::dr_add_recipe(
+      dataraft.core::dr_recipe() |>
+        dataraft.core::dr_step_transform(function(data) {
+          transform(data, amount = amount * 2)
+        })
     ) |>
     dr_add_quality(check) |>
     dr_set_target(target)
@@ -134,9 +136,9 @@ stopifnot(identical(
   as.data.frame(dr_collect(native))
 ))
 
-flags <- dr_capabilities(guide_target(tempfile()))
+flags <- dataraft.core::dr_capabilities(guide_target(tempfile()))
 stopifnot(
-  setequal(names(flags), names(dr_component_capabilities())),
+  setequal(names(flags), names(dataraft.core::dr_component_capabilities())),
   all(vapply(flags, function(x) is.logical(x) && length(x) == 1L, logical(1)))
 )
 

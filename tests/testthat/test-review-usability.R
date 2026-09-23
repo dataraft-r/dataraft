@@ -13,7 +13,7 @@ test_that("trial disables writers and catalogs throughout dependencies", {
   ) |>
     dr_add_quality(list(positive = ~ amount >= 0))
   before <- product
-  result <- dr_trial(product)
+  result <- dr_run(write = FALSE, stop_on_failure = FALSE, product)
   expect_identical(written, 0L)
   expect_identical(product, before)
   expect_equal(dr_collect(result)$amount, c(10, 20))
@@ -26,7 +26,10 @@ test_that("trial disables writers and catalogs throughout dependencies", {
   )
   measured <- dr_measure(result, metrics = definitions)
   expect_equal(dr_collect(measured)$value, c(30, 2))
-  expect_identical(all(dr_quality(measured)$status %in% c("passed", "unvalidated")), TRUE)
+  expect_identical(
+    all(dr_quality(measured)$status %in% c("passed", "unvalidated")),
+    TRUE
+  )
   expect_match(dr_status(measured)$message[1], "unpublished trial")
   expect_snapshot(
     error = TRUE,
@@ -42,14 +45,14 @@ test_that("quality rows identify predicate, required, duplicate and lookup failu
       key = "id"
     )) |>
     dr_add_quality(list(positive = ~ amount >= 0))
-  failed <- dr_trial(definition, stop_on_failure = FALSE)
+  failed <- dr_run(write = FALSE, definition, stop_on_failure = FALSE)
   expect_equal(dr_quality_rows(failed, "positive")$id, c(1L, 3L))
   expect_equal(dr_quality_rows(failed, "positive", limit = 1)$id, 1L)
   expect_equal(dr_quality_rows(failed, "not_null:amount")$id, 3L)
   expect_equal(dr_quality_rows(failed, "unique_key")$id, c(1L, 1L))
   lookup <- dr_product("orders", data.frame(customer = c("a", "missing"))) |>
     dr_add_lookup(data.frame(customer = "a"), by = "customer")
-  failed <- dr_trial(lookup, stop_on_failure = FALSE)
+  failed <- dr_run(write = FALSE, lookup, stop_on_failure = FALSE)
   expect_equal(dr_quality_rows(failed, "lookup")$customer, "missing")
 })
 

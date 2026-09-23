@@ -43,8 +43,8 @@ policies <- dr_product("policy_months", inputs$policy_months,
   contract = contracts$policy_months)
 payments <- dr_product("payments", inputs$payments,
   contract = contracts$payments)
-policy_result <- dr_trial(policies)
-payment_result <- dr_trial(payments)
+policy_result <- dr_run(write = FALSE, stop_on_failure = FALSE, policies)
+payment_result <- dr_run(write = FALSE, stop_on_failure = FALSE, payments)
 stopifnot(policy_result$status == "completed", payment_result$status == "completed")
 dr_quality_report(payment_result)
 ```
@@ -59,7 +59,7 @@ we validate the broker relationship on the policy snapshots.
 model <- dm::dm(brokers = inputs$brokers, policy_months = inputs$policy_months) |>
   dm::dm_add_pk(brokers, broker_id) |>
   dm::dm_add_fk(policy_months, broker_id, brokers)
-model_result <- dr_trial(dr_product("insurance_model", model,
+model_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("insurance_model", model,
   contracts = list(policy_months = contracts$policy_months)))
 stopifnot(model_result$status == "completed")
 dr_quality_report(model_result)
@@ -73,13 +73,13 @@ policy product because it is a monthly amount, not a payment-level measure.
 ```{r}
 attributes <- dr_product("payment_policy_attributes", policy_result) |>
   dplyr::select(policy_id, month, company, broker_id, policy_status = status)
-recipe <- dr_recipe() |>
-  dr_step_lookup(attributes, by = dplyr::join_by(policy_id, month)) |>
-  dr_step_lookup(inputs$brokers, by = dplyr::join_by(broker_id))
-flow <- dr_workflow() |>
-  dr_add_product(dr_product("enriched_payments", contract = contracts$enriched_payments)) |>
-  dr_add_recipe(recipe)
-checked <- dr_trial(flow, data = inputs$payments)
+recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_lookup(attributes, by = dplyr::join_by(policy_id, month)) |>
+  dataraft.core::dr_step_lookup(inputs$brokers, by = dplyr::join_by(broker_id))
+flow <- dataraft.core::dr_workflow() |>
+  dataraft.core::dr_add_product(dr_product("enriched_payments", contract = contracts$enriched_payments)) |>
+  dataraft.core::dr_add_recipe(recipe)
+checked <- dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = inputs$payments)
 table <- dr_collect(checked)
 stopifnot(nrow(table) == 10L, anyDuplicated(table$payment_id) == 0L,
   !"premium_due" %in% names(table))
@@ -92,9 +92,9 @@ in an inner join or multiplying rows in a many-to-many join.
 ```{r}
 broken <- inputs$payments
 broken$month[1] <- as.Date("2026-03-01")
-failed <- dr_trial(flow, data = broken)
+failed <- dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = broken)
 stopifnot(failed$status %in% c("blocked", "error"))
-dr_status(failed)
+dataraft.core::dr_status(failed)
 ```
 
 ## Define the lapse-rate denominator explicitly
@@ -115,11 +115,11 @@ closing <- inputs$policy_months |>
 cohort <- dplyr::left_join(opening, closing, by = "policy_id", relationship = "one-to-one")
 stopifnot(!anyNA(cohort$status))
 cohort$lapsed <- cohort$status == "lapsed"
-rate <- dr_metric("monthly_lapse_rate", "cohort", expr = mean(lapsed),
+rate <- dataraft.metrics::dr_metric("monthly_lapse_rate", "cohort", expr = mean(lapsed),
   unit = "proportion", owner = "Risk",
   description = "Lapses among policies active at the start of February")
-cohort_result <- dr_trial(dr_product("cohort", cohort))
-measured <- dr_measure(cohort_result, rate)
+cohort_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", cohort))
+measured <- dataraft.metrics::dr_measure(cohort_result, rate)
 stopifnot(isTRUE(all.equal(measured$value, 1 / 5)))
 measured
 ```
@@ -134,28 +134,28 @@ For stronger retention and concurrent multi-user governance, use a Lake target.
 root <- tempfile("insurance-releases-")
 release <- dr_product("cohort", cohort) |>
   dr_add_quality(~ !is.na(lapsed)) |>
-  dr_set_target(dr_target_rds(file.path(root, "cohort"))) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "cohort"))) |>
   dr_publish()
-pinned <- dr_source_rds(file.path(root, "cohort"), release$outputs$version)
-pinned_result <- dr_trial(dr_product("cohort", pinned))
-report <- dr_product("lapse_report", dr_measure(pinned_result, rate)) |>
-  dr_set_target(dr_target_rds(file.path(root, "report"))) |>
+pinned <- dataraft.adapters::dr_source_rds(file.path(root, "cohort"), release$outputs$version)
+pinned_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", pinned))
+report <- dr_product("lapse_report", dataraft.metrics::dr_measure(pinned_result, rate)) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "report"))) |>
   dr_publish()
 corrected <- cohort
 corrected$lapsed[1] <- TRUE
 later <- dr_product("cohort", corrected) |>
-  dr_set_target(dr_target_rds(file.path(root, "cohort"))) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "cohort"))) |>
   dr_publish()
 stopifnot(!identical(release$outputs$version, later$outputs$version))
-stopifnot(isTRUE(all.equal(dr_measure(dr_trial(dr_product("cohort", pinned)), rate)$value, 1 / 5)))
-dr_read_source(dr_source_rds(file.path(root, "report"), report$outputs$version))
+stopifnot(isTRUE(all.equal(dataraft.metrics::dr_measure(dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", pinned)), rate)$value, 1 / 5)))
+dataraft.core::dr_read_source(dataraft.adapters::dr_source_rds(file.path(root, "report"), report$outputs$version))
 unlink(root, recursive = TRUE)
 ```
 
 The stored report contains the computed numbers. Keep its input version and code
-version in your reporting manifest. `dr_report_release()` adds governed lake
+version in your reporting manifest. `dataraft.metrics::dr_report_release()` adds governed lake
 report registration when a Lake backend is available. The complete lake example
 in `system.file("examples", "relational-insurance.R", package = "dataraft")`
 shows publication, late corrections and pinned reports. dbt can stage these lake
-releases using `dr_dbt_sources()` and `dr_dbt_build()`; those calls belong to the
+releases using `dataraft.dbt::dr_dbt_sources()` and `dataraft.dbt::dr_dbt_build()`; those calls belong to the
 optional `dataraft.dbt` component.

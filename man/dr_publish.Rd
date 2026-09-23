@@ -26,23 +26,13 @@ publication to reject stale corrections if the destination has changed. dbt buil
 A run result. An exception on failure includes \code{condition$result}.
 }
 \description{
-Use \code{\link[dataraft.core:dr_trial]{dr_trial()}} to try a product without configured framework writers.
+Use \code{\link[dataraft.core:dr_run]{dr_run()}} to try a product without configured framework writers.
 \code{dr_run()} executes its full configuration, including targets and catalogs.
 \code{dr_publish()} adds a local lake target when none was supplied. A new folder
 uses DuckDB; an existing folder retains its saved backend. \code{\link[dataraft.lake:dr_target_lake]{dataraft.lake::dr_target_lake()}}
 accepts other lake configurations. Execution automatically validates the
 definition before source acquisition.
 Use \code{\link[dataraft.core:dr_collect]{dr_collect()}} to obtain the output as an ordinary tibble.
-}
-\examples{
-\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-root <- tempfile("dataraft-")
-result <- dr_product("orders") |>
-  dr_add_source(data.frame(id = 1:2)) |>
-  dr_publish(to = root)
-dr_collect(result)
-unlink(root, recursive = TRUE)
-\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[dataraft.core:dr_publish]{dataraft.core::dr_publish()}}

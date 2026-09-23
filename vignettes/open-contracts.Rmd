@@ -9,7 +9,7 @@ vignette: >
 
 A reproducible report needs more than a saved total: retain the input release
 identifiers, the metric definition and the checks made against those inputs.
-`dr_report_release()` in dataraft.metrics freezes that evidence for lake-backed
+`dataraft.metrics::dr_report_release()` in dataraft.metrics freezes that evidence for lake-backed
 reports. The compiler-free example below first establishes a checked, versioned
 delivery; it does not claim that an RDS delivery is itself a report release.
 
@@ -21,8 +21,8 @@ contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric"
     tags = c("Finance.Reporting")),
   column_metadata = list(amount = list(description = "Order value in EUR")))
 file <- tempfile(fileext = ".json")
-dr_contract_odcs(contract, file)
-reviewed <- dr_contract_from_odcs(file)
+dataraft.adapters::dr_contract_odcs(contract, file)
+reviewed <- dataraft.adapters::dr_contract_from_odcs(file)
 reviewed
 ```
 
@@ -44,10 +44,10 @@ root <- tempfile("orders-")
 product <- dr_product("orders", data.frame(id = 1:3, amount = c(25, -75, 50))) |>
   dr_add_contract(reviewed) |>
   dr_add_quality(~ amount >= 0, action = "quarantine", dimension = "conformity") |>
-  dr_set_target(dr_target_rds(root))
+  dr_set_target(dataraft.adapters::dr_target_rds(root))
 result <- dr_run(product)
 dr_collect(result)
-dr_quarantine_rows(result)
+dataraft.core::dr_quarantine_rows(result)
 dr_quality_report(result)
 ```
 
@@ -62,12 +62,12 @@ For warning and blocking rules, `threshold = .02` permits up to two percent
 failures. Existing `severity` and `max_failure` remain supported.
 
 ```{r}
-before <- dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, 75, 50)), "input-v1")
-after <- dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, NA, 50)), "input-v2")
-dr_profile_compare(before, after)
+before <- dataraft.core::dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, 75, 50)), "input-v1")
+after <- dataraft.core::dr_profile_snapshot(data.frame(id = 1:3, amount = c(25, NA, 50)), "input-v2")
+dataraft.core::dr_profile_compare(before, after)
 profile_path <- tempfile("profiles-")
 profile_release <- dr_product("orders.profile", after) |>
-  dr_set_target(dr_target_rds(profile_path)) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(profile_path)) |>
   dr_run()
 profile_release$outputs$version
 ```
@@ -78,10 +78,10 @@ replacing it. Missingness changes are deterministic alerts, not a calibrated
 statistical anomaly detector. Exact profiles can still expose sensitive counts.
 
 ```{r}
-recipe <- dr_recipe() |>
-  dr_step_mutate(net = amount / 1.19) |>
-  dr_step_select(id, net)
-dr_column_lineage(recipe, c("id", "amount"))
+recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_mutate(net = amount / 1.19) |>
+  dataraft.core::dr_step_select(id, net)
+dataraft.core::dr_column_lineage(recipe, c("id", "amount"))
 ```
 
 The direct-value map handles simple mutation, selection and rename. An opaque
@@ -90,7 +90,7 @@ runs publish complete maps through OpenLineage column facets. This does not infe
 row influence, joins, historical graphs or arbitrary R side effects.
 
 For a file-first project, place `project.yaml`, an ODCS contract and a CSV source
-in one directory. `dr_project_yaml("project.yaml") |> dr_run()` reads this manifest:
+in one directory. `dataraft.adapters::dr_project_yaml("project.yaml") |> dr_run()` reads this manifest:
 
 ```yaml
 id: orders
@@ -103,8 +103,8 @@ All paths stay inside the project directory. Review the files in Git. Add custom
 R transformations explicitly in trusted project code when the declarative grammar
 is insufficient.
 
-Iceberg is an experimental alternative: `dr_source_iceberg()` reads a metadata
-location with an optional snapshot ID; `dr_target_iceberg()` writes to an already
+Iceberg is an experimental alternative: `dataraft.adapters::dr_source_iceberg()` reads a metadata
+location with an optional snapshot ID; `dataraft.adapters::dr_target_iceberg()` writes to an already
 attached DuckDB Iceberg REST catalog. Authentication and catalog attachment stay
 outside definitions. The backend must support transactional candidate validation;
 no fallback, retention guarantee or branch/merge behavior is implied. See

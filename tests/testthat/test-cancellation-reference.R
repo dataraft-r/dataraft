@@ -65,19 +65,38 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
   brokers <- dr_product("brokers", brokers_data, contract = broker_contract)
   policies <- dr_product("policies", policies_data, contract = policy_contract)
 
-  attempt <- dr_trial(policies)
+  attempt <- dr_run(write = FALSE, stop_on_failure = FALSE, policies)
   stopifnot(identical(dr_quality_rows(attempt)$policy_id, "P6"))
   fixed_policies <- policies_data
   fixed_policies$cancelled_on[fixed_policies$policy_id == "P6"] <- as.Date(
     "2026-07-31"
   )
   policies <- dr_replace_sources(policies, policies = fixed_policies)
-  stopifnot(nrow(dr_collect(dr_trial(policies))) == 8L)
+  stopifnot(
+    nrow(dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      policies
+    ))) ==
+      8L
+  )
 
   portfolio_model <- dm::dm(
-    customers = dr_collect(dr_trial(customers)),
-    policies = dr_collect(dr_trial(policies)),
-    brokers = dr_collect(dr_trial(brokers))
+    customers = dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      customers
+    )),
+    policies = dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      policies
+    )),
+    brokers = dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      brokers
+    ))
   ) |>
     dm::dm_add_pk(customers, customer_id) |>
     dm::dm_add_pk(policies, policy_id) |>
@@ -92,7 +111,7 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
       policies = policies,
       brokers = brokers
     )
-  checked_model <- dr_trial(portfolio)
+  checked_model <- dr_run(write = FALSE, stop_on_failure = FALSE, portfolio)
 
   reporting_month <- function(data, from, until) {
     data |>
@@ -139,7 +158,7 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
     )
   }
   cancellation_metrics <- define_cancellation_metrics()
-  preview <- dr_trial(august)
+  preview <- dr_run(write = FALSE, stop_on_failure = FALSE, august)
   values <- dr_measure(
     preview,
     metrics = cancellation_metrics,
@@ -205,17 +224,22 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
   rate <- function(x) x$value[x$.metric == "cancellation_rate"]
   expect_equal(rate(original), 0.4)
   expect_equal(rate(corrected), 0.6)
-  data <- dr_collect(dr_trial(august))
+  data <- dr_collect(dr_run(write = FALSE, stop_on_failure = FALSE, august))
   expect_equal(data$policy_id[data$opening], c("P1", "P2", "P3", "P4", "P7"))
   expect_equal(data$policy_id[data$cancelled], c("P2", "P3"))
 
   no_opening <- fixed_policies
   no_opening$started_on <- as.Date("2026-08-01")
   no_opening$cancelled_on <- as.Date(NA)
-  empty_cohort <- dr_trial(reporting_product(dr_trial(
-    portfolio,
-    sources = list(policies = no_opening)
-  )))
+  empty_cohort <- dr_run(
+    write = FALSE,
+    reporting_product(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      portfolio,
+      sources = list(policies = no_opening)
+    ))
+  )
   counts <- dr_collect(dr_measure(
     empty_cohort,
     metrics = cancellation_metrics[c("opening", "cancellations")],
@@ -234,10 +258,20 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
   expect_match(conditionMessage(error), "missing or non-finite")
 
   duplicate <- rbind(customers_data, customers_data[1, ])
-  blocked <- dr_trial(portfolio, sources = list(customers = duplicate))
+  blocked <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
+    portfolio,
+    sources = list(customers = duplicate)
+  )
   expect_equal(blocked$status %in% c("blocked", "error"), TRUE)
   orphan <- fixed_policies
   orphan$customer_id[1] <- "missing"
-  blocked <- dr_trial(portfolio, sources = list(policies = orphan))
+  blocked <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
+    portfolio,
+    sources = list(policies = orphan)
+  )
   expect_equal(blocked$status %in% c("blocked", "error"), TRUE)
 })

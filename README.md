@@ -30,7 +30,7 @@ semantic modeling engine. No stable public release is claimed by the
 development compatibility lock.
 
 Start without a database: `library(dataraft); demo <- dr_demo()`.
-Inspect `dr_quality_rows(demo$blocked)` and `dr_collect(demo$passed)`.
+Inspect `dataraft.core::dr_quality_rows(demo$blocked)` and `dr_collect(demo$passed)`.
 See the [insurance
 walkthrough](https://github.com/dataraft-r/dataraft/blob/main/examples/insurance-delivery.md)
 and the [family compatibility policy](FAMILY_COMPATIBILITY.md). The
@@ -46,13 +46,13 @@ orders <- dr_product("orders") |>
   dr_add_quality(~ amount >= 0)
 
 orders <- orders |>
-  dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = round(amount, 2)))
+  dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_mutate(amount = round(amount, 2)))
 
 bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
 checked <- dr_run(orders, data = bad_delivery, write = FALSE, stop_on_failure = FALSE)
 checked$status
 #> [1] "blocked"
-dr_quality_rows(checked)
+dataraft.core::dr_quality_rows(checked)
 #> # A tibble: 1 × 2
 #>      id amount
 #>   <int>  <dbl>
@@ -80,10 +80,10 @@ output. Source reads and user callbacks still run in both modes.
 
 ## Start with the essentials
 
-Use `dr_product()`, `dr_contract()`, `dr_add_source()`, `dr_add_quality()`,
+Use `dr_product()`, `dr_contract()`, `dataraft.core::dr_add_source()`, `dr_add_quality()`,
 `dr_quality()`, `dr_set_target()`, `dr_run()` and `dr_collect()` first.
 Ordinary dplyr verbs and optional recipes prepare the delivery. Use
-`dr_contract_policy()` and `dr_contract_meta()` when more policy or metadata is
+`dataraft.core::dr_contract_policy()` and `dataraft.core::dr_contract_meta()` when more policy or metadata is
 needed. Legacy workflow/trial constructors remain compatibility entry points.
 
 Without a declared contract, inferred schema checks and validation reports say
@@ -138,7 +138,7 @@ and [guarantees and
 limits](https://dataraft-r.github.io/dataraft/articles/guarantees.html).
 
 For persistence without an optional storage engine, use
-`dr_publish(flow, data = delivery, to = dr_target_rds("data/orders"))`.
-The result’s `outputs$version` pins that delivery for `dr_source_rds()`.
+`dr_publish(flow, data = delivery, to = dataraft.adapters::dr_target_rds("data/orders"))`.
+The result’s `outputs$version` pins that delivery for `dataraft.adapters::dr_source_rds()`.
 After a failed pipe, `dr_last_failure()` retrieves the failed result for
 diagnosis.

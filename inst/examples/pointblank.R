@@ -11,7 +11,7 @@ if (requireNamespace("pointblank", quietly = TRUE)) {
     columns = c(id = "character", date = "Date", reserve = "numeric"),
     key = c("id", "date")
   )
-  checks <- dr_pointblank_checks(
+  checks <- dataraft.core::dr_pointblank_checks(
     "business_checks",
     function(data) {
       pointblank::create_agent(
@@ -24,7 +24,7 @@ if (requireNamespace("pointblank", quietly = TRUE)) {
   )
 
   result <- dr_product("reserves") |>
-    dr_add_source(reserves) |>
+    dataraft.core::dr_add_source(reserves) |>
     dr_add_contract(schema) |>
     dr_add_quality(checks) |>
     dr_run()

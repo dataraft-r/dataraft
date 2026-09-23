@@ -31,7 +31,11 @@ test_that("failed branches block consumers and retain successful steps for retry
   calls <- 0L
   flow <- dr_workflow(
     accepted = function(delivery) {
-      dr_trial(dr_product("orders", delivery) |> dr_add_quality(~ amount >= 0))
+      dr_run(
+        write = FALSE,
+        stop_on_failure = FALSE,
+        dr_product("orders", delivery) |> dr_add_quality(~ amount >= 0)
+      )
     },
     independent = function() {
       calls <<- calls + 1L

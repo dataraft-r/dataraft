@@ -10,10 +10,10 @@ test_that("targets runs each dependency once and tracks changed input files", {
   writeLines(
     c(
       "library(dataraft)",
-      "orders_definition <- dr_product('orders') |> dr_add_source('input.csv')",
-      "totals_definition <- dr_product('totals') |> dr_add_source(orders_definition) |> dr_add_recipe(dr_recipe() |> dr_step_transform(function(data) data.frame(total = sum(data$amount))))",
-      "unrelated_definition <- dr_product('unrelated') |> dr_add_source(data.frame(id = 1L))",
-      "dr_as_targets(list(totals = totals_definition, unrelated = unrelated_definition), evidence = './evidence')"
+      "orders_definition <- dr_product('orders') |> dataraft.core::dr_add_source('input.csv')",
+      "totals_definition <- dr_product('totals') |> dataraft.core::dr_add_source(orders_definition) |> dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_transform(function(data) data.frame(total = sum(data$amount))))",
+      "unrelated_definition <- dr_product('unrelated') |> dataraft.core::dr_add_source(data.frame(id = 1L))",
+      "dataraft.adapters::dr_as_targets(list(totals = totals_definition, unrelated = unrelated_definition), evidence = './evidence')"
     ),
     "_targets.R"
   )
@@ -59,9 +59,9 @@ test_that("targets tracks auxiliary lookup files and preserves upstream provenan
     c(
       "library(dataraft)",
       "rates_definition <- dr_product('rates', 'rates.csv')",
-      "summary_definition <- dr_product('summary', 'orders.csv') |> dplyr::mutate(amount = amount * 2) |> dr_add_recipe(dr_recipe() |> dr_step_lookup(rates_definition, by = 'id')) |> dplyr::mutate(total = amount * rate) |> dplyr::summarise(total = sum(total))",
+      "summary_definition <- dr_product('summary', 'orders.csv') |> dplyr::mutate(amount = amount * 2) |> dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_lookup(rates_definition, by = 'id')) |> dplyr::mutate(total = amount * rate) |> dplyr::summarise(total = sum(total))",
       "unrelated_definition <- dr_product('unrelated', data.frame(id = 1L))",
-      "dr_as_targets(list(summary_definition, unrelated_definition), evidence = 'evidence')"
+      "dataraft.adapters::dr_as_targets(list(summary_definition, unrelated_definition), evidence = 'evidence')"
     ),
     "_targets.R"
   )
@@ -108,8 +108,8 @@ test_that("targets observes globals used inside ordinary transform functions", {
   script <- c(
     "library(dataraft)",
     "multiplier <- 2",
-    "orders_definition <- dr_product('orders') |> dr_add_source(data.frame(amount = 10)) |> dr_add_recipe(dr_recipe() |> dr_step_transform(function(data) transform(data, amount = amount * multiplier)))",
-    "dr_as_targets(orders_definition)"
+    "orders_definition <- dr_product('orders') |> dataraft.core::dr_add_source(data.frame(amount = 10)) |> dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_transform(function(data) transform(data, amount = amount * multiplier)))",
+    "dataraft.adapters::dr_as_targets(orders_definition)"
   )
   writeLines(script, "_targets.R")
   targets::tar_make(callr_function = NULL, reporter = "silent")
@@ -128,7 +128,7 @@ test_that("targets tracks static .env values in deferred dplyr expressions", {
     "library(dataraft)",
     "multiplier <- 2",
     "orders_definition <- dr_product('orders', data.frame(amount = 10)) |> dplyr::mutate(total = amount * .env$multiplier, second = amount * .env[['multiplier']])",
-    "dr_as_targets(orders_definition)"
+    "dataraft.adapters::dr_as_targets(orders_definition)"
   )
   writeLines(script, "_targets.R")
   targets::tar_make(callr_function = NULL, reporter = "silent")
@@ -153,7 +153,7 @@ test_that("data-mask column names do not become product dependencies", {
       "library(dataraft)",
       "a_definition <- dr_product('a', data.frame(b = 1)) |> dplyr::mutate(value = b + 1)",
       "b_definition <- dr_product('b', data.frame(a = 1)) |> dplyr::mutate(value = a + 1)",
-      "dr_as_targets(list(a_definition, b_definition))"
+      "dataraft.adapters::dr_as_targets(list(a_definition, b_definition))"
     ),
     "_targets.R"
   )
@@ -178,10 +178,10 @@ test_that("targets keeps lake definitions stable while recording new input relea
   writeLines(
     c(
       "library(dataraft)",
-      "orders_definition <- dr_product('orders') |> dr_add_source('input.csv') |> dr_set_target('lake')",
-      "explicit_definition <- dr_product('explicit', version='1.0.0') |> dr_add_source(orders_definition) |> dr_set_target('lake')",
-      "automatic_definition <- dr_product('automatic') |> dr_add_source(orders_definition) |> dr_set_target('lake')",
-      "dr_as_targets(list(explicit_definition, automatic_definition))"
+      "orders_definition <- dr_product('orders') |> dataraft.core::dr_add_source('input.csv') |> dr_set_target('lake')",
+      "explicit_definition <- dr_product('explicit', version='1.0.0') |> dataraft.core::dr_add_source(orders_definition) |> dr_set_target('lake')",
+      "automatic_definition <- dr_product('automatic') |> dataraft.core::dr_add_source(orders_definition) |> dr_set_target('lake')",
+      "dataraft.adapters::dr_as_targets(list(explicit_definition, automatic_definition))"
     ),
     "_targets.R"
   )
@@ -216,10 +216,10 @@ test_that("direct and targets execution share the same lake product definition",
   writeLines(
     c(
       "library(dataraft)",
-      "input_definition <- dr_product('input') |> dr_add_source(data.frame(id = 1L))",
+      "input_definition <- dr_product('input') |> dataraft.core::dr_add_source(data.frame(id = 1L))",
       "reference_definition <- dr_product('reference', data.frame(id = 1L, label = 'a'))",
-      "output_definition <- dr_product('output', version = '1.0.0') |> dr_add_source(input_definition) |> dr_add_recipe(dr_recipe() |> dr_step_lookup(reference_definition, by = 'id')) |> dr_set_target('lake')",
-      "dr_as_targets(output_definition)"
+      "output_definition <- dr_product('output', version = '1.0.0') |> dataraft.core::dr_add_source(input_definition) |> dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_lookup(reference_definition, by = 'id')) |> dr_set_target('lake')",
+      "dataraft.adapters::dr_as_targets(output_definition)"
     ),
     "_targets.R"
   )
@@ -252,9 +252,9 @@ test_that("installed targets commands execute in a clean R process", {
   writeLines(
     c(
       "library(dataraft)",
-      "input_definition <- dr_product('input') |> dr_add_source(data.frame(id = 1:2))",
-      "output_definition <- dr_product('output') |> dr_add_source(input_definition) |> dr_add_recipe(dr_recipe() |> dr_step_transform(function(data) transform(data, doubled = id * 2)))",
-      "dr_as_targets(output_definition)"
+      "input_definition <- dr_product('input') |> dataraft.core::dr_add_source(data.frame(id = 1:2))",
+      "output_definition <- dr_product('output') |> dataraft.core::dr_add_source(input_definition) |> dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_transform(function(data) transform(data, doubled = id * 2)))",
+      "dataraft.adapters::dr_as_targets(output_definition)"
     ),
     "_targets.R"
   )

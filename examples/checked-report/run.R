@@ -2,7 +2,10 @@ library(dataraft.core)
 library(dataraft.adapters)
 root <- Sys.getenv("DATARAFT_EXAMPLE_OUTPUT", tempfile("dataraft-example-"))
 product <- dr_product("orders", data.frame(id = 1:3, amount = c(25, 75, 50))) |>
-  dr_add_contract(dr_contract(columns = c(id = "integer", amount = "numeric"), key = "id")) |>
+  dr_add_contract(dr_contract(
+    columns = c(id = "integer", amount = "numeric"),
+    key = "id"
+  )) |>
   dr_add_quality(~ amount >= 0) |>
   dr_set_target(dr_target_rds(file.path(root, "orders")))
 result <- dr_run(product)

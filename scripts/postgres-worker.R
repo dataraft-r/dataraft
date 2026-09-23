@@ -4,8 +4,8 @@ result <- tryCatch(
   {
     if (job$action == "hold") {
       hold <- function() {
-        lake <- dr_open_lake(job$config)
-        on.exit(dr_close_lake(lake), add = TRUE)
+        lake <- dataraft.lake::dr_open_lake(job$config)
+        on.exit(dataraft.lake::dr_close_lake(lake), add = TRUE)
         dataraft.lake::dr_internal_acquire_lake_writer(
           lake,
           environment(),
@@ -19,15 +19,23 @@ result <- tryCatch(
       hold()
       list(status = "held")
     } else if (job$action == "report") {
-      metrics <- dr_metric_set(
+      metrics <- dataraft.metrics::dr_metric_set(
         "shared",
         count = dplyr::n(),
         approved = TRUE,
         code_version = "v1"
       )
       set.seed(101)
-      values <- dr_measure(job$previous, metrics = metrics, by = character())
-      dr_report_release(values, "same-report", code_version = "v1")
+      values <- dataraft.metrics::dr_measure(
+        job$previous,
+        metrics = metrics,
+        by = character()
+      )
+      dataraft.metrics::dr_report_release(
+        values,
+        "same-report",
+        code_version = "v1"
+      )
       list(status = "reported")
     } else {
       product <- dr_product(job$asset, data.frame(id = job$value))
@@ -49,10 +57,10 @@ result <- tryCatch(
             data
           }
         }
-        product <- dr_add_recipe(
+        product <- dataraft.core::dr_add_recipe(
           product,
-          dr_recipe() |>
-            dr_step_transform(barrier(job$ready, job$proceed))
+          dataraft.core::dr_recipe() |>
+            dataraft.core::dr_step_transform(barrier(job$ready, job$proceed))
         )
       }
       result <- dr_publish(

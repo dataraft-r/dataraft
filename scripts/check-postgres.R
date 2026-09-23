@@ -27,15 +27,18 @@ publish <- function(...) {
     stop(e)
   })
 }
-config <- dr_lake_config(
-  dr_registry_postgres("DATARAFT_TEST_PG_CONNECTION", lock_timeout = 30),
-  dr_storage_local(file.path(root, "data")),
+config <- dataraft.lake::dr_lake_config(
+  dataraft.lake::dr_registry_postgres(
+    "DATARAFT_TEST_PG_CONNECTION",
+    lock_timeout = 30
+  ),
+  dataraft.lake::dr_storage_local(file.path(root, "data")),
   landing = file.path(root, "landing"),
   backend = "ducklake"
 )
-lake <- dr_open_lake(config)
+lake <- dataraft.lake::dr_open_lake(config)
 stopifnot(nrow(dr_releases(lake)) == 0L)
-dr_close_lake(lake)
+dataraft.lake::dr_close_lake(lake)
 worker <- normalizePath("scripts/postgres-worker.R")
 launch <- function(job, number) {
   input <- file.path(root, paste0("job-", number, ".rds"))
@@ -106,15 +109,15 @@ stopifnot(file.create(parallel_go))
 left <- finish(a)
 right <- finish(b)
 stopifnot(left$status == "published", right$status == "published")
-lake <- dr_open_lake(config, read_only = TRUE)
+lake <- dataraft.lake::dr_open_lake(config, read_only = TRUE)
 orders <- dr_releases(lake)
 stopifnot(
   setequal(orders$release_id, c(left$release, right$release)),
   identical(as.character(orders$release_order), c("2", "1")),
-  identical(dr_read_release(lake, "left")$id, 1L),
-  identical(dr_read_release(lake, "right")$id, 2L)
+  identical(dataraft.lake::dr_read_release(lake, "left")$id, 1L),
+  identical(dataraft.lake::dr_read_release(lake, "right")$id, 2L)
 )
-dr_close_lake(lake)
+dataraft.lake::dr_close_lake(lake)
 # Nested publication must not wait on a lock already owned by this process.
 upstream <- dr_product("upstream", data.frame(id = 1L)) |> dr_set_target(config)
 stopifnot(
@@ -149,15 +152,15 @@ stopifnot(
   stale$status == "error",
   "dr_publication_conflict" %in% stale$error_class
 )
-lake <- dr_open_lake(config, read_only = TRUE)
+lake <- dataraft.lake::dr_open_lake(config, read_only = TRUE)
 stopifnot(
-  identical(dr_read_release(lake, "shared")$id, 3L),
+  identical(dataraft.lake::dr_read_release(lake, "shared")$id, 3L),
   identical(
     dr_releases(lake, "shared")$release_id,
     c(newer$release, first$release_id)
   )
 )
-dr_close_lake(lake)
+dataraft.lake::dr_close_lake(lake)
 # Same reviewed report is idempotent even when two clients issue it together.
 a <- launch(list(action = "report", previous = first), 5)
 b <- launch(list(action = "report", previous = first), 6)
@@ -180,9 +183,11 @@ for (asset in c("busy", "unrelated")) {
   )
   stopifnot(inherits(busy$result$error, "dr_writer_busy"))
 }
-reader <- dr_open_lake(config, read_only = TRUE)
-stopifnot(dr_read_release(reader, "shared", first$release_id)$id == 1L)
-dr_close_lake(reader)
+reader <- dataraft.lake::dr_open_lake(config, read_only = TRUE)
+stopifnot(
+  dataraft.lake::dr_read_release(reader, "shared", first$release_id)$id == 1L
+)
+dataraft.lake::dr_close_lake(reader)
 holder$process$kill()
 holder$process$wait(timeout = 10000)
 stopifnot(
@@ -192,10 +197,10 @@ stopifnot(
   )$status ==
     "published"
 )
-lake <- dr_open_lake(config)
+lake <- dataraft.lake::dr_open_lake(config)
 stopifnot(
   nrow(dr_releases(lake, "shared")) == 2L,
-  sum(dr_registry(lake, "reports")$id == "same-report") == 1L,
+  sum(dataraft.lake::dr_registry(lake, "reports")$id == "same-report") == 1L,
   identical(dr_collect(first)$id, 1L),
   !anyDuplicated(as.character(dr_releases(lake)$release_order))
 )
@@ -217,7 +222,7 @@ stopifnot(
   nrow(dr_releases(lake, "portfolio")) == 1L,
   identical(dr_collect(original)$policies$id, 1:2)
 )
-dr_close_lake(lake)
+dataraft.lake::dr_close_lake(lake)
 cat(
   "PostgreSQL/DuckLake: serialized writers, ordered commits, stale correction, report identity, catalog lock recovery and model gate passed.\n"
 )

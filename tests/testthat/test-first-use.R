@@ -17,7 +17,9 @@ test_that("delivery names survive simultaneous corrections without changing defi
     dr_explain(definition),
     "Deliveries: payments, policies, brokers"
   )
-  changed <- dr_trial(
+  changed <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
     definition,
     data = data.frame(policy = 1:2, amount = c(30, 40)),
     sources = list(policies = transform(policies, company = "North"))
@@ -25,8 +27,17 @@ test_that("delivery names survive simultaneous corrections without changing defi
   expect_equal(dr_collect(changed)$amount, c(30, 40))
   expect_equal(dr_collect(changed)$channel, c("a", "a"))
   expect_identical(definition, original)
-  expect_equal(dr_collect(dr_trial(definition))$company, c("North", "South"))
-  failed <- dr_trial(
+  expect_equal(
+    dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      definition
+    ))$company,
+    c("North", "South")
+  )
+  failed <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
     definition,
     sources = list(policies = policies[1, , drop = FALSE])
   )
@@ -37,7 +48,13 @@ test_that("delivery names survive simultaneous corrections without changing defi
   )
   expect_snapshot(
     error = TRUE,
-    dr_trial(definition, data = policies, sources = list(payments = policies))
+    dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
+      definition,
+      data = policies,
+      sources = list(payments = policies)
+    )
   )
 })
 
@@ -49,7 +66,9 @@ test_that("lookup names can be explicit and cannot silently select another deliv
       name = "contracts"
     )
   expect_equal(
-    dr_collect(dr_trial(
+    dr_collect(dr_run(
+      write = FALSE,
+      stop_on_failure = FALSE,
       definition,
       sources = list(contracts = data.frame(id = 1L, value = 20))
     ))$value,
@@ -82,13 +101,16 @@ test_that("trial retains a failed result and row diagnostics select a single rul
     data.frame(id = 1:3, amount = c(100, 200, -50))
   ) |>
     dr_add_quality(~ amount >= 0, name = "nonnegative")
-  result <- dr_trial(definition)
+  result <- dr_run(write = FALSE, stop_on_failure = FALSE, definition)
   expect_identical(result$status, "blocked")
   expect_equal(dr_quality_rows(result)$id, 3L)
   expect_snapshot(error = TRUE, dr_collect(result))
-  expect_snapshot(error = TRUE, dr_trial(definition, stop_on_failure = TRUE))
+  expect_snapshot(
+    error = TRUE,
+    dr_run(write = FALSE, definition, stop_on_failure = TRUE)
+  )
   definition <- dr_add_quality(definition, ~ amount < 150, name = "ceiling")
-  failed <- dr_trial(definition)
+  failed <- dr_run(write = FALSE, stop_on_failure = FALSE, definition)
   expect_snapshot(error = TRUE, dr_quality_rows(failed))
   expect_equal(dr_quality_rows(failed, "ceiling")$id, 2L)
 })
@@ -98,7 +120,9 @@ test_that("a shared product keeps one delivery name and updates every reference"
   definition <- dr_product("joined", source) |>
     dr_add_lookup(source, by = "id")
   expect_output(dr_explain(definition), "Deliveries: input")
-  result <- dr_trial(
+  result <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
     definition,
     sources = list(input = data.frame(id = 1L, amount = 20))
   )
@@ -107,10 +131,14 @@ test_that("a shared product keeps one delivery name and updates every reference"
 })
 
 test_that("overall and grouped measurements make the requested layout clear", {
-  result <- dr_trial(dr_product(
-    "payments",
-    data.frame(company = c("North", "South"), amount = c(100, 50))
-  ))
+  result <- dr_run(
+    write = FALSE,
+    stop_on_failure = FALSE,
+    dr_product(
+      "payments",
+      data.frame(company = c("North", "South"), amount = c(100, 50))
+    )
+  )
   definitions <- dr_metric_set(
     "payments",
     total = sum(amount),
