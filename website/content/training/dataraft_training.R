@@ -59,7 +59,7 @@
 # tools.
 # install.packages("remotes", repos = "https://cloud.r-project.org")
 # remotes::install_github(
-#   "dataraft-r/dataraft.core@ff0a6a875f5b4405ad21f5aaf482e1087fc7bfe3",
+#   "dataraft-r/dataraft.core@69d0212bdd6b1e1e8a93fd948d3616f9cdad5092",
 #   dependencies = c("Depends", "Imports", "LinkingTo"),
 #   upgrade = "never", build_vignettes = FALSE
 # )
@@ -3805,8 +3805,8 @@ if (exists("dbt_lake", inherits = FALSE) && DBI::dbIsValid(dbt_lake$con)) {
 # family interfaces, and S3 methods are used through their generics. Compose directly on products;
 # use dr_run(write = FALSE) for checks and adapters for catalog integrations.
 
-# dataraft.core: ff0a6a875f5b4405ad21f5aaf482e1087fc7bfe3
-# https://github.com/dataraft-r/dataraft.core/tree/ff0a6a875f5b4405ad21f5aaf482e1087fc7bfe3
+# dataraft.core: 69d0212bdd6b1e1e8a93fd948d3616f9cdad5092
+# https://github.com/dataraft-r/dataraft.core/tree/69d0212bdd6b1e1e8a93fd948d3616f9cdad5092
 # dataraft.lake: 842a0fc24ac6dcb57a83789a0ccd517905c53b9b
 # https://github.com/dataraft-r/dataraft.lake/tree/842a0fc24ac6dcb57a83789a0ccd517905c53b9b
 # dataraft.metrics: abc97b130c5a62bd664a45b1ed656a1627d8715d
@@ -3817,5 +3817,5 @@ if (exists("dbt_lake", inherits = FALSE) && DBI::dbIsValid(dbt_lake$con)) {
 # https://github.com/dataraft-r/dataraft.dbt/tree/6c5d1376ce8987dd8166b14415a32090b4df8fae
 # dataraft.ide: 636213398632524bd5d22581eb2779c64beb8a8f
 # https://github.com/dataraft-r/dataraft.ide/tree/636213398632524bd5d22581eb2779c64beb8a8f
-# dataraft-positron: 278bd923487d8c83c9bedc92484df209849fd1b4
-# https://github.com/dataraft-r/dataraft-positron/tree/278bd923487d8c83c9bedc92484df209849fd1b4
+# dataraft-positron: d688fbdc33f7bb4640e65ea4e33ad2c663769b7a
+# https://github.com/dataraft-r/dataraft-positron/tree/d688fbdc33f7bb4640e65ea4e33ad2c663769b7a
