@@ -3,7 +3,7 @@
   "dataraft.core": "ff0a6a875f5b4405ad21f5aaf482e1087fc7bfe3",
   "dataraft.lake": "842a0fc24ac6dcb57a83789a0ccd517905c53b9b",
   "dataraft.dbt": "6c5d1376ce8987dd8166b14415a32090b4df8fae",
-  "dataraft": "469f0f8e03658bc6052ac90e6f2d53a58c2f60f8",
+  "dataraft": "b4105d93215d8933666970bf96aaff5e82aface9",
   "dataraft.adapters": "946e037d5e93835bc9b516d85b3dc1df50f2f032",
   "dataraft.metrics": "abc97b130c5a62bd664a45b1ed656a1627d8715d",
   "dataraft.ide": "636213398632524bd5d22581eb2779c64beb8a8f"
