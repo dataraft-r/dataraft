@@ -69,7 +69,7 @@ the working directory. It creates:
 - `policies.odcs.yaml`, an executable ODCS 3.2 contract.
 
 No lake is opened and no data is published. The YAML is generated with
-`dr_contract_odcs()`. The portable `dr_contract_yaml()` metadata export is not an
+`dataraft.adapters::dr_contract_odcs()`. The portable `dataraft.adapters::dr_contract_yaml()` metadata export is not an
 executable ODCS contract and is not the input for this editor.
 
 ## Manual checks and expected observations
@@ -129,7 +129,7 @@ error, not a fabricated successful refresh.
 ## Optional native phase 0 helpers
 
 The reviewed phase 0 metapackage and its pinned family dependencies provide
-`dr_review()`, `dr_catalog_pane()` and `dr_refresh_connection()`. Its installation
+`dataraft.core::dr_review()`, `dataraft.adapters::dr_catalog_pane()` and `dataraft.lake::dr_refresh_connection()`. Its installation
 command is recorded below using the published immutable review commit:
 
 ```r
@@ -139,19 +139,19 @@ pak::pkg_install("dataraft-r/dataraft@9df6d47dd2ebcfbedef368b2bbfa7fbddb404ac7")
 Run [demo.R](demo.R) for a blocked in-memory delivery, bounded failure inspection
 and a versioned local RDS delivery. It needs no database server. The generated
 release directory is temporary; remove it when finished. In an interactive
-session, `dr_review()` opens the diagnostic table through the IDE's `View()`.
+session, `dataraft.core::dr_review()` opens the diagnostic table through the IDE's `View()`.
 
 RDS is a file adapter. It does not provide a DBI connection, registry, live lake
-catalog or Connections entry. Use `dr_lake_config()` and `dr_connect_lake()` for
+catalog or Connections entry. Use `dataraft.lake::dr_lake_config()` and `dr_connect_lake()` for
 a real DuckDB/DuckLake lake. Its Connections entry follows the connection's
-lifecycle; `dr_refresh_connection(lake)` explicitly refreshes the tree.
+lifecycle; `dataraft.lake::dr_refresh_connection(lake)` explicitly refreshes the tree.
 
-For a metadata snapshot you previously exported with `dr_catalog_export()`:
+For a metadata snapshot you previously exported with `dataraft.adapters::dr_catalog_export()`:
 
 ```r
-app <- dr_catalog_pane(snapshot = "catalog.json", launch = FALSE)
+app <- dataraft.adapters::dr_catalog_pane(snapshot = "catalog.json", launch = FALSE)
 # Foreground execution in an interactive session:
-dr_catalog_pane(snapshot = "catalog.json")
+dataraft.adapters::dr_catalog_pane(snapshot = "catalog.json")
 ```
 
 Shiny supplies its actual listening URL to the IDE viewer and falls back to a

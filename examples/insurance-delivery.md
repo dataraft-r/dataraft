@@ -8,7 +8,7 @@ This example uses synthetic data and works entirely in memory.
 library(dataraft)
 demo <- dr_demo()
 demo$blocked$status
-dr_quality_rows(demo$blocked)
+dataraft.core::dr_quality_rows(demo$blocked)
 dr_collect(demo$passed)
 ```
 
