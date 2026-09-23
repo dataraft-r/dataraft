@@ -31,5 +31,24 @@ for name, spec in lock["packages"].items():
     resolved_packages[name] = {**spec, "ref": resolved}
     print(name + "=" + resolved, flush=True)
 
+# The immutable local checkout set, rather than package Remotes fields, defines
+# the dependency graph in CI. Sanitize only disposable checkouts.
+for package in [pathlib.Path("."), *pathlib.Path("packages").glob("*"),
+                *pathlib.Path("family").glob("*"), pathlib.Path("integration")]:
+    description = package / "DESCRIPTION"
+    if not description.exists():
+        continue
+    filtered = []
+    remote_continuation = False
+    for line in description.read_text().splitlines(keepends=True):
+        if line.startswith("Remotes:"):
+            remote_continuation = True
+            continue
+        if remote_continuation and line.startswith((" ", "\t")):
+            continue
+        remote_continuation = False
+        filtered.append(line)
+    description.write_text("".join(filtered))
+
 pathlib.Path("check").mkdir(exist_ok=True)
 pathlib.Path("check/resolved-family.json").write_text(json.dumps({"mode": mode, "packages": resolved_packages}, indent=2) + "\n")
