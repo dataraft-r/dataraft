@@ -26,12 +26,12 @@
     },
     "dataraft.ide": {
       "repository": "dataraft-r/dataraft.ide",
-      "ref": "47e151c0b281694a3e06a909df7a7a0860c2bd5f",
+      "ref": "67c84b920399fd9a5d519c37a2886f741d233719",
       "version": "0.1.0.9006"
     },
     "dataraft.lake": {
       "repository": "dataraft-r/dataraft.lake",
-      "ref": "4877f70678b0714e23de97f96139a2f03f787b0e",
+      "ref": "906d899383c84a9fe2ec3c6a95e9b1f5cfad0aac",
       "version": "0.1.0.9006"
     },
     "dataraft.metrics": {
