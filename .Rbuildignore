@@ -28,3 +28,6 @@
 
 ^family-lock\.json$
 ^FAMILY_COMPATIBILITY\.md$
+
+^extension$
+^coverage$

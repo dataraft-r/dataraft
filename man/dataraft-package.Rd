@@ -29,5 +29,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Jan-Hendrik Weinert \email{65009403+JanWein@users.noreply.github.com}
 
+Authors:
+\itemize{
+  \item Jan-Hendrik Weinert \email{65009403+JanWein@users.noreply.github.com}
+}
+
 }
 \keyword{internal}

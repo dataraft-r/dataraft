@@ -37,7 +37,7 @@ creates a background server. An exported snapshot can be used independently
 of a live lake connection.
 }
 \examples{
-\dontshow{if (requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 snapshot <- tempfile(fileext = ".json")
 writeLines('{"assets":[]}', snapshot)
 app <- dr_catalog_pane(snapshot = snapshot, launch = FALSE)
@@ -46,5 +46,5 @@ unlink(snapshot)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[dataraft.catalog:dr_catalog_pane]{dataraft.catalog::dr_catalog_pane()}}
+\code{\link[dataraft.adapters:dr_catalog_pane]{dataraft.adapters::dr_catalog_pane()}}
 }

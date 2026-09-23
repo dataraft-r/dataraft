@@ -1,3 +1,11 @@
+# dataraft 0.1.0.9004
+
+* Integrate the deep review hardening across the package family.
+* Make product-first execution with write = FALSE the documented entry path.
+* Expose unvalidated evidence, release integrity verification and bounded contract composition.
+* Move catalog ownership to adapters and consolidate CI pins into this repository.
+* Record compatibility decisions and remaining external acceptance gates in docs/plans/deep-review-implementation.md.
+
 # dataraft 0.1.0.9000
 
 * The optional `dataraft.ide` bridge joins the immutable family lock, full checks, minimal dependency checks, coverage and reference site.

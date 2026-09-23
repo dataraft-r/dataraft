@@ -146,7 +146,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libuv1-dev
       - name: Install only hard dependencies
-        run: Rscript -e 'install.packages(c("cli", "DBI", "dplyr", "dbplyr", "tibble", "rlang", "digest", "jsonlite", "withr"))'
+        shell: Rscript {0}
+        run: |
+          imports <- read.dcf("packages/dataraft.core/DESCRIPTION")[1, "Imports"]
+          packages <- trimws(sub("[(].*$", "", strsplit(imports, ",")[[1]]))
+          install.packages(packages)
       - name: Install core package
         run: R CMD INSTALL packages/dataraft.core
       - name: Verify an installation without DuckDB

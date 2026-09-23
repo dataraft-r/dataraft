@@ -67,39 +67,39 @@ dataraft.adapters::dr_as_targets
 dataraft.core::dr_capabilities
 
 #' @rdname dr_catalog_app
-#' @inherit dataraft.catalog::dr_catalog_app title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_app()]
-#' @importFrom dataraft.catalog dr_catalog_app
+#' @inherit dataraft.adapters::dr_catalog_app title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_app()]
+#' @importFrom dataraft.adapters dr_catalog_app
 #' @export
-dataraft.catalog::dr_catalog_app
+dataraft.adapters::dr_catalog_app
 
 #' @rdname dr_catalog_export
-#' @inherit dataraft.catalog::dr_catalog_export title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_export()]
-#' @importFrom dataraft.catalog dr_catalog_export
+#' @inherit dataraft.adapters::dr_catalog_export title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_export()]
+#' @importFrom dataraft.adapters dr_catalog_export
 #' @export
-dataraft.catalog::dr_catalog_export
+dataraft.adapters::dr_catalog_export
 
 #' @rdname dr_catalog_openlineage
-#' @inherit dataraft.catalog::dr_catalog_openlineage title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_openlineage()]
-#' @importFrom dataraft.catalog dr_catalog_openlineage
+#' @inherit dataraft.adapters::dr_catalog_openlineage title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_openlineage()]
+#' @importFrom dataraft.adapters dr_catalog_openlineage
 #' @export
-dataraft.catalog::dr_catalog_openlineage
+dataraft.adapters::dr_catalog_openlineage
 
 #' @rdname dr_catalog_openmetadata
-#' @inherit dataraft.catalog::dr_catalog_openmetadata title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_openmetadata()]
-#' @importFrom dataraft.catalog dr_catalog_openmetadata
+#' @inherit dataraft.adapters::dr_catalog_openmetadata title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_openmetadata()]
+#' @importFrom dataraft.adapters dr_catalog_openmetadata
 #' @export
-dataraft.catalog::dr_catalog_openmetadata
+dataraft.adapters::dr_catalog_openmetadata
 
 #' @rdname dr_catalog_openmetadata_dbt
-#' @inherit dataraft.catalog::dr_catalog_openmetadata_dbt title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_openmetadata_dbt()]
-#' @importFrom dataraft.catalog dr_catalog_openmetadata_dbt
+#' @inherit dataraft.adapters::dr_catalog_openmetadata_dbt title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_openmetadata_dbt()]
+#' @importFrom dataraft.adapters dr_catalog_openmetadata_dbt
 #' @export
-dataraft.catalog::dr_catalog_openmetadata_dbt
+dataraft.adapters::dr_catalog_openmetadata_dbt
 
 #' @rdname dr_check_component
 #' @inherit dataraft.core::dr_check_component title description details return params sections examples
@@ -305,11 +305,11 @@ dataraft.core::dr_extract_product
 dataraft.core::dr_extract_recipe
 
 #' @rdname dr_freshness
-#' @inherit dataraft.catalog::dr_freshness title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_freshness()]
-#' @importFrom dataraft.catalog dr_freshness
+#' @inherit dataraft.adapters::dr_freshness title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_freshness()]
+#' @importFrom dataraft.adapters dr_freshness
 #' @export
-dataraft.catalog::dr_freshness
+dataraft.adapters::dr_freshness
 
 #' @rdname dr_incidents
 #' @inherit dataraft.core::dr_incidents title description details return params sections examples
@@ -987,11 +987,11 @@ dataraft.adapters::dr_test_adapter
 dataraft.core::dr_review
 
 #' @rdname dr_catalog_pane
-#' @inherit dataraft.catalog::dr_catalog_pane title description details return params sections examples
-#' @seealso [dataraft.catalog::dr_catalog_pane()]
-#' @importFrom dataraft.catalog dr_catalog_pane
+#' @inherit dataraft.adapters::dr_catalog_pane title description details return params sections examples
+#' @seealso [dataraft.adapters::dr_catalog_pane()]
+#' @importFrom dataraft.adapters dr_catalog_pane
 #' @export
-dataraft.catalog::dr_catalog_pane
+dataraft.adapters::dr_catalog_pane
 
 #' @rdname dr_refresh_connection
 #' @inherit dataraft.lake::dr_refresh_connection title description details return params sections examples
@@ -1041,3 +1041,33 @@ dataraft.core::dr_remove_source
 #' @importFrom dataraft.core dr_update_source
 #' @export
 dataraft.core::dr_update_source
+
+#' @rdname dr_contract_policy
+#' @inherit dataraft.core::dr_contract_policy title description details return params sections examples
+#' @importFrom dataraft.core dr_contract_policy
+#' @export
+dataraft.core::dr_contract_policy
+
+#' @rdname dr_contract_meta
+#' @inherit dataraft.core::dr_contract_meta title description details return params sections examples
+#' @importFrom dataraft.core dr_contract_meta
+#' @export
+dataraft.core::dr_contract_meta
+
+#' @rdname dr_model_product
+#' @inherit dataraft.core::dr_model_product title description details return params sections examples
+#' @importFrom dataraft.core dr_model_product
+#' @export
+dataraft.core::dr_model_product
+
+#' @rdname dr_verify_releases
+#' @inherit dataraft.lake::dr_verify_releases title description details return params sections examples
+#' @importFrom dataraft.lake dr_verify_releases
+#' @export
+dataraft.lake::dr_verify_releases
+
+#' @rdname dr_dbt_contract_from_manifest
+#' @inherit dataraft.dbt::dr_dbt_contract_from_manifest title description details return params sections examples
+#' @importFrom dataraft.dbt dr_dbt_contract_from_manifest
+#' @export
+dataraft.dbt::dr_dbt_contract_from_manifest

@@ -33,7 +33,7 @@ Credentials, artifact paths and arbitrary CLI flags are not accepted here.}
 }
 \value{
 A catalog adapter for the \code{catalog} argument of \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_build()}} and
-\code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_test()}}. \code{dataraft.core::dr_publish_metadata(adapter, result)} returns a delivery list
+\code{\link[dataraft.dbt:dr_dbt_test]{dataraft.dbt::dr_dbt_test()}}. \code{dataraft.core::dr_publish_metadata(adapter, result)} returns a delivery list
 with \code{status}, \code{destination}, \code{invocation_id}, \code{attempt}, timestamps,
 \code{exit_status}, \code{error_class}, \code{message} and \code{recorded}. It never changes
 the dbt result's \code{success} or \code{status} fields.
@@ -41,14 +41,14 @@ the dbt result's \code{success} or \code{status} fields.
 \description{
 Run \verb{metadata ingest -c} using the separately installed OpenMetadata ingestion
 CLI. OpenMetadata interprets models, tests, descriptions, tags and SQL lineage;
-dataraft supplies verified artifacts from one \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_build()}} or \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_test()}}
+dataraft supplies verified artifacts from one \code{\link[dataraft.dbt:dr_dbt_build]{dataraft.dbt::dr_dbt_build()}} or \code{\link[dataraft.dbt:dr_dbt_test]{dataraft.dbt::dr_dbt_test()}}
 invocation. No data rows or database connections are transferred by this
 adapter. The database service and its table inventory must already exist in
 OpenMetadata. Refresh database ingestion after creating new physical RAW
 release relations or dbt models; the dbt engine enriches existing table
 entities and can omit lineage edges when a table cannot be found.
 \code{delivered} means the CLI returned zero, not that every intended graph edge
-was verified. This is separate from \code{\link[dataraft.catalog:dr_catalog_openmetadata]{dr_catalog_openmetadata()}}, which publishes
+was verified. This is separate from \code{\link[dataraft.adapters:dr_catalog_openmetadata]{dr_catalog_openmetadata()}}, which publishes
 ordinary product table metadata over HTTP.
 }
 \details{
@@ -88,5 +88,5 @@ dataraft.core::dr_inspect(catalog)
 # delivery <- dataraft.core::dr_publish_metadata(catalog, result)
 }
 \seealso{
-\code{\link[dataraft.catalog:dr_catalog_openmetadata_dbt]{dataraft.catalog::dr_catalog_openmetadata_dbt()}}
+\code{\link[dataraft.adapters:dr_catalog_openmetadata_dbt]{dataraft.adapters::dr_catalog_openmetadata_dbt()}}
 }

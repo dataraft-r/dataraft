@@ -35,3 +35,59 @@ undeletable storage. Operators must define retention for data, registry metadata
 quality evidence, frozen reports, backups and downstream catalogs. Deleting one
 release does not erase its copies. Resolve deletion requests across those stores;
 DataRaft does not provide a universal subject-erasure operation.
+
+## What validation establishes
+
+A declared contract checks its schema and configured constraints. Without a
+contract, schema and type evidence is `unvalidated`, including reports and release
+metadata. Non-empty checks and explicit quality rules can still run. Execution
+status (`completed` or `published`) and validation status are separate facts.
+Warnings permit publication by design and are not equivalent to passed checks.
+
+Generic targets receive the in-memory snapshot that was checked. Lake execution
+materializes candidates before checking and publication. These paths close the
+check/write gap; arbitrary adapter writers remain responsible for writing the
+provided snapshot without rereading the original source. Materialization and
+integrity verification currently require memory proportional to the release.
+
+Static inspection of random/time calls and repeated rule evaluation catch common
+nondeterminism. They cannot prove arbitrary R code pure or detect every external
+state change. Explicit dynamic references remain non-cacheable. Volatile checks
+are labelled and excluded from cache reuse and frozen-report approvals. Neither
+classification turns an external service into a reproducible input.
+
+## Release integrity and maintenance
+
+New releases record a SHA-256 digest of typed row content, independent of row
+order and including duplicate rows. `dr_verify_releases()` checks content,
+existence, originating runs and registry identity. Old releases without a recorded
+baseline are `unverifiable`; migration does not retroactively certify them.
+The digest is not a signature. A database administrator able to rewrite both data
+and evidence can defeat it. Use access control and independently retained evidence
+when that threat matters.
+
+The local DuckDB registry enforces unique run and release identities with indexes.
+DuckLake does not support those indexes: cooperating DataRaft writers check
+uniqueness under catalog coordination, and verification detects duplicates. Direct
+DBI writes bypass that protocol. Do not describe it as a database constraint on
+DuckLake.
+
+PostgreSQL-backed publication, ingestion, recovery, cleanup and snapshot expiration
+share a catalog-level advisory lock. This intentionally serializes independent
+assets as well as maintenance. Optimistic parent checks remain inside publication
+transactions. Local deployments still require a single coordinated writer.
+Failed publication attempts remove uncommitted candidate tables when the process
+can run cleanup; a killed process requires `dr_interrupted()` and `dr_recover()`.
+Cleanup recognizes quarantine candidates and preserves recorded releases.
+
+## Adapter and IDE boundaries
+
+Adapters must document atomicity, retries and partial failures for their backend.
+`dr_test_adapter(failure_probe = ..., read_committed = ...)` can exercise a
+specified injected failure and assert committed output is unchanged. A passing
+probe does not establish every possible crash or backend failure mode.
+
+The IDE bridge confines contract reads to the canonical `contract_root` supplied
+by trusted R code, resolving symlinks and path components before containment
+checks. Response writes have their own trusted root. These boundaries limit the
+bridge protocol; they are not a sandbox for arbitrary code in the R session.

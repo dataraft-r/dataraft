@@ -3,18 +3,17 @@
 `family-lock.json` records full immutable Git commit IDs, package versions,
 R 4.5.1 and a dated Posit Package Manager CRAN snapshot. It is a development
 compatibility set, not a release announcement. R package dependencies have
-explicit minimum family versions and GitHub Remotes are pinned to commits.
+explicit minimum family versions. Development `Remotes` select the coordinated
+branch; exact compatibility is established only by this umbrella's lockfile.
+There are no duplicated component lockfiles.
 
-Ordinary CI obtains sibling sources with `scripts/checkout-family.py`. It never
-selects a moving branch because the same branch name exists in another repo.
-Component checks compare the current component against its recorded sibling
-baseline. Those baselines need not describe mutually recursive commit sets.
-The compatibility set is the containing umbrella commit plus seven immutable
-component SHAs. Only the umbrella's own manifest entry uses `ref: "self"`,
-because a commit cannot embed its own hash. Checkout and validation resolve it
-to the actual umbrella HEAD in `check/resolved-family.json`. Component manifests
-retain their immutable umbrella comparison baseline. `python scripts/check-family.py`
-validates all seven component checkout SHAs, the package set and version bounds.
+Component CI obtains the umbrella's matching PR branch when present, otherwise
+main, then checks out every sibling at the immutable SHA in that manifest. It
+records the actual umbrella and component commits in `check/resolved-family.json`.
+The tested component itself is the PR checkout. Matching branch selection chooses
+a manifest, never a moving sibling baseline. The umbrella entry uses `ref: "self"`
+because a commit cannot contain its own hash. `scripts/check-family.py` validates
+the resolved component SHAs, package set and dependency bounds.
 
 The separate nightly HEAD workflow intentionally fetches all seven `main`
 branches, then runs the family check. This discovers cross-repository breaking
@@ -30,7 +29,7 @@ in-memory tests, including the umbrella dbt executable and PostgreSQL jobs.
 Before publishing a family release:
 
 1. Finish component checks and record immutable component commit IDs in the
-   umbrella manifest and dependency Remotes.
+   umbrella manifest. Move development Remotes to the intended stable branch when merging.
 2. Run pinned family checks, the real dbt and PostgreSQL checks, documentation
    examples, and the benchmark smoke job on this exact set.
 3. Update versions and dependency lower bounds together, then tag components

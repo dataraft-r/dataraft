@@ -37,5 +37,5 @@ required. Lazy validation avoids collecting the entire table by default;
 custom quality rules may still collect data.
 }
 \seealso{
-\code{\link[dataraft.adapters:dr_source_iceberg]{dataraft.adapters::dr_target_iceberg()}}
+\code{\link[dataraft.adapters:dr_target_iceberg]{dataraft.adapters::dr_target_iceberg()}}
 }

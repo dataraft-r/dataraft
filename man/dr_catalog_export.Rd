@@ -19,7 +19,7 @@ exported.
 Export a read-only metadata snapshot
 }
 \examples{
-\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE) && requireNamespace("bit64", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("dataraft.lake", quietly = TRUE) && requireNamespace("duckdb", quietly = TRUE) && requireNamespace("bit64", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 root <- tempfile("dataraft-example-")
 config <- dataraft.lake::dr_lake_config(
   dataraft.lake::dr_registry_duckdb(file.path(root, "lake.db")),
@@ -33,5 +33,5 @@ unlink(root, recursive = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[dataraft.catalog:dr_catalog_export]{dataraft.catalog::dr_catalog_export()}}
+\code{\link[dataraft.adapters:dr_catalog_export]{dataraft.adapters::dr_catalog_export()}}
 }

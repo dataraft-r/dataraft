@@ -10,9 +10,10 @@ dr_remove_source(x, name = NULL)
 \item{x}{A product or modular workflow definition.}
 
 \item{name}{Existing primary source name, or NULL for the only source.}
-
 }
-\value{An updated definition, or the extracted source specification.}
+\value{
+An updated definition, or the extracted source specification.
+}
 \description{
 Updating requires an existing source. Extraction returns its stored adapter,
 function or data frame, never its executed result. If \code{name} is omitted,
@@ -28,5 +29,5 @@ dr_update_source(product, data.frame(id = 2L)) |> dr_extract_source()
 dr_remove_source(product, "delivery")
 }
 \seealso{
-\code{\link[dataraft.core:dr_update_source]{dataraft.core::dr_remove_source()}}
+\code{\link[dataraft.core:dr_remove_source]{dataraft.core::dr_remove_source()}}
 }

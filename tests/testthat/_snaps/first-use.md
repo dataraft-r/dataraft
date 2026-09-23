@@ -19,7 +19,7 @@
     Code
       dr_trial(definition, data = policies, sources = list(payments = policies))
     Condition
-      Error in `dr_trial()`:
+      Error in `dr_run()`:
       ! Delivery 'payments' was supplied in both data and sources. Supply it once, not both.
 
 # lookup names can be explicit and cannot silently select another delivery

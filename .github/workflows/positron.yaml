@@ -1,0 +1,82 @@
+name: Positron current family
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  positron:
+    name: Positron 2026.09.1-2 / R 4.5.1 user flows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: extension
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DATARAFT_EXPECT_R_VERSION: "4.5.1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v4
+      - name: Obtain locked family sources
+        working-directory: .
+        run: python scripts/checkout-family.py
+      - name: Obtain pinned native UI test suite
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          repository: dataraft-r/dataraft-positron
+          ref: c9cb5a1559504616f83f7d85060e0c280352f1e0
+          path: extension
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.18.0"
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: "4.5.1"
+          use-public-rspm: false
+          cran: https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05
+        with:
+          extra-packages: |
+            any::duckdb
+            any::bit64
+            any::dm
+            any::yaml
+            local::packages/dataraft.core
+            local::packages/dataraft.lake
+            local::packages/dataraft.adapters
+            local::packages/dataraft.metrics
+            local::packages/dataraft.dbt
+            local::packages/dataraft.catalog
+            local::packages/dataraft.ide
+            local::.
+      - run: npm ci --ignore-scripts
+      - name: Install desktop system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb libasound2t64 libatk-bridge2.0-0t64 libgtk-3-0t64 libnss3 libgbm1 libxkbfile1
+      - name: Install and record the current locked family
+        working-directory: .
+        run: |
+          Rscript scripts/install-family.R
+          Rscript scripts/positron-provenance.R
+      - name: Exercise persistent R transport
+        run: npm run test:integration
+      - name: Verify and extract the official pinned Positron desktop
+        run: node test/install-positron.cjs
+      - name: Exercise native Positron and its real R runtime
+        run: xvfb-run -a npm run test:positron
+        timeout-minutes: 15
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: positron-runtime-evidence
+          path: extension/.vscode-test/positron-artifacts
+          include-hidden-files: true
+          if-no-files-found: warn

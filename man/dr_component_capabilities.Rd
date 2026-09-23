@@ -31,5 +31,5 @@ dr_capabilities(data.frame(id = 1L))
 dr_capabilities(NULL)
 }
 \seealso{
-\code{\link[dataraft.core:dr_capabilities]{dataraft.core::dr_component_capabilities()}}
+\code{\link[dataraft.core:dr_component_capabilities]{dataraft.core::dr_component_capabilities()}}
 }

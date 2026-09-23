@@ -1,0 +1,9 @@
+suite,fail,warn,skip,pass
+dataraft.core,0,0,1,1469
+dataraft.lake,0,0,3,681
+dataraft.adapters,0,0,11,314
+dataraft.catalog,0,0,0,2
+dataraft.metrics,0,0,0,175
+dataraft.dbt,0,0,2,207
+dataraft.ide,0,0,0,189
+dataraft,0,0,4,292

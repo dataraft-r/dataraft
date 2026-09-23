@@ -44,5 +44,5 @@ dr_trial(flow, data = data.frame(id = 1:2, amount = c(10.123, 20))) |>
   dr_collect()
 }
 \seealso{
-\code{\link[dataraft.core:workflow-components]{dataraft.core::dr_add_product()}}
+\code{\link[dataraft.core:dr_add_product]{dataraft.core::dr_add_product()}}
 }

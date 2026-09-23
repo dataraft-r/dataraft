@@ -14,9 +14,10 @@ dr_update_source(x, source, name = NULL, reader = NULL)
 \item{name}{Existing primary source name, or NULL for the only source.}
 
 \item{reader}{Optional file reader, as in \code{\link[dataraft.core:dr_add_source]{dr_add_source()}}.}
-
 }
-\value{An updated definition, or the extracted source specification.}
+\value{
+An updated definition, or the extracted source specification.
+}
 \description{
 Updating requires an existing source. Extraction returns its stored adapter,
 function or data frame, never its executed result. If \code{name} is omitted,

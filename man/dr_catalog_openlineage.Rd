@@ -51,5 +51,5 @@ catalog <- dr_catalog_openlineage("https://lineage.example/api/v1/lineage")
 dataraft.core::dr_inspect(catalog)
 }
 \seealso{
-\code{\link[dataraft.catalog:dr_catalog_openlineage]{dataraft.catalog::dr_catalog_openlineage()}}
+\code{\link[dataraft.adapters:dr_catalog_openlineage]{dataraft.adapters::dr_catalog_openlineage()}}
 }

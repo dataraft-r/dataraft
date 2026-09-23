@@ -39,5 +39,5 @@ dr_incidents(path)
 unlink(path, recursive = TRUE)
 }
 \seealso{
-\code{\link[dataraft.core:dr_run_history]{dataraft.core::dr_incidents()}}
+\code{\link[dataraft.core:dr_incidents]{dataraft.core::dr_incidents()}}
 }

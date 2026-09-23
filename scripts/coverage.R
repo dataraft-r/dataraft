@@ -10,6 +10,42 @@ code <- sprintf(
   encodeString(file.path(root, "tests", "testthat"), quote = '"')
 )
 dir.create("coverage", showWarnings = FALSE)
+# The catalog package contains only adapter reexports. Check that invariant and
+# its compatibility tests instead of reporting a fictitious line percentage.
+if (component == "catalog") {
+  namespace <- asNamespace("dataraft.catalog")
+  exports <- getNamespaceExports(namespace)
+  stopifnot(length(exports) > 0L)
+  stopifnot(all(vapply(
+    exports,
+    function(name) {
+      identical(
+        getExportedValue("dataraft.catalog", name),
+        getExportedValue("dataraft.adapters", name)
+      )
+    },
+    logical(1)
+  )))
+  owned_functions <- Filter(
+    function(name) {
+      value <- get(name, envir = namespace, inherits = FALSE)
+      is.function(value) && identical(environment(value), namespace)
+    },
+    ls(namespace, all.names = TRUE)
+  )
+  stopifnot(length(owned_functions) == 0L)
+  testthat::test_local("packages/dataraft.catalog", stop_on_failure = TRUE)
+  summary <- paste0(
+    "Catalog: N/A (pure reexports); compatibility tests passed. ",
+    "Implementation coverage is measured in dataraft.adapters.\n"
+  )
+  cat(summary, file = "coverage/catalog-summary.md")
+  if (nzchar(Sys.getenv("GITHUB_STEP_SUMMARY"))) {
+    cat(summary, file = Sys.getenv("GITHUB_STEP_SUMMARY"), append = TRUE)
+  }
+  cat(summary)
+  quit(status = 0L)
+}
 coverage <- tryCatch(
   covr::package_coverage(
     path = file.path("packages", paste0("dataraft.", component)),

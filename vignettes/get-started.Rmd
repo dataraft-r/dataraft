@@ -1,8 +1,8 @@
 ---
-title: "Products, recipes and workflows"
+title: "Define, check and publish a product"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Products, recipes and workflows}
+  %\VignetteIndexEntry{Define, check and publish a product}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,87 +11,80 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = FALSE)
 ```
 
-```{r failure}
+A product contains its sources, preparation, contract, checks and destination.
+Start with an explicit contract: without one, inferred schema checks are labelled
+`unvalidated`. A completed run then means execution succeeded, not that a business
+schema was validated.
+
+```{r define}
 library(dataraft)
 
-orders <- dr_product("orders") |>
-  dr_add_contract(c(id = "integer", amount = "numeric")) |>
-  dr_add_quality(~ amount >= 0)
+contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric"),
+                        key = "id") |>
+  dr_contract_meta(owner = "Analytics", grain = "One order")
+orders <- dr_product("orders", contract = contract) |>
+  dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = round(amount, 2))) |>
+  dr_add_quality(dr_quality(~ amount >= 0, action = "block"))
+```
 
-flow <- dr_workflow() |>
-  dr_add_product(orders) |>
-  dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = round(amount, 2)))
+Use `action = "warn"` for a non-blocking check and `threshold` for an allowed
+failure fraction. Quarantine removes rejected rows before writing. It does not
+silently relax the rule's stored policy. Custom checks must be stable: ordinary
+checks are evaluated twice and known time/random calls are rejected. Explicit
+`volatile = TRUE` allows them, labels their evidence, disables release caching and
+prevents that evidence from authorizing frozen report approvals.
 
+```{r failure}
 bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
-checked <- dr_trial(flow, data = bad_delivery)
+checked <- dr_run(orders, data = bad_delivery, write = FALSE, stop_on_failure = FALSE)
 checked$status
 dr_quality_rows(checked)
 ```
 
-Correct the delivery and reuse the same workflow:
+Correct the delivery and reuse the product:
 
 ```{r success}
 next_delivery <- data.frame(id = 1:3, amount = c(25, 75, 50))
-result <- dr_trial(flow, data = next_delivery)
+result <- dr_run(orders, data = next_delivery, write = FALSE)
 dr_collect(result)
 ```
 
-A **product** defines identity, contract and quality requirements. A **recipe**
-defines preparation in step order. A **workflow** binds these definitions to
-sources and a target. Definitions do no I/O. `dr_trial()` checks without writing;
-`dr_run()` executes the configured target. `dr_collect()` retrieves the output.
+`write = FALSE` uses the same checks and transformations while suppressing
+framework targets, catalogs and run-evidence writes, including upstream products.
+It still reads sources and executes your functions. Those functions can perform
+I/O themselves. A later run reads a new delivery; this check does not reserve it.
 
-
-Use `dr_plan()` to inspect a definition before reading sources. Contract failures
-and quality failures are available in the result; `dr_quality_rows()` exposes
-retained failing rows. Set a destination with `dr_set_target()` and execute with
-`dr_run()` once the trial passes. Quality gates run before the destination writer.
-
-Recipes own preparation in modular workflows. Products added with
-`dr_add_product()` must not carry embedded transformations. Recipe steps run in
-the order added, followed by output contract checks and quality rules.
-
-## Inspect a failed rule
-
-Keep the result before collecting it. Failed predicates and errors while evaluating
-predicates are different: the latter have original R conditions for local inspection.
-
-```{r diagnose}
-broken <- dr_product("orders", next_delivery) |> dr_add_quality(~ amont >= 0)
-result <- dr_trial(broken)
-dr_quality_report(result)
-lapply(dr_quality_errors(result), conditionMessage)
-```
-
-When catching an error from `dr_run()` or `dr_collect()`, its `result` field also
-retains the diagnosis. `dr_quality_errors(error)` accepts that condition directly.
-Raw exception text is not included in exported HTML or JSON quality reports.
-
-## Save locally without DuckDB
-
-`dr_target_rds()` writes versioned RDS releases using only R and the hard
-DataRaft dependencies. Keep the returned version to reproduce a delivery.
+## Save locally
 
 ```{r local-rds}
 folder <- tempfile("dataraft-rds-")
-saved <- dr_publish(flow, data = next_delivery, to = dr_target_rds(folder))
+saved <- dr_publish(orders, data = next_delivery, to = dr_target_rds(folder))
 reference <- saved$outputs$version
 restored <- dr_read_source(dr_source_rds(folder, version = reference))
 stopifnot(sum(restored$amount) == 150)
 unlink(folder, recursive = TRUE)
 ```
 
-The adapter serializes local writers with a directory lock and never overwrites
-an existing version. It does not provide lake transactions across tables or a
-frozen-report registry. Use `dataraft.lake` when those guarantees are required.
+The generic execution path materializes lazy output before checking it and passes
+that same snapshot to the writer. This may require memory proportional to the
+output. RDS serializes cooperating local writers and preserves existing versions;
+it does not provide a transaction across multiple tables. See the guarantees
+article before choosing a storage backend.
 
-After a failed pipe, use `result <- dr_last_failure()` to recover its checks
-without repeating source reads. Clear the retained reference with
-`dr_last_failure(clear = TRUE)` when you are done.
+## Diagnose and extend
 
-## Inspect a definition before execution
+`dr_plan()` inspects the definition. `dr_validate(product)` checks configuration;
+it does not read the delivery. After execution, `dr_quality_report(result)` shows
+the evidence and `dr_quality_errors(result)` returns retained local errors. After
+a thrown error, use `dr_last_failure()` to retrieve the result without reading the
+source again. Exported reports omit raw exception text.
 
-`dr_plan()` shows planned work; `dr_validate()` checks configuration without
-reading sources when given a definition. `dr_inspect()` describes an object;
-`dr_status()` summarizes the outcome of an execution. None substitutes for checking
-a real delivery with `dr_trial()`.
+Use `dr_contract_policy()` for empty/extra-column and freshness policy. Use
+`dr_model_product()` with a `dm` for related tables. Catalog sinks are supplied by
+`dataraft.adapters`; `dataraft.catalog` remains a compatibility facade. dbt,
+metrics and IDE integrations are optional module APIs.
+
+Existing `dr_workflow()` definitions compile into products, and `dr_trial()` is a
+compatibility wrapper for `dr_run(write = FALSE, stop_on_failure = FALSE)`. Neither
+is required for this entry path. Legacy quality and contract constructors remain
+available for existing saved definitions.

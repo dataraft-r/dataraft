@@ -28,11 +28,14 @@ export(dr_contract_confirm)
 export(dr_contract_diff)
 export(dr_contract_from)
 export(dr_contract_from_odcs)
+export(dr_contract_meta)
 export(dr_contract_odcs)
+export(dr_contract_policy)
 export(dr_contract_update)
 export(dr_contract_yaml)
 export(dr_dbt_build)
 export(dr_dbt_contract)
+export(dr_dbt_contract_from_manifest)
 export(dr_dbt_init)
 export(dr_dbt_lineage)
 export(dr_dbt_model)
@@ -64,6 +67,7 @@ export(dr_measure)
 export(dr_metric)
 export(dr_metric_set)
 export(dr_model)
+export(dr_model_product)
 export(dr_open_lake)
 export(dr_plan)
 export(dr_pointblank_checks)
@@ -145,153 +149,169 @@ export(dr_update_product)
 export(dr_update_recipe)
 export(dr_update_source)
 export(dr_validate)
+export(dr_verify_releases)
 export(dr_workflow)
 export(dr_write_data)
 export(dr_write_target)
-importFrom(dataraft.adapters,dr_as_targets)
-importFrom(dataraft.adapters,dr_contract_from_odcs)
-importFrom(dataraft.adapters,dr_contract_odcs)
-importFrom(dataraft.adapters,dr_contract_yaml)
-importFrom(dataraft.adapters,dr_init_project)
-importFrom(dataraft.adapters,dr_project_yaml)
-importFrom(dataraft.adapters,dr_source_api)
-importFrom(dataraft.adapters,dr_source_database)
-importFrom(dataraft.adapters,dr_source_iceberg)
-importFrom(dataraft.adapters,dr_source_parquet)
-importFrom(dataraft.adapters,dr_source_pins)
-importFrom(dataraft.adapters,dr_source_rds)
-importFrom(dataraft.adapters,dr_sql_transform)
-importFrom(dataraft.adapters,dr_target_database)
-importFrom(dataraft.adapters,dr_target_iceberg)
-importFrom(dataraft.adapters,dr_target_parquet)
-importFrom(dataraft.adapters,dr_target_pins)
-importFrom(dataraft.adapters,dr_target_rds)
-importFrom(dataraft.adapters,dr_test_adapter)
-importFrom(dataraft.catalog,dr_catalog_app)
-importFrom(dataraft.catalog,dr_catalog_export)
-importFrom(dataraft.catalog,dr_catalog_openlineage)
-importFrom(dataraft.catalog,dr_catalog_openmetadata)
-importFrom(dataraft.catalog,dr_catalog_openmetadata_dbt)
-importFrom(dataraft.catalog,dr_catalog_pane)
-importFrom(dataraft.catalog,dr_freshness)
-importFrom(dataraft.core,dr_add_catalog)
-importFrom(dataraft.core,dr_add_contract)
-importFrom(dataraft.core,dr_add_product)
-importFrom(dataraft.core,dr_add_quality)
-importFrom(dataraft.core,dr_add_recipe)
-importFrom(dataraft.core,dr_add_source)
-importFrom(dataraft.core,dr_capabilities)
-importFrom(dataraft.core,dr_check_component)
-importFrom(dataraft.core,dr_collect)
-importFrom(dataraft.core,dr_column_lineage)
-importFrom(dataraft.core,dr_component_capabilities)
-importFrom(dataraft.core,dr_contract)
-importFrom(dataraft.core,dr_contract_confirm)
-importFrom(dataraft.core,dr_contract_diff)
-importFrom(dataraft.core,dr_contract_from)
-importFrom(dataraft.core,dr_contract_update)
-importFrom(dataraft.core,dr_execute_transform)
-importFrom(dataraft.core,dr_execution_config)
-importFrom(dataraft.core,dr_expect_quality)
-importFrom(dataraft.core,dr_extract_contract)
-importFrom(dataraft.core,dr_extract_product)
-importFrom(dataraft.core,dr_extract_recipe)
-importFrom(dataraft.core,dr_extract_source)
-importFrom(dataraft.core,dr_incidents)
-importFrom(dataraft.core,dr_inspect)
-importFrom(dataraft.core,dr_last_failure)
-importFrom(dataraft.core,dr_lineage)
-importFrom(dataraft.core,dr_lookup_spec)
-importFrom(dataraft.core,dr_model)
-importFrom(dataraft.core,dr_plan)
-importFrom(dataraft.core,dr_pointblank_checks)
-importFrom(dataraft.core,dr_pointblank_report)
-importFrom(dataraft.core,dr_product)
-importFrom(dataraft.core,dr_profile_compare)
-importFrom(dataraft.core,dr_profile_data)
-importFrom(dataraft.core,dr_profile_snapshot)
-importFrom(dataraft.core,dr_publish)
-importFrom(dataraft.core,dr_publish_metadata)
-importFrom(dataraft.core,dr_quality)
-importFrom(dataraft.core,dr_quality_counts)
-importFrom(dataraft.core,dr_quality_errors)
-importFrom(dataraft.core,dr_quality_reference)
-importFrom(dataraft.core,dr_quality_report)
-importFrom(dataraft.core,dr_quality_rows)
-importFrom(dataraft.core,dr_quality_rule)
-importFrom(dataraft.core,dr_quarantine_rows)
-importFrom(dataraft.core,dr_read_run)
-importFrom(dataraft.core,dr_read_source)
-importFrom(dataraft.core,dr_recipe)
-importFrom(dataraft.core,dr_remove_contract)
-importFrom(dataraft.core,dr_remove_product)
-importFrom(dataraft.core,dr_remove_recipe)
-importFrom(dataraft.core,dr_remove_source)
-importFrom(dataraft.core,dr_replace_sources)
-importFrom(dataraft.core,dr_retry_catalogs)
-importFrom(dataraft.core,dr_review)
-importFrom(dataraft.core,dr_run)
-importFrom(dataraft.core,dr_run_history)
-importFrom(dataraft.core,dr_run_quality)
-importFrom(dataraft.core,dr_set_engine)
-importFrom(dataraft.core,dr_set_target)
-importFrom(dataraft.core,dr_source_file)
-importFrom(dataraft.core,dr_status)
-importFrom(dataraft.core,dr_step_arrange)
-importFrom(dataraft.core,dr_step_distinct)
-importFrom(dataraft.core,dr_step_filter)
-importFrom(dataraft.core,dr_step_lookup)
-importFrom(dataraft.core,dr_step_mutate)
-importFrom(dataraft.core,dr_step_rename)
-importFrom(dataraft.core,dr_step_select)
-importFrom(dataraft.core,dr_step_summarise)
-importFrom(dataraft.core,dr_step_transform)
-importFrom(dataraft.core,dr_trial)
-importFrom(dataraft.core,dr_update_contract)
-importFrom(dataraft.core,dr_update_product)
-importFrom(dataraft.core,dr_update_recipe)
-importFrom(dataraft.core,dr_update_source)
-importFrom(dataraft.core,dr_validate)
-importFrom(dataraft.core,dr_workflow)
-importFrom(dataraft.core,dr_write_target)
-importFrom(dataraft.dbt,dr_dbt_build)
-importFrom(dataraft.dbt,dr_dbt_contract)
-importFrom(dataraft.dbt,dr_dbt_init)
-importFrom(dataraft.dbt,dr_dbt_lineage)
-importFrom(dataraft.dbt,dr_dbt_model)
-importFrom(dataraft.dbt,dr_dbt_project)
-importFrom(dataraft.dbt,dr_dbt_publish)
-importFrom(dataraft.dbt,dr_dbt_sources)
-importFrom(dataraft.dbt,dr_dbt_status)
-importFrom(dataraft.dbt,dr_dbt_test)
-importFrom(dataraft.dbt,dr_transform_dbt)
-importFrom(dataraft.lake,dr_check_delivery)
-importFrom(dataraft.lake,dr_cleanup)
-importFrom(dataraft.lake,dr_close_lake)
-importFrom(dataraft.lake,dr_compare)
-importFrom(dataraft.lake,dr_expire_snapshots)
-importFrom(dataraft.lake,dr_ingest)
-importFrom(dataraft.lake,dr_interrupted)
-importFrom(dataraft.lake,dr_lake_config)
-importFrom(dataraft.lake,dr_open_lake)
-importFrom(dataraft.lake,dr_read_release)
-importFrom(dataraft.lake,dr_recover)
-importFrom(dataraft.lake,dr_refresh_connection)
-importFrom(dataraft.lake,dr_register)
-importFrom(dataraft.lake,dr_registry)
-importFrom(dataraft.lake,dr_registry_duckdb)
-importFrom(dataraft.lake,dr_registry_postgres)
-importFrom(dataraft.lake,dr_releases)
-importFrom(dataraft.lake,dr_source_release)
-importFrom(dataraft.lake,dr_storage_local)
-importFrom(dataraft.lake,dr_storage_s3)
-importFrom(dataraft.lake,dr_target_lake)
-importFrom(dataraft.lake,dr_tbl)
-importFrom(dataraft.lake,dr_write_data)
-importFrom(dataraft.metrics,dr_commons_yaml)
-importFrom(dataraft.metrics,dr_measure)
-importFrom(dataraft.metrics,dr_metric)
-importFrom(dataraft.metrics,dr_metric_set)
-importFrom(dataraft.metrics,dr_report_read)
-importFrom(dataraft.metrics,dr_report_release)
-importFrom(dataraft.metrics,dr_report_verify)
+importFrom(dataraft.adapters,
+  dr_as_targets,
+  dr_catalog_app,
+  dr_catalog_export,
+  dr_catalog_openlineage,
+  dr_catalog_openmetadata,
+  dr_catalog_openmetadata_dbt,
+  dr_catalog_pane,
+  dr_contract_from_odcs,
+  dr_contract_odcs,
+  dr_contract_yaml,
+  dr_freshness,
+  dr_init_project,
+  dr_project_yaml,
+  dr_source_api,
+  dr_source_database,
+  dr_source_iceberg,
+  dr_source_parquet,
+  dr_source_pins,
+  dr_source_rds,
+  dr_sql_transform,
+  dr_target_database,
+  dr_target_iceberg,
+  dr_target_parquet,
+  dr_target_pins,
+  dr_target_rds,
+  dr_test_adapter
+)
+importFrom(dataraft.core,
+  dr_add_catalog,
+  dr_add_contract,
+  dr_add_product,
+  dr_add_quality,
+  dr_add_recipe,
+  dr_add_source,
+  dr_capabilities,
+  dr_check_component,
+  dr_collect,
+  dr_column_lineage,
+  dr_component_capabilities,
+  dr_contract,
+  dr_contract_confirm,
+  dr_contract_diff,
+  dr_contract_from,
+  dr_contract_meta,
+  dr_contract_policy,
+  dr_contract_update,
+  dr_execute_transform,
+  dr_execution_config,
+  dr_expect_quality,
+  dr_extract_contract,
+  dr_extract_product,
+  dr_extract_recipe,
+  dr_extract_source,
+  dr_incidents,
+  dr_inspect,
+  dr_last_failure,
+  dr_lineage,
+  dr_lookup_spec,
+  dr_model,
+  dr_model_product,
+  dr_plan,
+  dr_pointblank_checks,
+  dr_pointblank_report,
+  dr_product,
+  dr_profile_compare,
+  dr_profile_data,
+  dr_profile_snapshot,
+  dr_publish,
+  dr_publish_metadata,
+  dr_quality,
+  dr_quality_counts,
+  dr_quality_errors,
+  dr_quality_reference,
+  dr_quality_report,
+  dr_quality_rows,
+  dr_quality_rule,
+  dr_quarantine_rows,
+  dr_read_run,
+  dr_read_source,
+  dr_recipe,
+  dr_remove_contract,
+  dr_remove_product,
+  dr_remove_recipe,
+  dr_remove_source,
+  dr_replace_sources,
+  dr_retry_catalogs,
+  dr_review,
+  dr_run,
+  dr_run_history,
+  dr_run_quality,
+  dr_set_engine,
+  dr_set_target,
+  dr_source_file,
+  dr_status,
+  dr_step_arrange,
+  dr_step_distinct,
+  dr_step_filter,
+  dr_step_lookup,
+  dr_step_mutate,
+  dr_step_rename,
+  dr_step_select,
+  dr_step_summarise,
+  dr_step_transform,
+  dr_trial,
+  dr_update_contract,
+  dr_update_product,
+  dr_update_recipe,
+  dr_update_source,
+  dr_validate,
+  dr_workflow,
+  dr_write_target
+)
+importFrom(dataraft.dbt,
+  dr_dbt_build,
+  dr_dbt_contract,
+  dr_dbt_contract_from_manifest,
+  dr_dbt_init,
+  dr_dbt_lineage,
+  dr_dbt_model,
+  dr_dbt_project,
+  dr_dbt_publish,
+  dr_dbt_sources,
+  dr_dbt_status,
+  dr_dbt_test,
+  dr_transform_dbt
+)
+importFrom(dataraft.lake,
+  dr_check_delivery,
+  dr_cleanup,
+  dr_close_lake,
+  dr_compare,
+  dr_expire_snapshots,
+  dr_ingest,
+  dr_interrupted,
+  dr_lake_config,
+  dr_open_lake,
+  dr_read_release,
+  dr_recover,
+  dr_refresh_connection,
+  dr_register,
+  dr_registry,
+  dr_registry_duckdb,
+  dr_registry_postgres,
+  dr_releases,
+  dr_source_release,
+  dr_storage_local,
+  dr_storage_s3,
+  dr_target_lake,
+  dr_tbl,
+  dr_verify_releases,
+  dr_write_data
+)
+importFrom(dataraft.metrics,
+  dr_commons_yaml,
+  dr_measure,
+  dr_metric,
+  dr_metric_set,
+  dr_report_read,
+  dr_report_release,
+  dr_report_verify
+)

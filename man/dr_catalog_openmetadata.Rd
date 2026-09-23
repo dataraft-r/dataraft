@@ -18,7 +18,7 @@ dr_catalog_openmetadata(
 \code{warehouse.analytics.public}.}
 
 \item{request}{Optional authenticated httr2 request or request factory,
-as described in \code{\link[dataraft.catalog:dr_catalog_openlineage]{dr_catalog_openlineage()}}.}
+as described in \code{\link[dataraft.adapters:dr_catalog_openlineage]{dr_catalog_openlineage()}}.}
 
 \item{source_tables}{Optional named character vector of source-name to
 OpenMetadata table fully qualified name mappings.}
@@ -47,5 +47,5 @@ catalog <- dr_catalog_openmetadata("https://metadata.example",
 dataraft.core::dr_inspect(catalog)
 }
 \seealso{
-\code{\link[dataraft.catalog:dr_catalog_openmetadata]{dataraft.catalog::dr_catalog_openmetadata()}}
+\code{\link[dataraft.adapters:dr_catalog_openmetadata]{dataraft.adapters::dr_catalog_openmetadata()}}
 }
