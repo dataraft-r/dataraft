@@ -3,8 +3,8 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from playwright.sync_api import sync_playwright
-import os
+from playwright.sync_api import sync_playwright, expect
+import os, re
 
 ROOT = Path(__file__).parent
 BASE = os.environ.get('BASE_PATH', '/dataraft').rstrip('/')
@@ -38,7 +38,7 @@ try:
         page.locator('summary').click()
         assert page.locator('details').evaluate('(el) => el.open')
         page.locator('.copy-button').first.click()
-        assert page.locator('.copy-button').first.inner_text() in ('Copied', 'Select to copy')
+        expect(page.locator('.copy-button').first).to_have_text(re.compile(r'^(Copied|Select to copy)$'))
         page.locator('#search-open').click()
         page.locator('#search-input').fill('cancellation rate')
         page.locator('#search-results a[href*="training"]').first.wait_for()
