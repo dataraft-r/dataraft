@@ -444,7 +444,7 @@ training_step("H16", {
 #
 # Extend the same recipe approach and revise the output contract.
 training_step("H17", {
-  brokers <- data.frame(broker_id = 1:2, broker_name = c("Makler A", "Makler B"))
+  brokers <- data.frame(broker_id = 1:2, broker_name = c("Broker A", "Broker B"))
   enriched_contract <- dr_contract_update(linked_contract, version = "2.0.0", columns = c(broker_name = "character"))
   enrichment_recipe <- customer_recipe |> dr_step_lookup(brokers, by = "broker_id")
   enriched_product <- dr_product("policies.enriched", linked_policies, contract = enriched_contract) |> dr_add_recipe(enrichment_recipe)
@@ -1519,7 +1519,7 @@ training_step("V14a", {
 # A manifest only contains its declared metadata. For this teaching product, confirm a contract
 # derived from the actual result.
 training_step("V14b", {
-  dbt_output_contract <- dr_contract_from(premium_totals, "customer.premiums", grain="Ein Kunde", key="customer_id", required=c("customer_id", "revenue")) |> dr_contract_confirm()
+  dbt_output_contract <- dr_contract_from(premium_totals, "customer.premiums", grain="One customer", key="customer_id", required=c("customer_id", "revenue")) |> dr_contract_confirm()
   dbt_contract_spec <- dataraft.dbt::dr_dbt_contract(dbt_output_contract, name="customer_revenue")
   print(dbt_contract_spec)
 }, needs = c("V14a"), enabled = training_options$dbt, optional = TRUE)
