@@ -12,7 +12,7 @@ dr_demo(quiet = FALSE)
 \value{
 Invisibly, a list with \code{blocked} and \code{passed} trial results, and the
 shared \code{workflow}. Use \code{\link[dataraft.core:dr_quality_rows]{dataraft.core::dr_quality_rows()}} to inspect the blocked result or
-\code{\link[=dr_collect]{dr_collect()}} to collect the passed result.
+\code{\link[dataraft.core:dr_collect]{dr_collect()}} to collect the passed result.
 }
 \description{
 Runs synthetic policy data through the same contract and quality gate twice.

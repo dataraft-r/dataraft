@@ -82,8 +82,8 @@ dr_run_quality.guide_quality <- function(rule, data, ...) {
   native <- dataraft.core::dr_quality_rule(
     rule$name,
     function(data) dataraft.core::dr_quality_counts(failed, total),
-    severity = rule$severity,
-    max_failure = rule$max_failure
+    action = rule$action,
+    threshold = rule$threshold
   )
   evidence <- dataraft.core::dr_run_quality(native, data)
   evidence$engine <- "example"

@@ -15,7 +15,7 @@ a manifest, never a moving sibling baseline. The umbrella entry uses `ref: "self
 because a commit cannot contain its own hash. `scripts/check-family.py` validates
 the resolved component SHAs, package set and dependency bounds.
 
-The separate nightly HEAD workflow intentionally fetches all seven `main`
+The separate nightly HEAD workflow intentionally fetches all six component `main`
 branches, then runs the family check. This discovers cross-repository breaking
 changes without making ordinary checks depend on changing sibling branches.
 All resolved commits are printed in the job log.

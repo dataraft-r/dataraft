@@ -40,4 +40,29 @@ for key,blocks in expected.items():
  assert page.html.get('lang')=='en'
 print('Checked',len(expected),'course modules: code, solutions, language and script download match')
 
+
+# Keep the generated reference and teaching code on the current public API.
+import json
+retired = ('dr_trial', 'dr_add_product', 'dr_update_product', 'dr_remove_product',
+           'dr_extract_product', 'dr_replace_sources', 'dr_update_contract',
+           'dr_remove_contract', 'dr_extract_contract', 'dr_update_source',
+           'dr_remove_source', 'dr_extract_source')
+upstream = Path(__file__).parent/'content/upstream'
+assert not (upstream/'dataraft.catalog').exists()
+assert not (root/'packages/dataraft.catalog').exists()
+for package in upstream.iterdir():
+ for topic in (package/'man').glob('*.Rd'):
+  text = topic.read_text()
+  for name in retired:
+   assert '\\alias{' + name + '}' not in text, f'Retired reference: {topic}: {name}'
+for page in root.rglob('index.html'):
+ if '/news/' in str(page):
+  continue
+ soup = BeautifulSoup(page.read_text(), 'html.parser')
+ for block in soup.select('main pre code'):
+  text = block.get_text()
+  for name in retired:
+   assert not re.search(r'\b' + name + r'\s*\(', text), f'Retired teaching call: {page}: {name}'
+print('Checked current API references and executable teaching examples')
+
 raise SystemExit(bool(bad))

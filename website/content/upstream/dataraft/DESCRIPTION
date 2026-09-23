@@ -1,6 +1,6 @@
 Package: dataraft
 Title: Modular Workflows for Checked Data Products
-Version: 0.1.0.9005
+Version: 0.1.0.9006
 Authors@R: person("Jan-Hendrik", "Weinert", role = c("aut", "cre"), email = "65009403+JanWein@users.noreply.github.com")
 Description: Installs a family of cooperating packages for checked data
     products. Product specifications define requirements, recipes define ordered
@@ -9,9 +9,9 @@ Description: Installs a family of cooperating packages for checked data
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.2.0)
-Imports: dataraft.core (>= 0.1.0.9005), dataraft.lake (>= 0.1.0.9005), dataraft.adapters (>= 0.1.0.9005), dataraft.dbt (>= 0.1.0.9005),
-    dataraft.metrics (>= 0.1.0.9005)
-Suggests: dataraft.ide (>= 0.1.0.9005), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
+Imports: dataraft.core (>= 0.1.0.9006), dataraft.lake (>= 0.1.0.9006), dataraft.adapters (>= 0.1.0.9006), dataraft.dbt (>= 0.1.0.9006),
+    dataraft.metrics (>= 0.1.0.9006)
+Suggests: dataraft.ide (>= 0.1.0.9006), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
     rlang, digest, jsonlite, withr, duckdb (>= 1.5.5), pointblank, dm, shiny,
     bslib, yaml, readr, readxl, paws.storage, processx, RPostgres, arrow,
     pins (>= 1.2.0), httr2, targets, renv, RSQLite, webfakes, bit64, covr
@@ -19,12 +19,12 @@ Config/testthat/edition: 3
 Config/Needs/website: pkgdown
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
-Remotes: dataraft-r/dataraft.core@fix/deep-review-2,
-    dataraft-r/dataraft.lake@fix/deep-review-2,
-    dataraft-r/dataraft.adapters@fix/deep-review-2,
-    dataraft-r/dataraft.metrics@fix/deep-review-2,
-    dataraft-r/dataraft.dbt@fix/deep-review-2,
-    dataraft-r/dataraft.ide@fix/deep-review-2
+Remotes: dataraft-r/dataraft.core@main,
+    dataraft-r/dataraft.lake@main,
+    dataraft-r/dataraft.adapters@main,
+    dataraft-r/dataraft.metrics@main,
+    dataraft-r/dataraft.dbt@main,
+    dataraft-r/dataraft.ide@main
 URL: https://dataraft-r.github.io/dataraft/,
     https://github.com/dataraft-r/dataraft
 BugReports: https://github.com/dataraft-r/dataraft/issues

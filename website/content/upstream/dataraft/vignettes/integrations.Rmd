@@ -16,7 +16,7 @@ storage and integration engines live in separate packages.
 | Persistent checked releases | dataraft.lake | `dataraft.lake::dr_open_lake()`, `dataraft.lake::dr_target_lake()`, `dataraft.lake::dr_close_lake()` |
 | External sources and targets | dataraft.adapters | `dataraft.adapters::dr_source_database()`, `dataraft.adapters::dr_target_parquet()`, `dataraft.adapters::dr_as_targets()` |
 | SQL model execution | dataraft.dbt | `dataraft.dbt::dr_dbt_project()`, `dataraft.dbt::dr_dbt_build()` |
-| Metadata publication | dataraft.catalog | `dataraft.adapters::dr_catalog_openlineage()`, `dataraft.adapters::dr_catalog_openmetadata()` |
+| Metadata publication | dataraft.adapters | `dataraft.adapters::dr_catalog_openlineage()`, `dataraft.adapters::dr_catalog_openmetadata()` |
 | Metrics and reports | dataraft.metrics | `dataraft.metrics::dr_metric()`, `dataraft.metrics::dr_measure()`, `dataraft.metrics::dr_report_release()` |
 
 For help on an extension, use `help(package = "dataraft.lake")`, substituting the

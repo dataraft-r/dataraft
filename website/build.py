@@ -2,6 +2,7 @@ from pathlib import Path
 import re,json,html,markdown,shutil,os
 from bs4 import BeautifulSoup
 ROOT=Path(__file__).parent; OUT=ROOT/'dist'; UP=ROOT/'content/upstream'
+shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(exist_ok=True)
 shutil.copytree(ROOT/'assets',OUT/'assets',dirs_exist_ok=True)
 sha=json.loads((ROOT/'content/sources.json').read_text()); esc=html.escape
@@ -12,8 +13,7 @@ packages={
 'dataraft.adapters':('Connect your tools','Integration','Sources, destinations and metadata publishers for databases, RDS, Parquet, pins, APIs, OpenLineage and OpenMetadata.'),
 'dataraft.dbt':('Bring SQL models along','Experimental','Configure dbt projects, run builds and inspect artifacts. Add managed publication when SQL results need DataRaft release governance.'),
 'dataraft.metrics':('Keep reporting evidence','Experimental','Define metrics, evaluate checked inputs and retain frozen report evidence. A governed results layer, not a general-purpose semantic modeling engine.'),
-'dataraft.ide':('Connect R to your editor','Experimental','The optional R metadata bridge for Positron. Inspect an existing workspace or lake without transferring data cells to the extension.'),
-'dataraft.catalog':('Compatibility for catalogs','Deprecated','The catalog compatibility package retires on 1 January 2027. Use dataraft.adapters for new catalog, freshness and metadata integrations.')}
+'dataraft.ide':('Connect R to your editor','Experimental','The optional R metadata bridge for Positron. Inspect an existing workspace or lake without transferring data cells to the extension.'),}
 pages={}; aliases={}; refs={}; current_pkg='dataraft'
 def group(s,i):
  assert s[i]=='{'
@@ -140,7 +140,7 @@ library(dataraft.core)
 A **product** is a reusable definition: identity, sources, preparation, contract, quality checks and destination. A **run result** retains status, check evidence and output. A **release** is an immutable published version on a supported target.
 
 ## Pin the family
-The umbrella repository's `family-lock.json` records a tested development combination with immutable component commits. Individual GitHub HEAD installs can move independently. Use the [compatibility policy](/learn/compatibility/) when establishing a reproducible environment. Development Remotes can name coordinated branches; if one has retired, use the component SHAs in that lock rather than guessing a replacement version.
+The umbrella repository's `family-lock.json` records a tested development combination with immutable component commits. Individual GitHub HEAD installs can move independently. Use the [compatibility policy](/learn/compatibility/) when establishing a reproducible environment. Development Remotes use main. Install the component SHAs in that lock when you need the exact tested family. Earlier development interfaces and registry migrations are not supported.
 ''',
 '''## Describe the delivery
 A contract makes the schema explicit. Here each row represents one order and `id` is the key.
@@ -247,7 +247,6 @@ for pkg in packages:
  for file in sorted((UP/pkg/'vignettes').glob('*.Rmd')):
   if file.stem=='get-started':continue
   s=file.read_text();m=re.search(r'^title:\s*["\']?(.*?)["\']?$',s,re.M);title=m[1] if m else file.stem
-  if file.stem=='integrations':s=s.replace('| Metadata publication | dataraft.catalog |','| Metadata publication | dataraft.adapters |')
   # Preserve setup imports required by examples when the hidden setup chunk is removed.
   if re.search(r'```\{r setup[^\n]*\}[^`]*library\(dataraft\)',s):s=re.sub(r'(---\n.*?\n---\n)',r'\1\n```r\nlibrary(dataraft)\n```\n',s,count=1,flags=re.S)
   url=f'/learn/{file.stem}/';add(url,title,md(s,pkg,'vignettes/'+file.name),'Learn',source=(pkg,'vignettes/'+file.name));learn.append((url,pkg,title,'A practical guide from the package documentation.'))
@@ -256,11 +255,10 @@ for filename,title in [('FAMILY_COMPATIBILITY.md','Pin a compatible family'),('S
  add('/learn/'+slug+'/',title,md(s),'Learn',source=('dataraft',filename));learn.append(('/learn/'+slug+'/','PROJECT',title,'Project guidance and practical reference.'))
 add('/learn/','Go further with DataRaft','<p class="lead">Learn by task: model relationships, connect tools, preserve evidence and extend the framework.</p>'+cards(learn),'Learn')
 add('/packages/','One family. Clear responsibilities.','<p class="lead">Start with the common product API. Add storage, integrations and editor support independently.</p>'+cards([(f'/packages/{p}/',tag,p,desc) for p,(_,tag,desc) in packages.items()]),'Packages')
-entry={'dataraft':['dr_product','dr_contract','dr_run','dr_collect','dr_demo'],'dataraft.core':['dr_product','dr_add_source','dr_recipe','dr_validate','dr_quality_rows'],'dataraft.lake':['dr_open_lake','dr_target_lake','dr_releases','dr_close_lake'],'dataraft.adapters':['dr_target_rds','dr_source_database','dr_contract_from_odcs','dr_catalog_openmetadata'],'dataraft.dbt':['dr_dbt_project','dr_dbt_build'],'dataraft.metrics':['dr_metric','dr_measure','dr_report_verify'],'dataraft.ide':['ide_context','ide_request'],'dataraft.catalog':['dr_catalog_openmetadata','dr_freshness']}
+entry={'dataraft':['dr_product','dr_contract','dr_run','dr_collect','dr_demo'],'dataraft.core':['dr_product','dr_add_source','dr_recipe','dr_validate','dr_quality_rows'],'dataraft.lake':['dr_open_lake','dr_target_lake','dr_releases','dr_close_lake'],'dataraft.adapters':['dr_target_rds','dr_source_database','dr_contract_from_odcs','dr_catalog_openmetadata'],'dataraft.dbt':['dr_dbt_project','dr_dbt_build'],'dataraft.metrics':['dr_metric','dr_measure','dr_report_verify'],'dataraft.ide':['ide_context','ide_request']}
 for pkg,(title,tag,desc) in packages.items():
  ver=re.search(r'^Version: (.*)$',(UP/pkg/'DESCRIPTION').read_text(),re.M)[1]
  body=f'<p class="lead">{desc}</p><div class="meta-row"><span>{tag}</span><span>Version {ver}</span><a href="https://github.com/dataraft-r/{pkg}">GitHub ↗</a></div><h2>Install</h2>'+code(f'pak::pak("dataraft-r/{pkg}")')
- if pkg=='dataraft.catalog':body+='<p class="notice">Deprecated since 23 September 2026. Removal from the supported family is planned for 1 January 2027. Prefer <code>dataraft.adapters::dr_catalog_*()</code> and <code>dataraft.adapters::dr_freshness()</code>.</p>'
  if pkg=='dataraft':body+='<h2>A small public surface</h2><p>The metapackage exposes the common product verbs. Use component namespaces for specialist APIs. Begin with the five-chapter tutorial, then use the reference for exact arguments and behavior.</p>'+code(intro)
  body+='<h2>Start with these functions</h2><div class="function-list">'
  for name in entry[pkg]:

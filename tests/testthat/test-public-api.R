@@ -24,8 +24,7 @@ test_that("public functions use a package prefix without masking other grammars"
 })
 
 test_that("collection preserves dplyr dispatch and ordinary result fields", {
-  flow <- dr_workflow() |>
-    dr_add_product(dr_product("orders")) |>
+  flow <- dr_product("orders") |>
     dr_add_recipe(dr_recipe() |> dr_step_mutate(amount = amount * 2))
   result <- dr_run(
     write = FALSE,
@@ -36,5 +35,5 @@ test_that("collection preserves dplyr dispatch and ordinary result fields", {
   expect_identical(result$status, "completed")
   expect_equal(dr_collect(result), dplyr::collect(result))
   expect_equal(dr_collect(result)$amount, c(20, 40))
-  expect_identical(dr_extract_product(flow)$id, "orders")
+  expect_identical(flow$id, "orders")
 })

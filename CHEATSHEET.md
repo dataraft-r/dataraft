@@ -38,6 +38,6 @@ Vocabulary: product = asset specification; recipe = transformation model;
 trial = validation-only run; delivery = input batch; release = versioned snapshot;
 measurement = evaluated metric. These labels describe roles, not a new storage standard.
 
-Use recipe composition for new work. Direct dplyr verbs on a product are a compact
-alternative for standalone products. Move those steps into a recipe before adding
-that product to a modular workflow with `dataraft.core::dr_add_product()`.
+Attach reusable preparation with `dataraft.core::dr_add_recipe(product, recipe)`.
+Direct dplyr verbs on a product are a compact alternative. Sources, preparation,
+checks and destinations all belong to the product definition.

@@ -9,9 +9,9 @@
 ---
 
     Code
-      dr_replace_sources(definition, unknown = policies)
+      dr_set_sources(definition, unknown = policies, .recursive = TRUE)
     Condition
-      Error in `dr_replace_sources()`:
+      Error in `dr_set_sources()`:
       ! Unknown replacement source: unknown. Available names: brokers, payments, policies.
 
 ---
@@ -34,9 +34,9 @@
 ---
 
     Code
-      dr_replace_sources(ambiguous, contracts = data.frame(id = 1L))
+      dr_set_sources(ambiguous, contracts = data.frame(id = 1L), .recursive = TRUE)
     Condition
-      Error in `dr_replace_sources()`:
+      Error in `dr_set_sources()`:
       ! Ambiguous delivery name and product ID: contracts
 
 # trial retains a failed result and row diagnostics select a single rule

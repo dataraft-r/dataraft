@@ -9,7 +9,7 @@ root = pathlib.Path(__file__).resolve().parents[1]
 lock = json.loads((root / "family-lock.json").read_text())
 mode = os.environ.get("DATARAFT_FAMILY_MODE", "pinned")
 assert mode in ("pinned", "head"), "Unknown family mode"
-expected = {"dataraft"} | {"dataraft." + x for x in ("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")}
+expected = {"dataraft"} | {"dataraft." + x for x in ("core", "lake", "adapters", "metrics", "dbt", "ide")}
 assert lock["schema_version"] == 1
 assert set(lock["packages"]) == expected
 assert re.fullmatch(r"\d+\.\d+\.\d+", lock["r_version"])

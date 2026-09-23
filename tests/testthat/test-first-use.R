@@ -44,7 +44,7 @@ test_that("delivery names survive simultaneous corrections without changing defi
   expect_equal(dr_quality_rows(failed)$policy, 2L)
   expect_snapshot(
     error = TRUE,
-    dr_replace_sources(definition, unknown = policies)
+    dr_set_sources(definition, unknown = policies, .recursive = TRUE)
   )
   expect_snapshot(
     error = TRUE,
@@ -88,9 +88,10 @@ test_that("lookup names can be explicit and cannot silently select another deliv
     dr_add_lookup(data.frame(id = 1L), by = "id", name = "contracts")
   expect_snapshot(
     error = TRUE,
-    dr_replace_sources(
+    dr_set_sources(
       ambiguous,
-      contracts = data.frame(id = 1L)
+      contracts = data.frame(id = 1L),
+      .recursive = TRUE
     )
   )
 })

@@ -316,17 +316,13 @@ test_that("recovery previews and protects live writers", {
   expect_error(dr_recover(f$lake, dry_run = FALSE), "explicitly")
 })
 
-test_that("staging recovery enables retry while preserving published releases", {
+test_that("run-scoped staging recovery preserves published releases", {
   f <- fixture()
   on.exit(fixture_cleanup(f))
   published <- dr_write_data(f$lake, data.frame(id = 1L), "orders")
-  slot <- file.path(f$lake$config$landing, ".dataraft-staging", "orders")
+  slot <- file.path(f$lake$config$landing, ".dataraft-staging", "orders--r123")
   dir.create(slot, recursive = TRUE)
   writeLines("orphan", file.path(slot, "delivery.rds"))
-  expect_error(
-    dr_write_data(f$lake, data.frame(id = 2L), "orders"),
-    "Staging already exists"
-  )
   expect_equal(dr_recover(f$lake, staging_assets = "orders")$writer, "unknown")
   expect_equal(
     dr_recover(

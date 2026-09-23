@@ -52,7 +52,7 @@ jsonlite::write_json(
 )
 if (identical(Sys.getenv("DATARAFT_A11Y_SERVE"), "true")) {
   shiny::runApp(
-    dataraft.catalog::dr_catalog_app(
+    dataraft.adapters::dr_catalog_app(
       snapshot = "accessibility-artifacts/catalog.json",
       launch = FALSE
     ),

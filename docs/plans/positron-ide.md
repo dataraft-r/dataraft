@@ -104,7 +104,7 @@ See [pin maintenance](../pin-maintenance.md) for ownership, update cadence and
 the verification required before a compatibility set changes. The extension
 remains a separately packaged VSIX; no marketplace release is implied.
 
-The subsequent [bridge boundaries and API review](review-boundaries.md) tracks
+The subsequent [current API guide](current-api.md) tracks
 response-path restrictions, imported graph bounds, panel cleanup and compatible
 core API composition. Contract file-read restrictions are explicitly outside
 that review change.

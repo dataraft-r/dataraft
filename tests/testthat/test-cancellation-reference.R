@@ -34,14 +34,14 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
 
   customer_contract <- dr_contract(
     columns = c(customer_id = "character", segment = "character"),
-    key = "customer_id",
-    grain = "One customer"
-  )
+    key = "customer_id"
+  ) |>
+    dataraft.core::dr_contract_meta(grain = "One customer")
   broker_contract <- dr_contract(
     columns = c(broker_id = "character", channel = "character"),
-    key = "broker_id",
-    grain = "One broker"
-  )
+    key = "broker_id"
+  ) |>
+    dataraft.core::dr_contract_meta(grain = "One broker")
   policy_contract <- dr_contract(
     columns = c(
       policy_id = "character",
@@ -50,13 +50,17 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
       started_on = "Date",
       cancelled_on = "Date"
     ),
-    required = c("policy_id", "customer_id", "broker_id", "started_on"),
     key = "policy_id",
-    grain = "One policy with at most one cancellation",
     rules = list(
       date_order = ~ is.na(cancelled_on) | cancelled_on >= started_on
     )
-  )
+  ) |>
+    dataraft.core::dr_contract_meta(
+      grain = "One policy with at most one cancellation"
+    ) |>
+    dataraft.core::dr_contract_policy(
+      required = c("policy_id", "customer_id", "broker_id", "started_on")
+    )
   customers <- dr_product(
     "customers",
     customers_data,
@@ -71,7 +75,11 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
   fixed_policies$cancelled_on[fixed_policies$policy_id == "P6"] <- as.Date(
     "2026-07-31"
   )
-  policies <- dr_replace_sources(policies, policies = fixed_policies)
+  policies <- dr_set_sources(
+    policies,
+    policies = fixed_policies,
+    .recursive = TRUE
+  )
   stopifnot(
     nrow(dr_collect(dr_run(
       write = FALSE,
@@ -106,10 +114,11 @@ test_that("the cancellation reference retains cohort grain and issued reports", 
   stopifnot(all(dm::dm_examine_constraints(portfolio_model)$is_key))
 
   portfolio <- dr_product("portfolio", portfolio_model) |>
-    dr_replace_sources(
+    dr_set_sources(
       customers = customers,
       policies = policies,
-      brokers = brokers
+      brokers = brokers,
+      .recursive = TRUE
     )
   checked_model <- dr_run(write = FALSE, stop_on_failure = FALSE, portfolio)
 

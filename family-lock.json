@@ -7,42 +7,37 @@
     "dataraft": {
       "repository": "dataraft-r/dataraft",
       "ref": "self",
-      "version": "0.1.0.9005"
+      "version": "0.1.0.9006"
     },
     "dataraft.adapters": {
       "repository": "dataraft-r/dataraft.adapters",
-      "ref": "ab28d72c14a6276317a0c45d5aeebd0572bd87a3",
-      "version": "0.1.0.9005"
-    },
-    "dataraft.catalog": {
-      "repository": "dataraft-r/dataraft.catalog",
-      "ref": "e5f34db0ab22792e549d73e0febb1a04a10b7530",
-      "version": "0.1.0.9005"
+      "ref": "946e037d5e93835bc9b516d85b3dc1df50f2f032",
+      "version": "0.1.0.9006"
     },
     "dataraft.core": {
       "repository": "dataraft-r/dataraft.core",
-      "ref": "d6626eafc8eec7355f7ae226d6e319f9d7d99371",
-      "version": "0.1.0.9005"
+      "ref": "69d0212bdd6b1e1e8a93fd948d3616f9cdad5092",
+      "version": "0.1.0.9006"
     },
     "dataraft.dbt": {
       "repository": "dataraft-r/dataraft.dbt",
-      "ref": "292689e84a0ef0f1678aee4f2c1379daea841a4d",
-      "version": "0.1.0.9005"
+      "ref": "6c5d1376ce8987dd8166b14415a32090b4df8fae",
+      "version": "0.1.0.9006"
     },
     "dataraft.ide": {
       "repository": "dataraft-r/dataraft.ide",
-      "ref": "a288659802535789309eb2878ce5d225c24e3234",
-      "version": "0.1.0.9005"
+      "ref": "636213398632524bd5d22581eb2779c64beb8a8f",
+      "version": "0.1.0.9006"
     },
     "dataraft.lake": {
       "repository": "dataraft-r/dataraft.lake",
-      "ref": "82574476d3198343eeb1363f4a7a969efa4f233b",
-      "version": "0.1.0.9005"
+      "ref": "842a0fc24ac6dcb57a83789a0ccd517905c53b9b",
+      "version": "0.1.0.9006"
     },
     "dataraft.metrics": {
       "repository": "dataraft-r/dataraft.metrics",
-      "ref": "62ece48f5d9d6dc7cabf244d3f21425773e9006c",
-      "version": "0.1.0.9005"
+      "ref": "abc97b130c5a62bd664a45b1ed656a1627d8715d",
+      "version": "0.1.0.9006"
     }
   }
 }

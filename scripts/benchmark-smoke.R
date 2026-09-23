@@ -3,12 +3,9 @@ library(dataraft)
 set.seed(20260921)
 rows <- 10000L
 data <- data.frame(policy_id = seq_len(rows), premium = runif(rows, 0, 1000))
-workflow <- dataraft.core::dr_workflow() |>
-  dataraft.core::dr_add_product(
-    dr_product("benchmark") |>
-      dr_add_contract(c(policy_id = "integer", premium = "numeric")) |>
-      dr_add_quality(~ premium >= 0)
-  )
+workflow <- dr_product("benchmark") |>
+  dr_add_contract(c(policy_id = "integer", premium = "numeric")) |>
+  dr_add_quality(~ premium >= 0)
 elapsed <- system.time(
   result <- dr_run(
     write = FALSE,

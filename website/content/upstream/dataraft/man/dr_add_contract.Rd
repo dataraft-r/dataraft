@@ -7,7 +7,7 @@
 dr_add_contract(x, contract)
 }
 \arguments{
-\item{x}{A \code{\link[dataraft.core:dr_product]{dr_product()}} specification or modular \code{\link[dataraft.core:dr_workflow]{dr_workflow()}}.}
+\item{x}{A \code{\link[dataraft.core:dr_product]{dr_product()}} specification.}
 
 \item{contract}{Contract, named type vector, or named list of prototypes.}
 }

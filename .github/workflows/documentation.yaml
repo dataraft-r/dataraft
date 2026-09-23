@@ -33,15 +33,23 @@ jobs:
             any::DiagrammeR
             any::DiagrammeRsvg
             any::devtools
+            any::shiny
+            any::bslib
             local::packages/dataraft.core
             local::packages/dataraft.lake
             local::packages/dataraft.adapters
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
-            local::packages/dataraft.catalog
             local::packages/dataraft.ide
             local::.
           needs: website
+      - name: Execute the main learning path with DuckLake
+        run: Rscript scripts/check-training.R
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: training-results
+          path: check/training-summary.csv
       - name: Check and build documentation
         run: |
           rmarkdown::render("README.Rmd", output_format = "github_document", quiet = TRUE)

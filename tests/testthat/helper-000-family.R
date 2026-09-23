@@ -45,9 +45,7 @@ family_owners <- c(
   "new_run" = "dataraft.lake",
   "persist_quality" = "dataraft.lake",
   "dr_run" = "dataraft.core",
-  "dr_add_product" = "dataraft.core",
   "dr_add_recipe" = "dataraft.core",
-  "dr_extract_product" = "dataraft.core",
   "dr_product" = "dataraft.core",
   "dr_model" = "dataraft.core",
   "dr_init_project" = "dataraft.adapters",
@@ -61,7 +59,6 @@ family_owners <- c(
   "dr_registry" = "dataraft.lake",
   "dr_register" = "dataraft.lake",
   "dr_tbl" = "dataraft.lake",
-  "dr_replace_sources" = "dataraft.core",
   "dr_run_history" = "dataraft.core",
   "dr_registry_duckdb" = "dataraft.lake",
   "dr_storage_local" = "dataraft.lake",
@@ -73,7 +70,6 @@ family_owners <- c(
   "dr_write_data" = "dataraft.lake",
   "automatic_schema" = "dataraft.core",
   "dr_read_release" = "dataraft.lake",
-  "dr_trial" = "dataraft.core",
   "uid" = "dataraft.core",
   "canonical" = "dataraft.core",
   "fingerprint" = "dataraft.core",
@@ -123,9 +119,7 @@ local_family_bindings <- function(..., .package = NULL, .env = parent.frame()) {
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_add_catalog <- get("dr_add_catalog", asNamespace("dataraft.core"))
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_add_product <- get("dr_add_product", asNamespace("dataraft.core"))
-}
+
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_add_recipe <- get("dr_add_recipe", asNamespace("dataraft.core"))
 }
@@ -252,9 +246,7 @@ if (requireNamespace("dataraft.core", quietly = TRUE)) {
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_expect_quality <- get("dr_expect_quality", asNamespace("dataraft.core"))
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_extract_product <- get("dr_extract_product", asNamespace("dataraft.core"))
-}
+
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_extract_recipe <- get("dr_extract_recipe", asNamespace("dataraft.core"))
 }
@@ -363,15 +355,11 @@ if (requireNamespace("dataraft.lake", quietly = TRUE)) {
     asNamespace("dataraft.lake")
   )
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_remove_product <- get("dr_remove_product", asNamespace("dataraft.core"))
-}
+
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_remove_recipe <- get("dr_remove_recipe", asNamespace("dataraft.core"))
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_replace_sources <- get("dr_replace_sources", asNamespace("dataraft.core"))
-}
+
 if (requireNamespace("dataraft.metrics", quietly = TRUE)) {
   dr_report_read <- get("dr_report_read", asNamespace("dataraft.metrics"))
 }
@@ -474,12 +462,8 @@ if (requireNamespace("dataraft.adapters", quietly = TRUE)) {
 if (requireNamespace("dataraft.dbt", quietly = TRUE)) {
   dr_transform_dbt <- get("dr_transform_dbt", asNamespace("dataraft.dbt"))
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_trial <- get("dr_trial", asNamespace("dataraft.core"))
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_update_product <- get("dr_update_product", asNamespace("dataraft.core"))
-}
+
+
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_update_recipe <- get("dr_update_recipe", asNamespace("dataraft.core"))
 }
@@ -564,27 +548,8 @@ if (requireNamespace("dataraft.lake", quietly = TRUE)) {
     asNamespace("dataraft.lake")
   )
 }
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_extract_contract <- get(
-    "dr_extract_contract",
-    asNamespace("dataraft.core")
-  )
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_remove_contract <- get("dr_remove_contract", asNamespace("dataraft.core"))
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_update_contract <- get("dr_update_contract", asNamespace("dataraft.core"))
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_extract_source <- get("dr_extract_source", asNamespace("dataraft.core"))
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_remove_source <- get("dr_remove_source", asNamespace("dataraft.core"))
-}
-if (requireNamespace("dataraft.core", quietly = TRUE)) {
-  dr_update_source <- get("dr_update_source", asNamespace("dataraft.core"))
-}
+
+
 if (requireNamespace("dataraft.core", quietly = TRUE)) {
   dr_contract_policy <- get("dr_contract_policy", asNamespace("dataraft.core"))
 }
