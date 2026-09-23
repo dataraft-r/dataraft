@@ -264,7 +264,7 @@ run_relational_insurance <- function(
       dr_add_contract(contracts$payments) |>
       dr_add_quality(~ cash_amount > 0)
   )
-  raw <- lapply(deliveries, dr_ingest)
+  raw <- lapply(deliveries, dataraft.lake::dr_ingest)
   dr_quality(raw$payments)
 
   policy_product <- dr_product(
