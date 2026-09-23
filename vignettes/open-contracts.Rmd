@@ -15,11 +15,14 @@ delivery; it does not claim that an RDS delivery is itself a report release.
 
 ```{r}
 library(dataraft)
-contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric"),
-  key = "id", owner = "Reporting",
-  governance = list(steward = "Data operations", retention = "P7Y",
+contract <- dr_contract("orders",
+columns = c(id = "integer", amount = "numeric"),
+key = "id") |>
+  dataraft.core::dr_contract_meta(owner = "Reporting",
+governance = list(steward = "Data operations", retention = "P7Y",
     tags = c("Finance.Reporting")),
-  column_metadata = list(amount = list(description = "Order value in EUR")))
+column_metadata = list(amount = list(description = "Order value in EUR")),
+producer = "Reporting")
 file <- tempfile(fileext = ".json")
 dataraft.adapters::dr_contract_odcs(contract, file)
 reviewed <- dataraft.adapters::dr_contract_from_odcs(file)

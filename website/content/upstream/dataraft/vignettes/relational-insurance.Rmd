@@ -76,8 +76,7 @@ attributes <- dr_product("payment_policy_attributes", policy_result) |>
 recipe <- dataraft.core::dr_recipe() |>
   dataraft.core::dr_step_lookup(attributes, by = dplyr::join_by(policy_id, month)) |>
   dataraft.core::dr_step_lookup(inputs$brokers, by = dplyr::join_by(broker_id))
-flow <- dataraft.core::dr_workflow() |>
-  dataraft.core::dr_add_product(dr_product("enriched_payments", contract = contracts$enriched_payments)) |>
+flow <- dr_product("enriched_payments", contract = contracts$enriched_payments) |>
   dataraft.core::dr_add_recipe(recipe)
 checked <- dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = inputs$payments)
 table <- dr_collect(checked)

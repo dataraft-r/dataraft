@@ -31,9 +31,10 @@ Declare the first two assumptions once and check every delivery against them.
 ```{r checked}
 orders <- dr_product("orders") |>
   dr_add_contract(dr_contract(columns = c(id = "integer", amount = "numeric"),
-                              key = "id", allow_extra = FALSE)) |>
+key = "id") |>
+  dataraft.core::dr_contract_policy(allow_extra = FALSE)) |>
   dr_add_quality(~ amount >= 0)
-flow <- dataraft.core::dr_workflow() |> dataraft.core::dr_add_product(orders)
+flow <- orders
 results <- lapply(list(first, second, third, fourth), function(delivery) {
   dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = delivery)
 })

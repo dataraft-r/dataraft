@@ -1,5 +1,5 @@
 # Run from the repository root.
-family <- c("core", "lake", "adapters", "metrics", "dbt", "catalog", "ide")
+family <- c("core", "lake", "adapters", "metrics", "dbt", "ide")
 paths <- c(file.path("packages", paste0("dataraft.", family)), ".")
 if (any(!file.exists(file.path(head(paths, -1L), "DESCRIPTION")))) {
   status <- system2("python", "scripts/checkout-family.py")

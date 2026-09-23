@@ -83,12 +83,9 @@ source again. Exported reports omit raw exception text.
 
 Use `dataraft.core::dr_contract_policy()` for empty/extra-column and freshness policy. Use
 `dataraft.core::dr_model_product()` with a `dm` for related tables. Catalog sinks are supplied by
-`dataraft.adapters`; `dataraft.catalog` remains a compatibility facade. dbt,
-metrics and IDE integrations are optional module APIs.
+`dataraft.adapters`. dbt, metrics and IDE integrations are optional module APIs.
 
-The meta-package exposes these 17 product verbs and `dr_demo()`. Specialist
-functions are accessed through their component namespaces. The deprecated empty
-workflow builder now returns an ordinary product, with no separate execution
-path. Use `dr_run(x, write = FALSE)` instead of `dataraft.core::dr_trial()`;
-both raise errors unless `stop_on_failure = FALSE` is explicit. The trial alias
-and catalog facade are scheduled for removal on 2027-01-01.
+The metapackage exposes 17 product verbs and `dr_demo()`. Specialist functions
+are accessed through their component namespaces. Compose sources, contracts and
+recipes directly on a product. Use `dr_run(x, write = FALSE)` to check it before
+writing; set `stop_on_failure = FALSE` explicitly to inspect a blocked result.

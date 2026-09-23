@@ -96,20 +96,26 @@ insurance_contracts <- function() {
   policy_contract <- dr_contract(
     "insurance.policy_months.schema",
     columns = policy_columns,
-    key = c("policy_id", "month"),
-    grain = "One monthly snapshot row per policy, including inactive policies."
-  )
+    key = c("policy_id", "month")
+  ) |>
+    dataraft.core::dr_contract_meta(
+      grain = "One monthly snapshot row per policy, including inactive policies."
+    )
   payment_contract <- dr_contract(
     "insurance.payments.schema",
     columns = payment_columns,
-    key = "payment_id",
-    grain = "One cash transaction, assigned to its receipt month."
-  )
+    key = "payment_id"
+  ) |>
+    dataraft.core::dr_contract_meta(
+      grain = "One cash transaction, assigned to its receipt month."
+    )
   mart_structure <- dr_contract(
     "insurance.monthly_performance.structure",
-    columns = mart_columns,
-    grain = "One company-channel-month; all monetary values are synthetic EUR."
-  )
+    columns = mart_columns
+  ) |>
+    dataraft.core::dr_contract_meta(
+      grain = "One company-channel-month; all monetary values are synthetic EUR."
+    )
   list(
     brokers = dr_contract(
       "insurance.brokers.schema",
@@ -118,9 +124,11 @@ insurance_contracts <- function() {
         broker_name = "character",
         channel = "character"
       ),
-      key = "broker_id",
-      grain = "One row per broker; attributes are static in this example."
-    ),
+      key = "broker_id"
+    ) |>
+      dataraft.core::dr_contract_meta(
+        grain = "One row per broker; attributes are static in this example."
+      ),
     policy_months = policy_contract,
     payments = payment_contract,
     enriched_policy_months = dataraft.core::dr_contract_update(
@@ -150,14 +158,18 @@ insurance_contracts <- function() {
     ),
     core_policy_monthly = dr_contract(
       "insurance.core_policy_monthly.schema",
-      columns = policy_summary,
-      grain = "One company-channel-month policy aggregate."
-    ),
+      columns = policy_summary
+    ) |>
+      dataraft.core::dr_contract_meta(
+        grain = "One company-channel-month policy aggregate."
+      ),
     core_cash_monthly = dr_contract(
       "insurance.core_cash_monthly.schema",
-      columns = payment_summary,
-      grain = "One company-channel-month cash aggregate."
-    ),
+      columns = payment_summary
+    ) |>
+      dataraft.core::dr_contract_meta(
+        grain = "One company-channel-month cash aggregate."
+      ),
     mart_schema = mart_structure,
     mart = dataraft.core::dr_contract_update(
       mart_structure,

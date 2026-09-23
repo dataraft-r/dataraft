@@ -38,7 +38,6 @@ jobs:
             local::packages/dataraft.adapters
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
-            local::packages/dataraft.catalog
             local::packages/dataraft.ide
             local::.
           needs: website

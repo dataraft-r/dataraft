@@ -2,15 +2,12 @@ stopifnot(!requireNamespace("duckdb", quietly = TRUE))
 library(dataraft.core)
 family_extensions <- paste0(
   "dataraft.",
-  c("lake", "adapters", "dbt", "catalog", "metrics", "ide")
+  c("lake", "adapters", "dbt", "metrics", "ide")
 )
 stopifnot(!any(family_extensions %in% loadedNamespaces()))
-flow <- dataraft.core::dr_workflow() |>
-  dataraft.core::dr_add_product(
-    dr_product("orders") |>
-      dr_add_contract(c(id = "integer", amount = "numeric")) |>
-      dr_add_quality(~ amount >= 0)
-  ) |>
+flow <- dr_product("orders") |>
+  dr_add_contract(c(id = "integer", amount = "numeric")) |>
+  dr_add_quality(~ amount >= 0) |>
   dataraft.core::dr_add_recipe(
     dataraft.core::dr_recipe() |>
       dataraft.core::dr_step_mutate(amount = round(amount, 2))

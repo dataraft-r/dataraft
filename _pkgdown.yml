@@ -25,8 +25,6 @@ navbar:
           href: components/dataraft.dbt/reference/index.html
         - text: dataraft.ide
           href: components/dataraft.ide/reference/index.html
-        - text: dataraft.catalog
-          href: components/dataraft.catalog/reference/index.html
 reference:
   - title: Product workflow
     desc: Define, check, inspect and publish. Advanced functions live in component namespaces.

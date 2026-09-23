@@ -10,14 +10,14 @@ policies_sample <- data.frame(
 policy_contract <- dr_contract(
   "policies",
   version = "1.0.0",
-  grain = "one policy",
   columns = c(policy_id = "integer", premium = "numeric"),
   key = "policy_id",
   rules = list(dataraft.core::dr_quality_rule(
     "nonnegative_premium",
     ~ premium >= 0
   ))
-)
+) |>
+  dataraft.core::dr_contract_meta(grain = "one policy")
 policies <- dr_product("policies", policies_sample, contract = policy_contract)
 policies_downstream <- dr_product("policies_downstream") |>
   dataraft.core::dr_add_source(policies)

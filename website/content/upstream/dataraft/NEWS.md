@@ -1,3 +1,8 @@
+# dataraft 0.1.0.9006
+
+* Use the current product API throughout code, examples and tests; development compatibility wrappers are removed.
+* Catalog integrations are provided exclusively by dataraft.adapters.
+
 # dataraft 0.1.0.9005
 
 * The public namespace is reduced to 17 product verbs plus dr_demo(); advanced operations use component namespaces.
@@ -9,7 +14,7 @@
 * Make product-first execution with write = FALSE the documented entry path.
 * Expose unvalidated evidence, release integrity verification and bounded contract composition.
 * Move catalog ownership to adapters and consolidate CI pins into this repository.
-* Record compatibility decisions and remaining external acceptance gates in docs/plans/deep-review-implementation.md.
+* Record compatibility decisions and remaining external acceptance gates in docs/plans/current-api.md.
 
 # dataraft 0.1.0.9000
 

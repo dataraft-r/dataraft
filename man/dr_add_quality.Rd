@@ -15,7 +15,7 @@ dr_add_quality(
 )
 }
 \arguments{
-\item{x}{A \code{\link[dataraft.core:dr_product]{dr_product()}} specification or modular \code{\link[dataraft.core:dr_workflow]{dr_workflow()}}.}
+\item{x}{A \code{\link[dataraft.core:dr_product]{dr_product()}} specification.}
 
 \item{quality}{One-sided row predicate, function, rule, or list of rules.
 Formula \code{NA} results count as failures. Functions return scalar logicals

@@ -10,7 +10,7 @@ paths <- c(
         "adapters",
         "metrics",
         "dbt",
-        "catalog"
+        "ide"
       )
     )
   ),

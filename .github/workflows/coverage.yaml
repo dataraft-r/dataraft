@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [core, lake, adapters, metrics, dbt, catalog, ide]
+        package: [core, lake, adapters, metrics, dbt, ide]
     env:
       NOT_CRAN: "true"
       DATARAFT_TEST_DUCKLAKE: "false"
@@ -41,7 +41,6 @@ jobs:
             local::packages/dataraft.adapters
             local::packages/dataraft.metrics
             local::packages/dataraft.dbt
-            local::packages/dataraft.catalog
             local::packages/dataraft.ide
             local::.
       - run: Rscript scripts/coverage.R

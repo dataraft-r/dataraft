@@ -13,12 +13,9 @@
 #' demo$blocked$status
 #' dr_collect(demo$passed)
 dr_demo <- function(quiet = FALSE) {
-  workflow <- dataraft.core::dr_workflow() |>
-    dataraft.core::dr_add_product(
-      dr_product("policy_delivery") |>
-        dr_add_contract(c(policy_id = "integer", premium = "numeric")) |>
-        dr_add_quality(~ premium >= 0)
-    )
+  workflow <- dr_product("policy_delivery") |>
+    dr_add_contract(c(policy_id = "integer", premium = "numeric")) |>
+    dr_add_quality(~ premium >= 0)
   blocked <- dr_run(
     write = FALSE,
     stop_on_failure = FALSE,
