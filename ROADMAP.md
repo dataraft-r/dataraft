@@ -4,6 +4,22 @@ DataRaft is an experimental R-native contract, quality and reproducibility layer
 The seven-package structure remains. The existing lake supports current users;
 open storage adapters let teams keep their database or lakehouse.
 
+## Data-product lifecycle expansion
+
+The current development family includes registered product transitions, input and
+output ports, organization policies, registered-dependency impact analysis,
+scheduled delivery SLA evaluation, bounded date backfills, lifecycle hooks and
+two starter blueprints. Port SLAs are evaluated on publication and retained in
+run evidence. Several output ports can publish one checked delivery in sequence.
+
+Publication across separate targets is not atomic. A failed later output records
+which ports committed and requires inspection before retrying. Impact analysis
+covers registered dependencies, not unknown external consumers. The bounded
+Lake backfill replaces complete date partitions; general CDC and orchestration
+remain outside DataRaft. The registry blocks releases for retired products;
+enrolling previously unregistered products in an active-only publication policy
+is still a separate lifecycle decision.
+
 ## This review
 
 - Individual reference pages, execution cheatsheet and standard vocabulary.
