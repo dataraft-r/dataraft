@@ -4,6 +4,7 @@
 * Catalog integrations are provided exclusively by dataraft.adapters.
 
 # dataraft.ide 0.1.0.9005
+* `dr_init_product()` creates table and governed-table starter projects.
 
 * Contract-root containment canonicalizes both sides at read time.
 
