@@ -1,0 +1,70 @@
+{
+  "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35854562977",
+  "extension_commit": "19e1e4783c6c8d282224acf10c9fab26584e23ed",
+  "capture_commit": "c0f644867a5d0796dcd114443bb17b78e882f77b",
+  "host": "Positron 2026.09.1-2",
+  "r_version": "4.5.1",
+  "captured_at": "2026-09-23",
+  "images": {
+    "feature-select-session.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "aca470b96770c4f5f2e97bd56147438d32fda64a87639d097417dbb840694c99"
+    },
+    "feature-inspect-product.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "84ab1f0eb5e898a376028006c9b0ebe6a91fecdd5dbf1477e5eb237521112b42"
+    },
+    "feature-trial-completed.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "6f2a507028624e8275a57a5e2977db18d99d5fabc72b571903dea32c79441e0a"
+    },
+    "feature-trial-blocked.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "4a84b59f009fc829aa95f9b11c40d710bcfc614a555fab141ca30f27b639e591"
+    },
+    "feature-quality-evidence.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "bff73b5cecfdeb8dfafc882abcccc29484673db7cef718a7421797232c770ad8"
+    },
+    "rule-diagnostic.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "745675ac51b56d23970a89e155a4500ec810bb94fc1a25c9eb725abb3bfd16c5"
+    },
+    "bounded-data-explorer.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "7bef7e527b94972d71b952c3e6a9f8852d0f0a0575e26f14af4035e239a84ccc"
+    },
+    "feature-directed-lineage.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "fa5443f3ade15d635f9dc94bc0d00f5279bb56501ff14eacefda9ca0a5837ca4"
+    },
+    "feature-yaml-editor.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "80ad5a15ac8b8520ac2a9862f1c8a5a54467699b63feed3c2099041894b0835f"
+    },
+    "feature-yaml-diff.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "5c695ab4330ae6b8832601df5af0f5038d69d1d717f67f983f5bd3f6c99e83b8"
+    },
+    "feature-yaml-preview.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "680c38982c5fd308845a05d061dee767eb77205c1fc376bbe6f1ef2964baf84f"
+    },
+    "feature-yaml-applied.png": {
+      "width": 1600,
+      "height": 1000,
+      "sha256": "9775cd2519998ba5d49de8383d064e5f13896964d920604353a44cb53ca706f7"
+    }
+  }
+}

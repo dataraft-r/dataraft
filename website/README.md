@@ -29,3 +29,7 @@ MIT license. Package documentation and extension assets are by Jan-Hendrik Weine
 ## GitHub Pages
 
 `.github/workflows/website.yaml` builds and publishes this site after website changes on main. The older Documentation workflow still validates the R/pkgdown examples and archives its output, but does not overwrite Pages. The renderer rewrites links and search URLs using BASE_PATH, and retains redirects from the prior pkgdown article and reference URLs.
+
+## Extension feature gallery
+
+The ten feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, unchanged extension implementation commit, test-instrumentation commit, original dimensions and SHA-256 for each of the twelve original PNGs. The documentation captures are produced by native Positron tests on the `docs/feature-screenshots` branch of dataraft-positron. Images are not cropped or composited.

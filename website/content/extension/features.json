@@ -1,0 +1,150 @@
+[
+  {
+    "slug": "session",
+    "title": "Select an existing R session",
+    "command": "DataRaft: Select R Session",
+    "host": "Positron",
+    "summary": "Connect the extension to the workspace you are already using.",
+    "images": [
+      [
+        "feature-select-session.png",
+        "The native session picker lists the running R console. The example session uses R 4.5.1."
+      ]
+    ],
+    "body": "## What this does\nThe extension attaches to an existing R console session. Your objects and retained trial results stay in that session. DataRaft does not start an R process on your behalf.\n\n## Try it\n1. Start an R console in Positron and load your DataRaft workspace.\n2. Install `dataraft.ide` in the R environment used by that session.\n3. Open the Command Palette and choose **DataRaft: Select R Session**.\n4. Select the session whose workspace contains your products.\n5. Use **DataRaft: Refresh Metadata** to populate the DataRaft views.\n\n## Read the screenshot\nThe picker identifies the existing R session. Selecting it establishes the execution context for subsequent explicit commands. The R session identifier is temporary and will be different in your own workspace.\n\n## Keep in mind\nLive R commands require Positron and a trusted workspace. In a remote workspace, the extension and R must run on the same host and share access to the temporary directory. Switching sessions invalidates responses still in flight. A busy session rejects execution requests; wait until it is ready before trying again.\n"
+  },
+  {
+    "slug": "products",
+    "title": "Inspect a data product",
+    "command": "DataRaft: Inspect Product",
+    "host": "Positron",
+    "summary": "Browse definitions and inspect the metadata behind a product.",
+    "images": [
+      [
+        "feature-inspect-product.png",
+        "Selecting passing.orders opens its product metadata alongside the Data Products tree."
+      ]
+    ],
+    "body": "## What this does\nThe **Data Products** tree makes workspace definitions discoverable. Selecting a product opens an inspectable metadata document. Expanding an uncached product requests its detail, including the available contract, columns, rules and sources.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Open the DataRaft activity-bar view.\n3. Select a product in **Data Products**, or use **Inspect Product** from the Command Palette.\n4. Expand the product to see the metadata available for that definition.\n\n## Read the screenshot\n`passing.orders` is a synthetic product with one source and one rule. The metadata includes its identity, version, definition status and available actions. This particular test fixture has `contract: null`: an inspectable product is not automatically a schema-validated product. Use an explicit contract in your own workflow when you need schema validation.\n\n## Keep in mind\nInspection returns metadata, not table cells. Refresh is manual and the views show their generation timestamps. A definition's existence does not mean it has passed its checks or been published.\n"
+  },
+  {
+    "slug": "trials",
+    "title": "Run a product without publishing",
+    "command": "DataRaft: Trial Product",
+    "host": "Positron",
+    "summary": "Compare successful and blocked deliveries using retained trial results.",
+    "images": [
+      [
+        "feature-trial-completed.png",
+        "The successful trial returns status completed and a retained result handle."
+      ],
+      [
+        "feature-trial-blocked.png",
+        "The failing trial returns status blocked for failing.orders."
+      ]
+    ],
+    "body": "## What this does\n**Trial Product** explicitly executes a product through the R bridge. It retains a result that you can inspect afterwards. Configured framework destinations are not published by this command.\n\n## Try it\n1. Select the product definition, rather than a previous result.\n2. Run **DataRaft: Trial Product**.\n3. Read the returned status and result metadata.\n4. Refresh metadata, then inspect **Quality** and **Runs**.\n\n## Compare the two screenshots\nThe first delivery completes its trial. The second contains a negative amount that fails the `nonnegative` rule, so its result is blocked. Both outcomes are retained as evidence. A successful bridge request can therefore contain a blocked product result: read the result status, not just whether the command finished.\n\nThese fixtures deliberately have no explicit schema contract. `completed` describes execution; schema evidence can still be `unvalidated`.\n\n## Keep in mind\nA trial still reads sources and executes your transformations and checks. User functions can have side effects of their own. Cancellation or a timeout stops the extension waiting; it does not guarantee that R code already dispatched has stopped. The bridge retains up to 20 trial results in the session.\n"
+  },
+  {
+    "slug": "quality",
+    "title": "Inspect failed quality evidence",
+    "command": "Quality view: select a rule result",
+    "host": "Positron",
+    "summary": "See which rule failed and how many rows were affected.",
+    "images": [
+      [
+        "feature-quality-evidence.png",
+        "The nonnegative rule failed for one of the two rows in failing.orders."
+      ]
+    ],
+    "body": "## What this does\nThe **Quality** view exposes evidence retained by previous execution. Selecting a rule result opens its metadata, including the affected asset, rule identifier, status and available counts.\n\n## Try it\n1. Run a trial and refresh metadata.\n2. Expand **Quality** in the DataRaft view.\n3. Select a failed rule for the product you want to investigate.\n4. Inspect the evidence before changing the delivery or the rule.\n\n## Read the screenshot\nThe selected result belongs to `failing.orders`. It reports `rule: nonnegative`, `status: failed`, `n_failed: 1` and `n_total: 2`. The **Runs** view distinguishes the completed and blocked trials. The **Incidents** view records the observed failed check.\n\n## Keep in mind\nCounts are metadata, not a preview of rejected rows. Use R-side diagnostics when you need retained row-level evidence. An incident here describes an observed failed or unchecked check; it does not represent a complete incident-management or resolution workflow.\n"
+  },
+  {
+    "slug": "diagnostics",
+    "title": "Locate a failed rule in R code",
+    "command": "DataRaft: Show R Rule Diagnostics",
+    "host": "Positron",
+    "summary": "Map a retained failure to a verified location in your R source.",
+    "images": [
+      [
+        "rule-diagnostic.png",
+        "The failed nonnegative function rule is marked in its original workspace R file."
+      ]
+    ],
+    "body": "## What this does\nAfter a trial, DataRaft can map a failed function rule back to a verified R source location. This command uses the retained result and does not rerun the product.\n\n## Try it\n1. Define the rule in an R file and load it using `source(..., keep.source = TRUE)`.\n2. Run the product trial.\n3. Select its retained result and choose **Show R Rule Diagnostics**.\n4. Open the indicated file or inspect the Problems view.\n\n## Read the screenshot\nThe native editor displays the source-reference diagnostic for the `nonnegative` rule. The location comes from the real R function's source reference. The message identifies the rule and its failed status without transferring failure rows or raw condition text.\n\n## Keep in mind\nOrdinary formula rules do not provide supported source locations. The file must be unchanged, UTF-8, within the workspace and within the size limit. Dirty or stale buffers receive no marker. Markers clear on edits, refresh and session/context changes. No marker does not mean the rule passed; the command reports omitted locations separately.\n"
+  },
+  {
+    "slug": "data-preview",
+    "title": "View bounded rows inside R",
+    "command": "DataRaft: View Bounded Rows in R",
+    "host": "Positron",
+    "summary": "Open a small data preview in the native Data Explorer.",
+    "images": [
+      [
+        "bounded-data-explorer.png",
+        "The Data Explorer shows exactly three rows from a retained result containing twenty rows."
+      ]
+    ],
+    "body": "## What this does\nThe explicit **View Bounded Rows in R** command opens a bounded existing table or retained tabular result in Positron's native R Data Explorer. The extension receives an acknowledgement, not the table cells.\n\n## Try it\n1. Select a viewable table or retained successful result.\n2. Run **View Bounded Rows in R**.\n3. Inspect the native Data Explorer's columns and row count.\n4. Configure `dataraft.maximumRows` if a different preview limit is appropriate.\n\n## Read the screenshot\nThe capture uses `dataraft.maximumRows = 3` and shows three rows and two columns. The underlying successful result has twenty rows. This is a bounded view, not evidence that all rows were inspected visually.\n\n## Keep in mind\nThe default preview limit is 100 rows and the maximum is 1,000. Model manifests and results without retained viewable output are not supported by this command. Data remains in the R viewer, but anyone with access to that viewer can see the selected rows.\n"
+  },
+  {
+    "slug": "lineage",
+    "title": "Follow directed product lineage",
+    "command": "DataRaft: Show Directed Lineage",
+    "host": "Positron; offline lineage metadata is also supported",
+    "summary": "Inspect dependencies and jump from a graph node to its product.",
+    "images": [
+      [
+        "feature-directed-lineage.png",
+        "The native lineage panel shows the current workspace dependency metadata."
+      ]
+    ],
+    "body": "## What this does\nThe lineage panel represents directed relationships from metadata. Nodes support keyboard focus. Selecting a product node reveals the matching product in the Data Products tree.\n\n## Try it\n1. Refresh the workspace or connected lake metadata.\n2. Run **Show Directed Lineage**.\n3. Follow the directed relationships between sources and products.\n4. Select a product node to locate the matching tree item.\n\n## Read the screenshot\nThis is the real lineage panel for the synthetic acceptance-test workspace. The graph is a snapshot, with a generation timestamp. It is not a live animation of a running pipeline. The native test also verifies that selecting `passing.orders` reveals its corresponding product in the tree.\n\n## Keep in mind\nRefresh is explicit. The bridge limits metadata collections, and offline lineage snapshots accept at most 500 nodes and 500 edges. The graph describes the relationships present in the supplied metadata; it does not infer every dependency hidden inside arbitrary user code.\n"
+  },
+  {
+    "slug": "yaml-editor",
+    "title": "Edit an ODCS contract",
+    "command": "DataRaft: Open Contract YAML Editor",
+    "host": "Positron and VS Code",
+    "summary": "Work with contract fields while keeping YAML as the authoritative document.",
+    "images": [
+      [
+        "feature-yaml-editor.png",
+        "The production custom editor displays fields from native.contract.yaml."
+      ]
+    ],
+    "body": "## What this does\nThe custom editor helps you edit an ODCS 3.2 YAML contract. It preserves comments and unknown metadata. The YAML document remains the source of truth.\n\n## Try it\n1. Open a saved ODCS contract YAML file.\n2. Choose **DataRaft: Open Contract YAML Editor**.\n3. Edit a field, or use the controls for columns and quality rules.\n4. Choose **Preview field edits** before applying anything.\n\n## Read the screenshot\nThe form belongs to the actual `native.contract.yaml` file in the synthetic workspace. The screenshot is captured in Positron; the same offline YAML editor is available in VS Code without a live R session.\n\n## Keep in mind\nEditing a contract document does not validate a full dataset. The portable `dr_contract_yaml()` metadata export is not an executable ODCS contract. R-based validation and bounded sampling are separate explicit commands and require Positron.\n"
+  },
+  {
+    "slug": "yaml-preview",
+    "title": "Review a proposed YAML change",
+    "command": "Preview field edits \u2192 review diff \u2192 apply or discard",
+    "host": "Positron and VS Code",
+    "summary": "Inspect the actual proposed diff before changing the document.",
+    "images": [
+      [
+        "feature-yaml-diff.png",
+        "The native diff viewer compares the proposed contract change with the current document."
+      ],
+      [
+        "feature-yaml-preview.png",
+        "The editor offers explicit Apply preview to document and Discard preview controls."
+      ]
+    ],
+    "body": "## What this does\nPreview creates a proposed edit and opens the native diff viewer. The document itself remains unchanged until you explicitly apply the preview.\n\n## Try it\n1. Change a contract field.\n2. Select **Preview field edits**.\n3. Inspect the proposed diff, including any formatting or metadata changes.\n4. Return to the contract editor and choose **Apply preview to document** or **Discard preview**.\n\n## Read the screenshots\nThe diff changes the synthetic contract name to `Applied form change`. The separate preview screenshot shows the apply/discard decision. The acceptance test verifies that preview alone leaves both the document and the saved file unchanged.\n\n## Keep in mind\nThe proposal is tied to a specific document version. A concurrent text edit invalidates it. Review the current state and create a new preview instead of applying a stale proposal.\n"
+  },
+  {
+    "slug": "yaml-apply",
+    "title": "Apply a change, then save explicitly",
+    "command": "Apply preview to document",
+    "host": "Positron and VS Code",
+    "summary": "Keep the distinction between an editor change and a saved contract.",
+    "images": [
+      [
+        "feature-yaml-applied.png",
+        "The applied form value is visible and the contract tab has an unsaved-change indicator."
+      ]
+    ],
+    "body": "## What this does\nApplying an accepted preview makes a version-checked workspace edit. The document is left unsaved so you can still review, undo or save it using the normal editor workflow.\n\n## Try it\n1. Review a proposed change in the diff viewer.\n2. Choose **Apply preview to document**.\n3. Check the changed field and the unsaved marker on the tab.\n4. Save the YAML explicitly when you are ready.\n\n## Read the screenshot\nThe form now contains `Applied form change`. The dirty-document indicator distinguishes this state from a persisted contract. In the native test, the saved file still matches its baseline immediately after Apply.\n\n## Keep in mind\n**Validate Saved ODCS Contract in R** reads the saved file, not an unsaved form proposal. If another program changes the file, preserve your work, review the external changes, then close and reopen the contract editor to establish a fresh saved-file baseline.\n"
+  }
+]
