@@ -310,10 +310,16 @@ add('/extension/','DataRaft for Positron & VS Code',ext,'Extension')
 s=(UP/'dataraft-positron/README.md').read_text();s=s[s.index('## Install'):]
 add('/extension/reference/','Extension installation & reference',md(s,'dataraft-positron'),'Extension',source=('dataraft-positron','README.md'))
 
-nav=[('/start/','Get started'),('/learn/','Learn'),('/packages/','Packages'),('/reference/','Reference'),('/extension/','Positron + VS Code')]
+from training import register
+training_nav=register(add,pages,OUT,code)
+pages['/learn/']['body']='<p class="notice">Learn by doing: <a href="/training/">DataRaft step by step</a>, the complete hands-on course with a downloadable R script.</p>'+pages['/learn/']['body']
+pages['/']['body']=pages['/']['body'].replace('<section class="install-band">', '<section class="section"><span class="eyebrow">HANDS-ON COURSE</span><h2>DataRaft step by step.</h2><p>From local data and quality checks to DuckLake and Positron. Small exercises, one continuous example and a complete R script.</p><a class="button" href="/training/">Explore the course →</a></section><section class="install-band">')
+nav=[('/start/','Get started'),('/training/','Training'),('/learn/','Learn'),('/packages/','Packages'),('/reference/','Reference'),('/extension/','Positron + VS Code')]
 def side(url,section):
  links='<span class="side-label">DOCUMENTATION</span>'+''.join(f'<a class="{"active" if url.startswith(u) else ""}" href="{u}">{t}</a>' for u,t in nav)
- if section=='Extension':
+ if section=='Training':
+  links+='<span class="side-label">LEARNING PATH</span>'+''.join(f'<a class="{"active" if url==u else ""}" href="{u}">{t}</a>' for u,t in training_nav)
+ elif section=='Extension':
   links+='<span class="side-label">EXTENSION GUIDES</span>'+''.join(f'<a class="{"active" if url=="/extension/"+f["slug"]+"/" else ""}" href="/extension/{f["slug"]}/">{esc(f["title"])}</a>' for f in features)
  elif section=='Get started':links+='<span class="side-label">YOUR FIRST PRODUCT</span>'+''.join(f'<a class="{"active" if url==f"/start/{i+1}/" else ""}" href="/start/{i+1}/">{i+1}. {t}</a>' for i,t in enumerate(start_titles))
  else:links+='<span class="side-label">THE PACKAGE FAMILY</span>'+''.join(f'<a class="{"active" if url.startswith("/packages/"+p+"/") else ""}" href="/packages/{p}/">{p}</a>' for p in packages)

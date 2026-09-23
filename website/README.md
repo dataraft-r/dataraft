@@ -33,3 +33,19 @@ MIT license. Package documentation and extension assets are by Jan-Hendrik Weine
 ## Extension feature gallery
 
 The ten feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, unchanged extension implementation commit, test-instrumentation commit, original dimensions and SHA-256 for each of the twelve original PNGs. The documentation captures are produced by native Positron tests on the `docs/feature-screenshots` branch of dataraft-positron. Images are not cropped or composited.
+
+## Hands-on training
+
+`/training/` is an English course with 39 main modules, 15 extension modules and
+25 optional deep dives, split into 133 small steps. `training.py` renders the
+commented R source in `content/training/dataraft_training.R` into chapter indexes
+and individual module pages. That same source is copied to
+`/downloads/dataraft_training.R`, so downloadable and displayed code stay aligned.
+Keep section IDs, goals, prerequisites, expected results, tasks and solutions when
+adding exercises. Solutions use native HTML details and remain usable without JS.
+The existing search, copy controls and responsive shell apply to course pages.
+
+The course runs locally in R, not in the browser. The source records component
+commits, runtime validation and untested integrations. The English edition's
+local default path was also executed successfully; website builds only render
+and check the content. Optional switches remain off by default.
