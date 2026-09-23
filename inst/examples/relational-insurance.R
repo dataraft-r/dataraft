@@ -123,13 +123,13 @@ insurance_contracts <- function() {
     ),
     policy_months = policy_contract,
     payments = payment_contract,
-    enriched_policy_months = dr_contract_update(
+    enriched_policy_months = dataraft.core::dr_contract_update(
       policy_contract,
       id = "insurance.enriched_policy_months.schema",
       columns = c(broker_name = "character", channel = "character"),
       required = c(policy_contract$required, "broker_name", "channel")
     ),
-    enriched_payments = dr_contract_update(
+    enriched_payments = dataraft.core::dr_contract_update(
       payment_contract,
       id = "insurance.enriched_payments.schema",
       columns = c(
@@ -159,7 +159,7 @@ insurance_contracts <- function() {
       grain = "One company-channel-month cash aggregate."
     ),
     mart_schema = mart_structure,
-    mart = dr_contract_update(
+    mart = dataraft.core::dr_contract_update(
       mart_structure,
       id = "insurance.monthly_performance.schema",
       key = c("company", "channel", "month"),
@@ -172,7 +172,7 @@ insurance_contracts <- function() {
 }
 
 insurance_metrics <- function() {
-  dr_metric_set(
+  dataraft.metrics::dr_metric_set(
     "insurance.monthly_performance",
     active_policies = sum(active_policies, na.rm = TRUE),
     premium_due = sum(premium_due, na.rm = TRUE),
@@ -226,12 +226,12 @@ run_relational_insurance <- function(
   inputs <- insurance_inputs()
   vapply(inputs, nrow, integer(1))
 
-  config <- dr_lake_config(
+  config <- dataraft.lake::dr_lake_config(
     path = file.path(path, "lake"),
     backend = backend,
     layers = c("raw", "staging", "core", "marts")
   )
-  execution <- dr_execution_config(
+  execution <- dataraft.core::dr_execution_config(
     quality = "pointblank",
     relationships = "dm",
     to = config
@@ -264,7 +264,7 @@ run_relational_insurance <- function(
       dr_add_contract(contracts$payments) |>
       dr_add_quality(~ cash_amount > 0)
   )
-  raw <- lapply(deliveries, dr_ingest)
+  raw <- lapply(deliveries, dataraft.lake::dr_ingest)
   dr_quality(raw$payments)
 
   policy_product <- dr_product(
@@ -273,8 +273,12 @@ run_relational_insurance <- function(
     source_name = "policy_months",
     execution = execution
   ) |>
-    dr_add_recipe(
-      dr_recipe() |> dr_step_lookup(raw$brokers, by = dplyr::join_by(broker_id))
+    dataraft.core::dr_add_recipe(
+      dataraft.core::dr_recipe() |>
+        dataraft.core::dr_step_lookup(
+          raw$brokers,
+          by = dplyr::join_by(broker_id)
+        )
     ) |>
     dr_add_contract(contracts$enriched_policy_months)
 
@@ -290,13 +294,16 @@ run_relational_insurance <- function(
     source_name = "payments",
     execution = execution
   ) |>
-    dr_add_recipe(
-      dr_recipe() |>
-        dr_step_lookup(
+    dataraft.core::dr_add_recipe(
+      dataraft.core::dr_recipe() |>
+        dataraft.core::dr_step_lookup(
           policy_attributes,
           by = dplyr::join_by(policy_id, month)
         ) |>
-        dr_step_lookup(raw$brokers, by = dplyr::join_by(broker_id))
+        dataraft.core::dr_step_lookup(
+          raw$brokers,
+          by = dplyr::join_by(broker_id)
+        )
     ) |>
     dr_add_contract(contracts$enriched_payments)
 
@@ -326,12 +333,18 @@ run_relational_insurance <- function(
   properties <- list(
     version = 2L,
     models = c(
-      dr_dbt_contract(
+      dataraft.dbt::dr_dbt_contract(
         contracts$core_policy_monthly,
         "core_policy_monthly"
       )$models,
-      dr_dbt_contract(contracts$core_cash_monthly, "core_cash_monthly")$models,
-      dr_dbt_contract(contracts$mart_schema, "monthly_performance")$models
+      dataraft.dbt::dr_dbt_contract(
+        contracts$core_cash_monthly,
+        "core_cash_monthly"
+      )$models,
+      dataraft.dbt::dr_dbt_contract(
+        contracts$mart_schema,
+        "monthly_performance"
+      )$models
     )
   )
   yaml::write_yaml(
@@ -339,7 +352,7 @@ run_relational_insurance <- function(
     file.path(project_path, "models", "contracts.yml")
   )
 
-  project <- dr_dbt_project(
+  project <- dataraft.dbt::dr_dbt_project(
     project_path,
     lake = config,
     sources = published,
@@ -358,20 +371,20 @@ run_relational_insurance <- function(
   january <- as.Date("2026-01-01")
   february <- as.Date("2026-02-01")
 
-  measures <- dr_measure(
+  measures <- dataraft.metrics::dr_measure(
     approved,
     metrics = metrics,
     at = c(january, february),
     period = "each"
   )
   summary <- dr_collect(measures)
-  totals <- dr_measure(
+  totals <- dataraft.metrics::dr_measure(
     approved,
     metrics = metrics[c("cash_collected", "cash_to_due")],
     at = c(january, february),
     period = "aggregate"
   )
-  by_channel <- dr_measure(
+  by_channel <- dataraft.metrics::dr_measure(
     approved,
     metrics = metrics["cash_collected"],
     at = january,
@@ -379,7 +392,7 @@ run_relational_insurance <- function(
   )
   dr_collect(by_channel)
 
-  report <- dr_report_release(
+  report <- dataraft.metrics::dr_report_release(
     measures,
     "insurance.report.initial",
     to = config,
@@ -403,8 +416,8 @@ run_relational_insurance <- function(
   rejected <- dr_product("insurance.payments", bad_payments) |>
     dr_add_contract(contracts$payments) |>
     dr_add_quality(~ cash_amount > 0) |>
-    dr_ingest(execution = execution, stop_on_failure = FALSE)
-  stopifnot(dr_status(rejected)$outcome == "blocked")
+    dataraft.lake::dr_ingest(execution = execution, stop_on_failure = FALSE)
+  stopifnot(dataraft.core::dr_status(rejected)$outcome == "blocked")
 
   orphan_policies <- inputs$policy_months
   orphan_policies$broker_id[1] <- "B404"
@@ -414,17 +427,17 @@ run_relational_insurance <- function(
       layer = "staging",
       stop_on_failure = FALSE
     )
-  stopifnot(dr_status(orphan_run)$outcome == "failed")
-  lake <- dr_open_lake(config, read_only = TRUE)
+  stopifnot(dataraft.core::dr_status(orphan_run)$outcome == "failed")
+  lake <- dataraft.lake::dr_open_lake(config, read_only = TRUE)
   current_policy_release <- dr_releases(
     lake,
     published$policies$asset
   )$release_id[[1]]
-  dr_close_lake(lake)
+  dataraft.lake::dr_close_lake(lake)
   stopifnot(identical(current_policy_release, published$policies$release_id))
 
   two_month_stock <- tryCatch(
-    dr_measure(
+    dataraft.metrics::dr_measure(
       approved,
       metrics = metrics["active_policies"],
       at = c(january, february),
@@ -433,7 +446,7 @@ run_relational_insurance <- function(
     error = identity
   )
   undefined_ratio <- tryCatch(
-    dr_measure(
+    dataraft.metrics::dr_measure(
       approved,
       metrics$cash_to_due,
       at = february,
@@ -446,11 +459,11 @@ run_relational_insurance <- function(
     inherits(undefined_ratio, "error")
   )
 
-  monthly <- dr_workflow(
+  monthly <- dataraft.core::dr_workflow(
     received = function(payments) {
       deliveries$payments |>
-        dr_replace_sources(insurance.payments = payments) |>
-        dr_ingest()
+        dr_set_sources(.recursive = TRUE, insurance.payments = payments) |>
+        dataraft.lake::dr_ingest()
     },
     enriched = function(received) {
       payment_product |>
@@ -469,7 +482,7 @@ run_relational_insurance <- function(
         )
     },
     measures = function(released) {
-      dr_measure(
+      dataraft.metrics::dr_measure(
         released,
         metrics = metrics,
         at = c(january, february),
@@ -484,7 +497,7 @@ run_relational_insurance <- function(
     monthly,
     inputs = list(payments = corrected_inputs$payments)
   )
-  dr_status(correction)
+  dataraft.core::dr_status(correction)
   corrected_raw <- raw
   corrected_raw$payments <- correction$results$received
   corrected_products <- published
@@ -493,14 +506,14 @@ run_relational_insurance <- function(
   corrected_release <- correction$results$released
 
   corrected_measures <- correction$results$measures
-  corrected_totals <- dr_measure(
+  corrected_totals <- dataraft.metrics::dr_measure(
     corrected_release,
     metrics = metrics[c("cash_collected", "cash_to_due")],
     at = c(january, february),
     period = "aggregate"
   )
 
-  corrected_report <- dr_report_release(
+  corrected_report <- dataraft.metrics::dr_report_release(
     corrected_measures,
     "insurance.report.corrected",
     to = config,
@@ -508,7 +521,11 @@ run_relational_insurance <- function(
     params = list(currency = "EUR", months = c("2026-01", "2026-02"))
   )
   preserved <- list(
-    report = dr_report_read(config, report$id, values_only = TRUE),
+    report = dataraft.metrics::dr_report_read(
+      config,
+      report$id,
+      values_only = TRUE
+    ),
     data = dr_collect(approved)
   )
   corrected_summary <- dr_collect(corrected_measures)

@@ -3,7 +3,7 @@ test_that("reviewing a blocked delivery never writes its RDS target", {
   product <- dr_product("policies", data.frame(premium = c(-2, 10))) |>
     dr_add_quality(list(nonnegative = ~ premium >= 0)) |>
     dr_set_target(dr_target_rds(target))
-  result <- dr_trial(product, stop_on_failure = FALSE)
+  result <- dr_run(write = FALSE, product, stop_on_failure = FALSE)
   viewed <- NULL
   testthat::local_mocked_bindings(
     View = function(x, title, ...) viewed <<- x,

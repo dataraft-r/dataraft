@@ -31,9 +31,18 @@ if (any(failed)) {
 }
 
 # Surface successful test summaries too: R CMD check otherwise prints only OK.
-for (path in list.files("check", pattern = "^test-summary[.]csv$",
-                        recursive = TRUE, full.names = TRUE)) {
+for (path in list.files(
+  "check",
+  pattern = "^test-summary[.]csv$",
+  recursive = TRUE,
+  full.names = TRUE
+)) {
   summary <- utils::read.csv(path)
-  cat(sprintf("%s: %d test blocks, %d passed assertions, %d skipped blocks\n",
-              path, nrow(summary), sum(summary$passed), sum(summary$skipped)))
+  cat(sprintf(
+    "%s: %d test blocks, %d passed assertions, %d skipped blocks\n",
+    path,
+    nrow(summary),
+    sum(summary$passed),
+    sum(summary$skipped)
+  ))
 }

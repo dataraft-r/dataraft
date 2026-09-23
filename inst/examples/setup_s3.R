@@ -12,17 +12,17 @@ if (length(missing)) {
 # Optional AWS_SESSION_TOKEN
 
 # Start locally while a PostgreSQL service is not yet available.
-catalog <- dr_registry_duckdb("metadata.ducklake")
+catalog <- dataraft.lake::dr_registry_duckdb("metadata.ducklake")
 
 # For the later PostgreSQL deployment, replace ONLY the configuration constructor:
 # Set DUCKLAKE_PG_CONNECTION in the runtime, not in Git.
 # Example format: host=... port=5432 dbname=... user=... password=... sslmode=require
-# catalog <- dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
+# catalog <- dataraft.lake::dr_registry_postgres("DUCKLAKE_PG_CONNECTION")
 # This configuration connects to a new catalog.
 
-lake <- dr_open_lake(dr_lake_config(
+lake <- dataraft.lake::dr_open_lake(dataraft.lake::dr_lake_config(
   catalog = catalog,
-  storage = dr_storage_s3(
+  storage = dataraft.lake::dr_storage_s3(
     bucket = Sys.getenv("DATARAFT_S3_BUCKET"),
     prefix = Sys.getenv("DATARAFT_S3_PREFIX", "dataraft/dev"),
     endpoint = Sys.getenv("DATARAFT_S3_ENDPOINT"),
@@ -35,5 +35,5 @@ lake <- dr_open_lake(dr_lake_config(
 # S3 Parquet storage uses DuckDB httpfs.
 # S3 originals use paws.storage and conditional PutObject.
 # Configure one writer process/job at a time for the dataraft registry.
-print(dr_capabilities(lake))
-# dr_close_lake(lake)
+print(dataraft.core::dr_capabilities(lake))
+# dataraft.lake::dr_close_lake(lake)

@@ -13,17 +13,17 @@ storage and integration engines live in separate packages.
 
 | Task | Package | Entry points |
 |---|---|---|
-| Persistent checked releases | dataraft.lake | `dr_open_lake()`, `dr_target_lake()`, `dr_close_lake()` |
-| External sources and targets | dataraft.adapters | `dr_source_database()`, `dr_target_parquet()`, `dr_as_targets()` |
-| SQL model execution | dataraft.dbt | `dr_dbt_project()`, `dr_dbt_build()` |
-| Metadata publication | dataraft.catalog | `dr_catalog_openlineage()`, `dr_catalog_openmetadata()` |
-| Metrics and reports | dataraft.metrics | `dr_metric()`, `dr_measure()`, `dr_report_release()` |
+| Persistent checked releases | dataraft.lake | `dataraft.lake::dr_open_lake()`, `dataraft.lake::dr_target_lake()`, `dataraft.lake::dr_close_lake()` |
+| External sources and targets | dataraft.adapters | `dataraft.adapters::dr_source_database()`, `dataraft.adapters::dr_target_parquet()`, `dataraft.adapters::dr_as_targets()` |
+| SQL model execution | dataraft.dbt | `dataraft.dbt::dr_dbt_project()`, `dataraft.dbt::dr_dbt_build()` |
+| Metadata publication | dataraft.catalog | `dataraft.adapters::dr_catalog_openlineage()`, `dataraft.adapters::dr_catalog_openmetadata()` |
+| Metrics and reports | dataraft.metrics | `dataraft.metrics::dr_metric()`, `dataraft.metrics::dr_measure()`, `dataraft.metrics::dr_report_release()` |
 
 For help on an extension, use `help(package = "dataraft.lake")`, substituting the
 package name. Sources, transformations, quality engines, targets and metadata
-publishers use the core S3 protocols `dr_read_source()`, `dr_execute_transform()`,
-`dr_run_quality()`, `dr_write_target()` and `dr_publish_metadata()`. A custom
-adapter implements its protocol and `dr_check_component()`; definition checks
+publishers use the core S3 protocols `dataraft.core::dr_read_source()`, `dataraft.core::dr_execute_transform()`,
+`dataraft.core::dr_run_quality()`, `dataraft.core::dr_write_target()` and `dataraft.core::dr_publish_metadata()`. A custom
+adapter implements its protocol and `dataraft.core::dr_check_component()`; definition checks
 must not perform I/O. Execution receives a context and must respect ownership
 of supplied connections. A borrowed connection remains the caller's resource.
 
@@ -40,6 +40,6 @@ classes remain available. These classes describe the failure, not a promise that
 retrying is safe. Unknown extension errors retain their original conditions.
 
 A blocked `dr_collect()` carries `condition$result` and `condition$checks`, just
-like a failed run. Pass the condition or result to `dr_quality_errors()` to obtain
+like a failed run. Pass the condition or result to `dataraft.core::dr_quality_errors()` to obtain
 locally retained rule exceptions. This also works for upstream failures and model
 members. Persisted quality reports contain diagnostic guidance, not raw exceptions.

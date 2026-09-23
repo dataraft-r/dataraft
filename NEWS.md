@@ -1,3 +1,8 @@
+# dataraft 0.1.0.9005
+
+* The public namespace is reduced to 17 product verbs plus dr_demo(); advanced operations use component namespaces.
+* The full CI profile rejects unlisted skipped tests and records test summaries.
+
 # dataraft 0.1.0.9004
 
 * Integrate the deep review hardening across the package family.

@@ -52,30 +52,7 @@ A \code{product}, ready for composition, inspection and execution.
 \description{
 Define a data delivery by name, its expected columns and its quality rules.
 A product is a reusable specification. Bind a source with \code{\link[dataraft.core:dr_add_source]{dr_add_source()}},
-or supply data when executing a workflow. Use \code{\link[dataraft.core:dr_trial]{dr_trial()}} before writing.
-}
-\details{
-Add named sources, ordinary transformation functions and optional checks or
-a target. Use \code{\link[dataraft.core:dr_trial]{dr_trial()}} to try it, or \code{\link[dataraft.core:dr_publish]{dr_publish()}} to save checked output.
-\code{\link[dataraft.core:dr_run]{dr_run()}} executes the full configuration, including writers. Products can be
-sources of other products; shared dependencies run once per execution.
-}
-\section{Table models}{
-
-
-A table input defines a table product. A dm input defines a model product:
-its tables and declared relationships are checked together and published in
-one transaction. dr_collect() returns a dm; select a member explicitly with
-dr_product("report", result, table = "policies"). Model execution materializes
-all tables in memory. Table contracts are supplied through contracts.
-
-}
-
-\examples{
-orders <- dr_product("orders", data.frame(id = 1:2, amount = c(25, 75))) |>
-  dplyr::mutate(amount = round(amount, 2)) |>
-  dr_add_quality(~ amount >= 0)
-orders |> dr_trial() |> dr_collect()
+or supply data when executing a workflow. Use \code{\link[dataraft.core:dr_run]{dr_run()}} before writing.
 }
 \seealso{
 \code{\link[dataraft.core:dr_product]{dataraft.core::dr_product()}}

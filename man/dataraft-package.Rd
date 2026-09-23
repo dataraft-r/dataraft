@@ -4,19 +4,12 @@
 \name{dataraft-package}
 \alias{dataraft}
 \alias{dataraft-package}
-\title{DataRaft: modular checked data products}
+\title{DataRaft: checked data products}
 \description{
-Install the family together, or install a component with its declared dependencies.
+Define a product, inspect a run with \code{write = FALSE}, then publish it.
+The meta-package exposes 18 entry points, including \code{\link[=dr_demo]{dr_demo()}}.
+Use the owning component namespace for advanced operations.
 }
-\section{Choose an execution path}{
-
-Use \code{\link[=dr_trial]{dr_trial()}} to check a delivery without configured writers, \code{\link[=dr_run]{dr_run()}}
-to execute the configured target, or \code{\link[=dr_publish]{dr_publish()}} to save output with a
-local lake as the default target. \code{\link[=dr_ingest]{dr_ingest()}} delivers data into a lake.
-Save \code{result <- dr_trial(...)} and inspect \code{\link[=dr_quality_report]{dr_quality_report()}} before
-calling \code{\link[=dr_collect]{dr_collect()}}. \code{\link[=dr_quality_errors]{dr_quality_errors()}} exposes local rule exceptions.
-}
-
 \seealso{
 Useful links:
 \itemize{
