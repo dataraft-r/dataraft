@@ -60,8 +60,8 @@ finish <- function(job) {
   print(result)
   result
 }
-# A filesystem barrier inside preparation proves that distinct assets overlap.
-# A whole-run global lock deadlocks this test before either publication starts.
+# A preparation barrier holds the first writer while a second client contends.
+# Catalog-wide coordination deliberately serializes publication and maintenance.
 await_ready <- function(paths) {
   deadline <- Sys.time() + 60
   while (!all(file.exists(paths)) && Sys.time() < deadline) {
@@ -82,6 +82,7 @@ a <- launch(
   ),
   1
 )
+await_ready(left_ready)
 b <- launch(
   list(
     action = "publish",
@@ -92,7 +93,15 @@ b <- launch(
   ),
   2
 )
-await_ready(c(left_ready, right_ready))
+# A zero-wait attempt must fail even for a different asset while left prepares.
+short_wait <- config
+short_wait$catalog$lock_timeout <- 0
+contender <- tryCatch(
+  publish(dr_product("contender", data.frame(id = 9L)), to = short_wait),
+  error = identity
+)
+stopifnot(inherits(contender$result$error, "dr_writer_busy"))
+stopifnot(!file.exists(right_ready))
 stopifnot(file.create(parallel_go))
 left <- finish(a)
 right <- finish(b)
@@ -111,8 +120,8 @@ upstream <- dr_product("upstream", data.frame(id = 1L)) |> dr_set_target(config)
 stopifnot(
   publish(dr_product("downstream", upstream), to = config)$status == "published"
 )
-# Force a stale correction AFTER its initial previous check and BEFORE candidate
-# construction: checking only the later candidate parent would accept this write.
+# Two clients hold the same reviewed parent. The first pauses during preparation;
+# the second must observe the changed parent after obtaining the catalog lock.
 first <- publish(dr_product("shared", data.frame(id = 1L)), to = config)
 stale_ready <- file.path(root, "stale-ready")
 stale_go <- file.path(root, "stale-go")
@@ -120,7 +129,7 @@ a <- launch(
   list(
     action = "publish",
     asset = "shared",
-    value = 2L,
+    value = 3L,
     previous = first,
     ready = stale_ready,
     proceed = stale_go
@@ -128,14 +137,15 @@ a <- launch(
   3
 )
 await_ready(stale_ready)
-newer <- publish(
-  dr_product("shared", data.frame(id = 3L)),
-  to = config,
-  previous = first
+b <- launch(
+  list(action = "publish", asset = "shared", value = 2L, previous = first),
+  4
 )
-stopifnot(newer$status == "published", file.create(stale_go))
-stale <- finish(a)
+stopifnot(file.create(stale_go))
+newer <- finish(a)
+stale <- finish(b)
 stopifnot(
+  newer$status == "published",
   stale$status == "error",
   "dr_publication_conflict" %in% stale$error_class
 )
@@ -144,7 +154,7 @@ stopifnot(
   identical(dr_read_release(lake, "shared")$id, 3L),
   identical(
     dr_releases(lake, "shared")$release_id,
-    c(newer$release_id, first$release_id)
+    c(newer$release, first$release_id)
   )
 )
 dr_close_lake(lake)
@@ -160,21 +170,16 @@ while (!file.exists(ready) && Sys.time() < deadline) {
   Sys.sleep(0.1)
 }
 stopifnot(file.exists(ready))
-# A held asset lock allows another asset to finish, not just to open a connection.
-stopifnot(
-  publish(
-    dr_product("unrelated", data.frame(id = 1L)),
-    to = config
-  )$status ==
-    "published"
-)
+# The coordinator covers the entire catalog, including unrelated assets.
 short_wait <- config
 short_wait$catalog$lock_timeout <- 0
-busy <- tryCatch(
-  publish(dr_product("busy", data.frame(id = 1L)), to = short_wait),
-  error = identity
-)
-stopifnot(inherits(busy$result$error, "dr_writer_busy"))
+for (asset in c("busy", "unrelated")) {
+  busy <- tryCatch(
+    publish(dr_product(asset, data.frame(id = 1L)), to = short_wait),
+    error = identity
+  )
+  stopifnot(inherits(busy$result$error, "dr_writer_busy"))
+}
 reader <- dr_open_lake(config, read_only = TRUE)
 stopifnot(dr_read_release(reader, "shared", first$release_id)$id == 1L)
 dr_close_lake(reader)
@@ -214,5 +219,5 @@ stopifnot(
 )
 dr_close_lake(lake)
 cat(
-  "PostgreSQL/DuckLake: overlapping preparation, ordered commits, stale correction, report identity, asset lock recovery and model gate passed.\n"
+  "PostgreSQL/DuckLake: serialized writers, ordered commits, stale correction, report identity, catalog lock recovery and model gate passed.\n"
 )

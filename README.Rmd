@@ -79,7 +79,7 @@ needed. Legacy workflow/trial constructors remain compatibility entry points.
 
 Without a declared contract, inferred schema checks and validation reports say
 `unvalidated`. Successful execution alone is not a validation guarantee.
-See the [deep review implementation](docs/plans/deep-review-implementation.md)
+See the [deep review implementation](https://github.com/dataraft-r/dataraft/blob/fix/deep-review/docs/plans/deep-review-implementation.md)
 for changed guarantees and explicit compatibility decisions.
 
 Start with [why DataRaft](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html)
