@@ -9,9 +9,9 @@ Description: Installs a family of cooperating packages for checked data
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.2.0)
-Imports: dataraft.core (>= 0.1.0.9006), dataraft.lake (>= 0.1.0.9006), dataraft.adapters (>= 0.1.0.9006), dataraft.dbt (>= 0.1.0.9006),
+Imports: dataraft.core (>= 0.1.0.9006), dataraft.lake (>= 0.1.0.9006), dataraft.adapters (>= 0.1.0.9006),
     dataraft.metrics (>= 0.1.0.9006)
-Suggests: dataraft.ide (>= 0.1.0.9006), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
+Suggests: dataraft.dbt (>= 0.1.0.9006), dataraft.ide (>= 0.1.0.9006), hedgehog, testthat (>= 3.2.0), knitr, rmarkdown, DBI, dplyr, dbplyr, tibble,
     rlang, digest, jsonlite, withr, duckdb (>= 1.5.5), pointblank, dm, shiny,
     bslib, yaml, readr, readxl, paws.storage, processx, RPostgres, arrow,
     pins (>= 1.2.0), httr2, targets, renv, RSQLite, webfakes, bit64, covr

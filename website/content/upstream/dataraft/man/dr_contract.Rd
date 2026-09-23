@@ -22,6 +22,7 @@ dr_contract(
 \item{rules}{Quality rules or named row predicates.}
 
 \item{version}{Immutable definition version.}
+
 }
 \value{
 A serializable contract specification.
