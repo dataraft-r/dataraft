@@ -253,6 +253,11 @@ for pkg in packages:
 for filename,title in [('FAMILY_COMPATIBILITY.md','Pin a compatible family'),('SECURITY.md','Security and trust boundaries'),('CONTRIBUTING.md','Contribute to DataRaft'),('CHEATSHEET.md','The DataRaft cheatsheet')]:
  slug={'FAMILY_COMPATIBILITY.md':'compatibility','SECURITY.md':'security','CONTRIBUTING.md':'contributing','CHEATSHEET.md':'cheatsheet'}[filename];s=(UP/'dataraft'/filename).read_text();s=re.sub(r'^# .*\n','',s,count=1)
  add('/learn/'+slug+'/',title,md(s),'Learn',source=('dataraft',filename));learn.append(('/learn/'+slug+'/','PROJECT',title,'Project guidance and practical reference.'))
+ports=(ROOT/'content/guides/output-ports.md').read_text()
+add('/learn/output-ports/','Publish to multiple output ports',md(ports),'Learn',
+    'Release evidence, SLA checks and partial output failures.')
+learn.append(('/learn/output-ports/','DATA PRODUCTS','Publish to multiple output ports',
+              'One checked delivery, multiple targets and explicit partial-failure evidence.'))
 add('/learn/','Go further with DataRaft','<p class="lead">Learn by task: model relationships, connect tools, preserve evidence and extend the framework.</p>'+cards(learn),'Learn')
 add('/packages/','One family. Clear responsibilities.','<p class="lead">Start with the common product API. Add storage, integrations and editor support independently.</p>'+cards([(f'/packages/{p}/',tag,p,desc) for p,(_,tag,desc) in packages.items()]),'Packages')
 entry={'dataraft':['dr_product','dr_contract','dr_run','dr_collect','dr_demo'],'dataraft.core':['dr_product','dr_add_source','dr_recipe','dr_validate','dr_quality_rows'],'dataraft.lake':['dr_open_lake','dr_target_lake','dr_releases','dr_close_lake'],'dataraft.adapters':['dr_target_rds','dr_source_database','dr_contract_from_odcs','dr_catalog_openmetadata'],'dataraft.dbt':['dr_dbt_project','dr_dbt_build'],'dataraft.metrics':['dr_metric','dr_measure','dr_report_verify'],'dataraft.ide':['ide_context','ide_request']}
