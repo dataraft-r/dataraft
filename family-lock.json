@@ -31,7 +31,7 @@
     },
     "dataraft.ide": {
       "repository": "dataraft-r/dataraft.ide",
-      "ref": "57849070c9c35f8818c58a148c6c6deb3c336836",
+      "ref": "a288659802535789309eb2878ce5d225c24e3234",
       "version": "0.1.0.9005"
     },
     "dataraft.lake": {
