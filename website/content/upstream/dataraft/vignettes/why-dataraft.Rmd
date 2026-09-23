@@ -1,0 +1,67 @@
+---
+title: "Why DataRaft?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Why DataRaft?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+A monthly script starts small: read orders and add their amounts. Repeated
+deliveries make its assumptions part of your reporting process.
+
+```{r deliveries}
+library(dataraft)
+first <- data.frame(id = 1:2, amount = c(25, 75))
+second <- transform(first, amount = as.character(amount))
+third <- rbind(first, first[1, ])
+fourth <- transform(first, amount = c(25, 80))
+sum(first$amount)  # 100
+sum(third$amount)  # 125: a duplicated order silently changes the total
+sum(fourth$amount) # 105: a correction changes the current figure
+```
+
+The second delivery changes a numeric column to text. The third duplicates an
+order. The fourth corrects a value, leaving an old report impossible to reproduce
+if its source was overwritten. These are different problems: schema, identity,
+and versioned evidence.
+
+Declare the first two assumptions once and check every delivery against them.
+
+```{r checked}
+orders <- dr_product("orders") |>
+  dr_add_contract(dr_contract(columns = c(id = "integer", amount = "numeric"),
+                              key = "id", allow_extra = FALSE)) |>
+  dr_add_quality(~ amount >= 0)
+flow <- dataraft.core::dr_workflow() |> dataraft.core::dr_add_product(orders)
+results <- lapply(list(first, second, third, fourth), function(delivery) {
+  dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = delivery)
+})
+vapply(results, function(result) result$status, character(1))
+dr_quality_report(results[[3]])
+```
+
+## A contract makes accidental changes visible
+
+Ordinary dplyr semantics allow a new column called `amont`. A strict output
+contract makes that typo visible after preparation.
+
+```{r typo}
+preparation <- dataraft.core::dr_recipe() |> dataraft.core::dr_step_mutate(amont = round(amount, 2))
+unchecked <- dr_product("orders", first) |> dataraft.core::dr_add_recipe(preparation)
+names(dr_collect(dr_run(write = FALSE, stop_on_failure = FALSE, unchecked)))
+checked <- orders |> dataraft.core::dr_add_source(first) |> dataraft.core::dr_add_recipe(preparation)
+dr_quality_report(dr_run(write = FALSE, stop_on_failure = FALSE, checked))
+```
+
+Checking alone does not preserve history. Publish accepted deliveries to
+`dataraft.lake` for pinned releases, and use `dataraft.metrics` to freeze report
+values with their evidence. A correction creates a new release while the earlier
+report continues to identify its original inputs. The local pins example in
+[the introduction](get-started.html) offers a smaller first persistence step,
+with the different guarantees described there.
+
+Use DataRaft when these requirements repeat across deliveries or teams. For one
+standalone validation, pointblank may be enough; for scheduling tasks, use targets.
+The component packages connect these responsibilities while keeping definitions
+reusable and execution explicit.

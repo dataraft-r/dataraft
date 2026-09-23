@@ -1,0 +1,161 @@
+---
+title: "Insurance deliveries: contracts, relationships and reproducible measures"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Insurance deliveries: contracts, relationships and reproducible measures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = FALSE)
+library(dataraft)
+```
+
+A monthly insurance report combines policy snapshots, brokers and payments.
+Their grains differ: a policy has one row per month, but can have several payments
+in that month. Joining a monthly premium onto each payment and summing it would
+silently double-count the premium. Contracts check each delivery; relationship
+checks and explicit lookups protect its grain.
+
+All values below are synthetic. The in-memory and RDS path runs without DuckDB,
+Arrow or a dbt installation. The optional `dm` section adds relational checks.
+
+## Reusable input deliveries and contracts
+
+The package contains a reproducible fixture also used by integration tests.
+It includes two payments for policy P1 in January and a late correction for P5.
+
+```{r}
+example <- new.env()
+sys.source(system.file("examples", "relational-insurance.R", package = "dataraft"), example)
+inputs <- example$insurance_inputs()
+contracts <- example$insurance_contracts()
+inputs$policy_months
+inputs$payments
+```
+
+Contracts carry column types, keys and quality rules. A new delivery can be
+substituted without rewriting the definition.
+
+```{r}
+policies <- dr_product("policy_months", inputs$policy_months,
+  contract = contracts$policy_months)
+payments <- dr_product("payments", inputs$payments,
+  contract = contracts$payments)
+policy_result <- dr_run(write = FALSE, stop_on_failure = FALSE, policies)
+payment_result <- dr_run(write = FALSE, stop_on_failure = FALSE, payments)
+stopifnot(policy_result$status == "completed", payment_result$status == "completed")
+dr_quality_report(payment_result)
+```
+
+## Relationships across tables
+
+A dm describes relationships, while each table keeps its own contract. Composite
+policy-month keys are checked separately by the policy contract. For this example,
+we validate the broker relationship on the policy snapshots.
+
+```{r model, eval=requireNamespace("dm", quietly=TRUE)}
+model <- dm::dm(brokers = inputs$brokers, policy_months = inputs$policy_months) |>
+  dm::dm_add_pk(brokers, broker_id) |>
+  dm::dm_add_fk(policy_months, broker_id, brokers)
+model_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("insurance_model", model,
+  contracts = list(policy_months = contracts$policy_months)))
+stopifnot(model_result$status == "completed")
+dr_quality_report(model_result)
+```
+
+## Prepare a payment product without changing its grain
+
+Select only policy attributes for the payment lookup. The premium stays in the
+policy product because it is a monthly amount, not a payment-level measure.
+
+```{r}
+attributes <- dr_product("payment_policy_attributes", policy_result) |>
+  dplyr::select(policy_id, month, company, broker_id, policy_status = status)
+recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_lookup(attributes, by = dplyr::join_by(policy_id, month)) |>
+  dataraft.core::dr_step_lookup(inputs$brokers, by = dplyr::join_by(broker_id))
+flow <- dataraft.core::dr_workflow() |>
+  dataraft.core::dr_add_product(dr_product("enriched_payments", contract = contracts$enriched_payments)) |>
+  dataraft.core::dr_add_recipe(recipe)
+checked <- dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = inputs$payments)
+table <- dr_collect(checked)
+stopifnot(nrow(table) == 10L, anyDuplicated(table$payment_id) == 0L,
+  !"premium_due" %in% names(table))
+table
+```
+
+A payment referencing a missing policy-month must fail instead of disappearing
+in an inner join or multiplying rows in a many-to-many join.
+
+```{r}
+broken <- inputs$payments
+broken$month[1] <- as.Date("2026-03-01")
+failed <- dr_run(write = FALSE, stop_on_failure = FALSE, flow, data = broken)
+stopifnot(failed$status %in% c("blocked", "error"))
+dataraft.core::dr_status(failed)
+```
+
+## Define the lapse-rate denominator explicitly
+
+For a simple count-based monthly lapse rate, use policies active at the start
+of the month as the denominator. Pending policies are excluded. A policy is
+counted as lapsed if it was active in January and has status `lapsed` in February.
+This is an illustrative definition, not a prescribed actuarial methodology.
+Missing closing snapshots must be investigated, not treated as non-lapses.
+
+```{r}
+opening <- inputs$policy_months |>
+  dplyr::filter(month == as.Date("2026-01-01"), status == "active") |>
+  dplyr::select(policy_id, company, broker_id)
+closing <- inputs$policy_months |>
+  dplyr::filter(month == as.Date("2026-02-01")) |>
+  dplyr::select(policy_id, status)
+cohort <- dplyr::left_join(opening, closing, by = "policy_id", relationship = "one-to-one")
+stopifnot(!anyNA(cohort$status))
+cohort$lapsed <- cohort$status == "lapsed"
+rate <- dataraft.metrics::dr_metric("monthly_lapse_rate", "cohort", expr = mean(lapsed),
+  unit = "proportion", owner = "Risk",
+  description = "Lapses among policies active at the start of February")
+cohort_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", cohort))
+measured <- dataraft.metrics::dr_measure(cohort_result, rate)
+stopifnot(isTRUE(all.equal(measured$value, 1 / 5)))
+measured
+```
+
+## Freeze checked data and the resulting report without a database
+
+An RDS target assigns each successful delivery a new version. Record that version
+alongside the report definition to reproduce its inputs after later corrections.
+For stronger retention and concurrent multi-user governance, use a Lake target.
+
+```{r}
+root <- tempfile("insurance-releases-")
+release <- dr_product("cohort", cohort) |>
+  dr_add_quality(~ !is.na(lapsed)) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "cohort"))) |>
+  dr_publish()
+pinned <- dataraft.adapters::dr_source_rds(file.path(root, "cohort"), release$outputs$version)
+pinned_result <- dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", pinned))
+report <- dr_product("lapse_report", dataraft.metrics::dr_measure(pinned_result, rate)) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "report"))) |>
+  dr_publish()
+corrected <- cohort
+corrected$lapsed[1] <- TRUE
+later <- dr_product("cohort", corrected) |>
+  dr_set_target(dataraft.adapters::dr_target_rds(file.path(root, "cohort"))) |>
+  dr_publish()
+stopifnot(!identical(release$outputs$version, later$outputs$version))
+stopifnot(isTRUE(all.equal(dataraft.metrics::dr_measure(dr_run(write = FALSE, stop_on_failure = FALSE, dr_product("cohort", pinned)), rate)$value, 1 / 5)))
+dataraft.core::dr_read_source(dataraft.adapters::dr_source_rds(file.path(root, "report"), report$outputs$version))
+unlink(root, recursive = TRUE)
+```
+
+The stored report contains the computed numbers. Keep its input version and code
+version in your reporting manifest. `dataraft.metrics::dr_report_release()` adds governed lake
+report registration when a Lake backend is available. The complete lake example
+in `system.file("examples", "relational-insurance.R", package = "dataraft")`
+shows publication, late corrections and pinned reports. dbt can stage these lake
+releases using `dataraft.dbt::dr_dbt_sources()` and `dataraft.dbt::dr_dbt_build()`; those calls belong to the
+optional `dataraft.dbt` component.

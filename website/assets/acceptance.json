@@ -1,0 +1,14 @@
+{
+  "sessionId": "r-193ef985",
+  "completed": [
+    "session selection, refresh and product tree inspection",
+    "passing.orders: completed",
+    "failing.orders: blocked",
+    "quality tree reports one failure in two rows",
+    "function srcref diagnostic maps to actual workspace R file",
+    "Ark View opens native Data Explorer with 3 of 20 rows",
+    "lineage node click reveals corresponding product tree item",
+    "native webview buttons preview, discard, apply and reject stale YAML edits",
+    "12 product lineage screenshots in native light and dark themes"
+  ]
+}

@@ -32,3 +32,6 @@ node_modules/
 accessibility-artifacts/
 accessibility-server.log
 accessibility-http.log
+
+website/dist/
+website/__pycache__/

@@ -1,0 +1,45 @@
+---
+title: "Integrations and extension boundaries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Integrations and extension boundaries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+Load only the packages needed by the application. The core runs in memory;
+storage and integration engines live in separate packages.
+
+| Task | Package | Entry points |
+|---|---|---|
+| Persistent checked releases | dataraft.lake | `dataraft.lake::dr_open_lake()`, `dataraft.lake::dr_target_lake()`, `dataraft.lake::dr_close_lake()` |
+| External sources and targets | dataraft.adapters | `dataraft.adapters::dr_source_database()`, `dataraft.adapters::dr_target_parquet()`, `dataraft.adapters::dr_as_targets()` |
+| SQL model execution | dataraft.dbt | `dataraft.dbt::dr_dbt_project()`, `dataraft.dbt::dr_dbt_build()` |
+| Metadata publication | dataraft.catalog | `dataraft.adapters::dr_catalog_openlineage()`, `dataraft.adapters::dr_catalog_openmetadata()` |
+| Metrics and reports | dataraft.metrics | `dataraft.metrics::dr_metric()`, `dataraft.metrics::dr_measure()`, `dataraft.metrics::dr_report_release()` |
+
+For help on an extension, use `help(package = "dataraft.lake")`, substituting the
+package name. Sources, transformations, quality engines, targets and metadata
+publishers use the core S3 protocols `dataraft.core::dr_read_source()`, `dataraft.core::dr_execute_transform()`,
+`dataraft.core::dr_run_quality()`, `dataraft.core::dr_write_target()` and `dataraft.core::dr_publish_metadata()`. A custom
+adapter implements its protocol and `dataraft.core::dr_check_component()`; definition checks
+must not perform I/O. Execution receives a context and must respect ownership
+of supplied connections. A borrowed connection remains the caller's resource.
+
+Conditions inherit from `dataraft_error` and a subsystem class, such as
+`dataraft_error_contract` or `dataraft_error_lake`. More specific conditions can
+carry a parent condition or execution result. Inspect those fields before
+retrying; a failed contract is not a transient connection failure.
+
+
+Missing optional packages raise `dataraft_error_dependency`, with `package` and
+`purpose` fields and an installation hint. Known storage connection and writer-lock
+failures additionally inherit from `dataraft_error_backend`; existing subsystem
+classes remain available. These classes describe the failure, not a promise that
+retrying is safe. Unknown extension errors retain their original conditions.
+
+A blocked `dr_collect()` carries `condition$result` and `condition$checks`, just
+like a failed run. Pass the condition or result to `dataraft.core::dr_quality_errors()` to obtain
+locally retained rule exceptions. This also works for upstream failures and model
+members. Persisted quality reports contain diagnostic guidance, not raw exceptions.

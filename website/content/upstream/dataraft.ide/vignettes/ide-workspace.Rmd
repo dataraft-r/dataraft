@@ -1,0 +1,65 @@
+---
+title: "Inspect and try products without a lake"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Inspect and try products without a lake}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+A workspace can show product definitions and existing quality evidence without installing DuckDB or opening a database connection. The IDE package itself contains no compiled code.
+
+```{r}
+library(dataraft.ide)
+workspace <- new.env(parent = emptyenv())
+workspace$orders <- dataraft.core::dr_product(
+  "orders", data.frame(amount = c(-10, 20))
+) |> dataraft.core::dr_add_quality(~ amount >= 0)
+context <- ide_context(workspace)
+request_metadata <- function(operation, handle = NULL) {
+  private <- tempfile("ide-private-")
+  dir.create(private, mode = "0700")
+  on.exit(unlink(private, recursive = TRUE))
+  request <- list(
+    version = 1L, operation = operation, request_id = "example",
+    response_path = file.path(private, "response.json")
+  )
+  if (!is.null(handle)) request$handle <- handle
+  encoded <- jsonlite::base64_enc(charToRaw(as.character(
+    jsonlite::toJSON(request, auto_unbox = TRUE)
+  )))
+  dataraft.ide::ide_request(gsub("[[:space:]]", "", encoded), context)
+}
+request_metadata("products")
+workspace$blocked <- dataraft.core::dr_run(write = FALSE, stop_on_failure = FALSE, workspace$orders)
+request_metadata("incidents")
+```
+
+Replace the delivery and explicitly try it again. Trial execution never invokes the configured framework destination writer.
+
+```{r}
+workspace$passed <- dataraft.core::dr_run(write = FALSE, stop_on_failure = FALSE,
+  workspace$orders, data = data.frame(amount = c(10, 20))
+)
+request_metadata("runs")
+```
+
+RDS offers a portable local delivery format for the same compiler-free example. Reading this file is an explicit user action, not IDE discovery.
+
+```{r}
+path <- tempfile(fileext = ".rds")
+saveRDS(data.frame(amount = c(30, 40)), path)
+workspace$delivery <- readRDS(path)
+request_metadata("profile", "binding:delivery")
+unlink(path)
+```
+
+A private file response contains metadata only. Applications must validate the bundled schema, enforce the one MiB bound and check the request ID.
+
+```{r}
+response <- request_metadata("quality")
+response$kind
+response$contract
+```
+
+Connected lakes add release, contract, lineage and freshness metadata. Supplying `ide_context(workspace, lake = existing_lake)` never opens a new connection. Reports list frozen report identifiers and creation times, not report values or verification results.

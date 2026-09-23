@@ -1,0 +1,94 @@
+---
+title: "Define, check and publish a product"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Define, check and publish a product}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = FALSE)
+```
+
+A product contains its sources, preparation, contract, checks and destination.
+Start with an explicit contract: without one, inferred schema checks are labelled
+`unvalidated`. A completed run then means execution succeeded, not that a business
+schema was validated.
+
+```{r define}
+library(dataraft)
+
+contract <- dr_contract("orders", columns = c(id = "integer", amount = "numeric"),
+                        key = "id") |>
+  dataraft.core::dr_contract_meta(owner = "Analytics", grain = "One order")
+orders <- dr_product("orders", contract = contract) |>
+  dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_mutate(amount = round(amount, 2))) |>
+  dr_add_quality(dr_quality(~ amount >= 0, action = "block"))
+```
+
+Use `action = "warn"` for a non-blocking check and `threshold` for an allowed
+failure fraction. Quarantine removes rejected rows before writing. It does not
+silently relax the rule's stored policy. Custom checks must be stable: ordinary
+checks are evaluated twice during dry runs and known time/random calls are rejected.
+Productive runs reuse a successful comparison for the same rule definition within
+the R session; without one they verify first. Explicit
+`volatile = TRUE` allows them, labels their evidence, disables release caching and
+prevents that evidence from authorizing frozen report approvals.
+
+```{r failure}
+bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
+checked <- dr_run(orders, data = bad_delivery, write = FALSE, stop_on_failure = FALSE)
+checked$status
+dataraft.core::dr_quality_rows(checked)
+```
+
+Correct the delivery and reuse the product:
+
+```{r success}
+next_delivery <- data.frame(id = 1:3, amount = c(25, 75, 50))
+result <- dr_run(orders, data = next_delivery, write = FALSE)
+dr_collect(result)
+```
+
+`write = FALSE` uses the same checks and transformations while suppressing
+framework targets, catalogs and run-evidence writes, including upstream products.
+It still reads sources and executes your functions. Those functions can perform
+I/O themselves. A later run reads a new delivery; this check does not reserve it.
+
+## Save locally
+
+```{r local-rds}
+folder <- tempfile("dataraft-rds-")
+saved <- dr_publish(orders, data = next_delivery, to = dataraft.adapters::dr_target_rds(folder))
+reference <- saved$outputs$version
+restored <- dataraft.core::dr_read_source(dataraft.adapters::dr_source_rds(folder, version = reference))
+stopifnot(sum(restored$amount) == 150)
+unlink(folder, recursive = TRUE)
+```
+
+The generic execution path materializes lazy output before checking it and passes
+that same snapshot to the writer. This may require memory proportional to the
+output. RDS serializes cooperating local writers and preserves existing versions;
+it does not provide a transaction across multiple tables. See the guarantees
+article before choosing a storage backend.
+
+## Diagnose and extend
+
+`dataraft.core::dr_plan()` inspects the definition. `dataraft.core::dr_validate(product)` checks configuration;
+it does not read the delivery. After execution, `dr_quality_report(result)` shows
+the evidence and `dataraft.core::dr_quality_errors(result)` returns retained local errors. After
+a thrown error, use `dr_last_failure()` to retrieve the result without reading the
+source again. Exported reports omit raw exception text.
+
+Use `dataraft.core::dr_contract_policy()` for empty/extra-column and freshness policy. Use
+`dataraft.core::dr_model_product()` with a `dm` for related tables. Catalog sinks are supplied by
+`dataraft.adapters`; `dataraft.catalog` remains a compatibility facade. dbt,
+metrics and IDE integrations are optional module APIs.
+
+The meta-package exposes these 17 product verbs and `dr_demo()`. Specialist
+functions are accessed through their component namespaces. The deprecated empty
+workflow builder now returns an ordinary product, with no separate execution
+path. Use `dr_run(x, write = FALSE)` instead of `dataraft.core::dr_trial()`;
+both raise errors unless `stop_on_failure = FALSE` is explicit. The trial alias
+and catalog facade are scheduled for removal on 2027-01-01.
