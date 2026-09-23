@@ -5,7 +5,6 @@
 #' Use the owning component namespace for advanced operations.
 #' @importFrom dataraft.adapters dr_init_project
 #' @importFrom dataraft.metrics dr_metric
-#' @importFrom dataraft.dbt dr_source_dbt
 #' @keywords internal
 "_PACKAGE"
 

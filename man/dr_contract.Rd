@@ -9,7 +9,8 @@ dr_contract(
   columns,
   key = character(),
   rules = list(),
-  version = "1.0.0"
+  version = "1.0.0",
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ dr_contract(
 \item{rules}{Quality rules or named row predicates.}
 
 \item{version}{Immutable definition version.}
+
+\item{...}{Additional contract metadata passed to the core constructor.}
 }
 \value{
 A serializable contract specification.
