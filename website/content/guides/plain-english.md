@@ -1,5 +1,3 @@
-# DataRaft, explained simply
-
 **DataRaft helps a team turn incoming data into checked, reusable results whose origins can still be explained later.**
 
 Imagine an insurer preparing a cancellation report every month. It receives policy data, checks it, calculates a cancellation rate and puts the number in a report. In December, someone asks: “Why did the September report show 8.1%?” To answer, the team needs the September input, the checks it passed and the agreed definition of the rate. DataRaft helps keep those pieces together.
