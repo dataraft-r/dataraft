@@ -14,6 +14,10 @@ test_that("the synthetic portfolio has coherent six-table business grains", {
   expect_equal(anyDuplicated(case$inputs$monthly_status[c("policy_id", "month")]), 0L)
   expect_setequal(case$inputs$policies$customer_id, case$inputs$customers$customer_id)
   expect_true(all(case$inputs$claims$policy_id %in% case$inputs$policies$policy_id))
+  expect_equal(sum(case$inputs$monthly_status$exposed_at_start[
+    case$inputs$monthly_status$month == as.Date("2026-02-01")]), 36L)
+  expect_equal(sum(case$inputs$monthly_status$exposed_at_start[
+    case$inputs$monthly_status$month == as.Date("2026-03-01")]), 33L)
   expect_equal(sum(case$inputs$monthly_status$new_lapse[
     case$inputs$monthly_status$month == as.Date("2026-03-01")]), 4L)
 })
