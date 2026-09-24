@@ -24,8 +24,7 @@ portfolio_case <- function(output_root = tempfile("portfolio-case-")) {
   status <- expand.grid(policy_id = policies$policy_id, month = months,
                         KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
   status$exposed_at_start <- with(status,
-    month == months[[1L]] |
-      (month == months[[2L]] & as.integer(sub("P", "", policy_id)) %% 11L != 0L) |
+    month == months[[1L]] | month == months[[2L]] |
       (month == months[[3L]] & as.integer(sub("P", "", policy_id)) %% 11L != 0L))
   id_number <- as.integer(sub("P", "", status$policy_id))
   status$new_lapse <- with(status,
