@@ -89,6 +89,13 @@ Some teams already use **dbt** to prepare data with SQL. DataRaft can connect to
 
 ## `dataraft.ide` and the Positron extension: Inspect the work
 
+A team can attach a policy to a product, for example “an owner must be named
+before publication.” The run records the policy decision and its version. A
+delivery deadline can be attached to an output port; publishing then records
+whether the output met that deadline. Several destinations receive the same
+checked data in order, so an error at a later destination may leave an earlier
+one published. [See the precise limits](/learn/guarantees/).
+
 `dataraft.ide` is a bridge that makes selected R information available to an editor. The [DataRaft extension](/extension/) is the visible interface in Positron: a person can open a product, inspect its contract, view quality results and follow relationships. The extension also offers guided contract editing. Reading a view does not publish a data release; a trial or write is a deliberate action.
 
 The extension's YAML editor also works in VS Code. Live R inspection needs Positron, the optional bridge and an appropriate R session. The [feature gallery](/extension/) shows real captures and explains the supported actions.
