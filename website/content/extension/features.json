@@ -1,5 +1,39 @@
 [
   {
+    "slug": "portfolio-case",
+    "title": "Follow a real reporting problem",
+    "command": "Select R Session → Refresh Metadata → Inspect Product → Trial Product",
+    "host": "Positron",
+    "summary": "Explore a synthetic insurer portfolio from six related source tables to a checked lapse-rate report.",
+    "images": [
+      [
+        "portfolio-overview.png",
+        "The native workspace overview lists the six-table portfolio, its model, a channel lapse-rate product and a deliberately invalid cash feed."
+      ],
+      [
+        "portfolio-model.png",
+        "The portfolio.relational_model definition identifies the six-table model; the R tests verify its primary and foreign keys."
+      ],
+      [
+        "portfolio-product-contract.png",
+        "The lapse-rate dashboard shows its column contract and named owner policy."
+      ],
+      [
+        "portfolio-kpi-trial.png",
+        "A dry run of the channel lapse-rate product completes without publishing a release."
+      ],
+      [
+        "portfolio-quality-failure.png",
+        "The invalid cash delivery records one failed nonnegative_cash check among 108 payment records."
+      ],
+      [
+        "portfolio-lineage.png",
+        "Directed product lineage connects the monthly exposure, policy and broker definitions to the lapse-rate product."
+      ]
+    ],
+    "body": "## The problem\nA portfolio analyst needs a monthly cancellation rate by distribution channel. Customer, broker, policy, status, payment and claim data arrive in different tables. An invalid negative receipt must not slip into reporting. Months later, the analyst needs to explain the input and rules behind a rate.\n\n## The synthetic case\nThe [versioned R example](https://github.com/dataraft-r/dataraft/blob/main/inst/examples/portfolio-case.R) defines 18 customers, six brokers, 36 policies, 108 monthly status rows, 108 payment records and eight claims. Every table has a contract, including keys. A six-table `dm` model checks the relationships. Separate products add a blocked payment scenario, a channel lapse-rate calculation, a named owner policy and an output with an 08:00 UTC deadline. In March, four newly lapsed policies are measured against 33 policies exposed at the start of the month, giving 4/33 across all channels. The counts are deterministic regression expectations, not production data.\n\n## Try the native workflow\n1. Load the example into an R session and select that session in Positron.\n2. Refresh metadata and find the portfolio products in the overview.\n3. Inspect the relational model and the lapse-rate product's contract, policy, port and SLA.\n4. Trial the lapse-rate product. Inspect the completed result without publishing.\n5. Trial `portfolio.invalid_cash_receipts`, then select the failed `nonnegative_cash` check.\n6. Follow the directed lineage from the inputs to `portfolio.lapse_rate_by_channel`.\n\n## What the screenshots prove\nThe test drives the actual Positron workbench and production extension in one Ark R session. It asserts the successful and blocked result statuses, then checks that exactly one of 108 cash rows failed. The same installed example is exercised by the R package test suite for contracts, model relationships, bad deliveries and 4/33 arithmetic. The screenshots show metadata and UI state; they do not prove that an output was published or that a consumer received it.\n"
+  },
+  {
     "slug": "session",
     "title": "Select an existing R session",
     "command": "DataRaft: Select R Session",
@@ -22,10 +56,10 @@
     "images": [
       [
         "feature-overview.png",
-        "The workspace overview lists three synthetic products with individual Inspect product actions."
+        "The native workspace overview lists the three small smoke-test products."
       ]
     ],
-    "body": "## What this does\nThe overview gathers product definitions, warning or failed quality checks and recent run counts from the current metadata snapshot. Each product has an **Inspect product** action.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Run **Open Data Product Overview**.\n3. Select **Inspect product** on the product you want to understand.\n\n## Read the screenshot\nThe synthetic workspace contains three product definitions. Counts describe the current metadata snapshot and may change after a trial and another refresh.\n\n## Keep in mind\nThe overview does not run products. Refresh is explicit, and the summary shows only the bounded records returned by the bridge.\n"
+    "body": "## What this does\nThe overview gathers product definitions, warning or failed quality checks and recent run counts from the current metadata snapshot. Each product has an **Inspect product** action.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Run **Open Data Product Overview**.\n3. Select **Inspect product** on the product you want to understand.\n\n## Read the screenshot\nThis earlier synthetic workspace contains three small smoke-test products. The portfolio case above adds nine related definitions in the same native workflow. Counts describe the current metadata snapshot and may change after a trial and another refresh.\n\n## Keep in mind\nThe overview does not run products. Refresh is explicit, and the summary shows only the bounded records returned by the bridge.\n"
   },
   {
     "slug": "products",

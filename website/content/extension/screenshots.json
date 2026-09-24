@@ -75,6 +75,54 @@
       "width": 1275,
       "height": 900,
       "sha256": "da09e29c4903756e5283c0face728417556e049b803930f1d9ea88042f795119"
+    },
+    "portfolio-kpi-trial.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "c3a2908c32c0357815de86db6703e9ebe187bdbc2ab6a7bdf3d8eb008b67406e",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
+    },
+    "portfolio-lineage.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "f770dcf2d1ea32e57172f03f2d8d6daf2e72eeec0e3332ec47d152da661d4dd4",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
+    },
+    "portfolio-model.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "aae74079c92093faa7e44cf814a09d6f6bc826d69e739d8b9c60b2a5ec678374",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
+    },
+    "portfolio-overview.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "11cde086dd0fc77ffff2845b74e9720acf0c88698051bb053ed26df997a16632",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
+    },
+    "portfolio-product-contract.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "4fc6a8ab30c788238e5eb6ce9753b29ff6ab7036a268ae04e4be057f330136da",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
+    },
+    "portfolio-quality-failure.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "0cec8d03230bace5f3513d5285d487d3dbda2bd88efb37746906e4f9936b749d",
+      "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35964866558",
+      "extension_commit": "a33652ddbb2a93090623a2b863eca650e70608f9",
+      "capture_commit": "a33652ddbb2a93090623a2b863eca650e70608f9"
     }
   }
 }
