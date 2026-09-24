@@ -24,12 +24,13 @@ config <- dataraft.lake::dr_lake_config(
 lake <- dataraft.lake::dr_open_lake(config)
 stopifnot(identical(lake$config$storage$type, "s3"))
 first <- dataraft::dr_publish(
-  dr_product("s3_orders", data.frame(id = 1:3, amount = c(10, 20, 30))),
+  # Above DuckLake's small-table inline threshold, so Parquet must reach S3.
+  dr_product("s3_orders", data.frame(id = 1:10000, amount = 1:10000)),
   to = lake
 )
 stopifnot(
   first$status == "published",
-  identical(dataraft.lake::dr_read_release(lake, "s3_orders")$id, 1:3)
+  identical(dataraft.lake::dr_read_release(lake, "s3_orders")$id, 1:10000)
 )
 path <- file.path(root, "incoming.csv")
 utils::write.csv(data.frame(id = 4L, amount = 40), path, row.names = FALSE)
@@ -43,7 +44,7 @@ dataraft.lake::dr_close_lake(lake)
 lake <- dataraft.lake::dr_open_lake(config, read_only = TRUE)
 on.exit(dataraft.lake::dr_close_lake(lake), add = TRUE)
 stopifnot(
-  identical(dataraft.lake::dr_read_release(lake, "s3_orders")$id, 1:3),
+  identical(dataraft.lake::dr_read_release(lake, "s3_orders")$id, 1:10000),
   identical(dataraft.lake::dr_read_release(lake, "s3_incoming")$id, 4L),
   nrow(dataraft.lake::dr_releases(lake)) == 2L
 )
