@@ -45,4 +45,9 @@ for (path in list.files(
     sum(summary$passed),
     sum(summary$skipped)
   ))
+  if (grepl("dataraft[.]lake", path, fixed = FALSE) &&
+      sum(summary$skipped) > 107L) {
+    stop(sprintf("Lake skipped %d test blocks; review and lower the skip budget (107).",
+      sum(summary$skipped)))
+  }
 }
