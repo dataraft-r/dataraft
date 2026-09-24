@@ -18,7 +18,7 @@ The generated HTML in `dist/` is deployable on any static host. Every route has 
 
 The reference renderer preserves documented signatures, arguments, values, details, named sections and examples from Rd files. It does not execute R or claim examples have been rerun for this website build.
 
-Screenshots are original Positron captures from successful native extension-host CI run 35942174468, extension commit fa33c697d8b8cbc80db83e8c7955a032fc7eea9e. They show synthetic fixtures in the actual application, not a recreated UI. VS Code supports offline metadata and YAML editing; the native R flows shown require Positron.
+Screenshots are original Positron captures from successful native extension-host CI run 35942844863, extension commit 0d55d405369d3cd547bb0f05c66357be7f32d50f. They show synthetic fixtures in the actual application, not a recreated UI. VS Code supports offline metadata and YAML editing; the native R flows shown require Positron.
 
 ## Validation
 

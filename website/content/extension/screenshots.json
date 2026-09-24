@@ -1,7 +1,7 @@
 {
-  "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35942174468",
-  "extension_commit": "fa33c697d8b8cbc80db83e8c7955a032fc7eea9e",
-  "capture_commit": "fa33c697d8b8cbc80db83e8c7955a032fc7eea9e",
+  "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35942844863",
+  "extension_commit": "0d55d405369d3cd547bb0f05c66357be7f32d50f",
+  "capture_commit": "0d55d405369d3cd547bb0f05c66357be7f32d50f",
   "host": "Positron 2026.09.1-2",
   "r_version": "4.5.1",
   "captured_at": "2026-09-24",
@@ -9,72 +9,72 @@
     "feature-select-session.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "b694aee238d62f12adf2dc1c6d2b6a4b98e20d2577c741663c1d6d9282ef3f8d"
+      "sha256": "3eff6d491938caf57a14f0b52f52d723480f600863b8ff41126d473c1f816515"
     },
     "feature-inspect-product.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "4113f8fc48eff6e9c64170e30484c199f224a29b2ab7879852c769579f3bee4a"
+      "sha256": "e1135b58fa4568ec4247d65ef6b6f9648e65c66e8f7a80e038dc34f80e7cb2ca"
     },
     "feature-trial-completed.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "487f356a6eccdff3ee7ba86bbf8046a3bb89c4d22ba7f476288c40e0ccd14148"
+      "sha256": "4f4a5312bdb3e5375c4808e62db4c927988bb0e9874f3bddc61f5ebd97922575"
     },
     "feature-trial-blocked.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "0e0e1dd4d5f35549e33a0ebfd0cf57c7d57c125e93ca2866c179dc6cf2ac0cf5"
+      "sha256": "0543e442b9a0661a3cd63400d029725e886bb93c2301da39198ae7d7b403cba4"
     },
     "feature-quality-evidence.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "3e2fcf8dea1e7a530bf8e0abce8f4857be9f742131b4d526fcddc5904d01d355"
+      "sha256": "3a60e80223770d4e5023e1b1972183369d830857d1b18e6270e59cd54e382e6c"
     },
     "rule-diagnostic.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "ceb20865272ae8796cfa73ed0a515858c8d12091252471f4797b7b143c7aae7c"
+      "sha256": "c67b253adba69e19238adcf05e5c9b555a290bfe85b4348487e8b61746d36be1"
     },
     "bounded-data-explorer.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "b36c420610988bc8b40ccbb319bb54fcc9ec6b54d2bef07ebb89129eecb6b0dd"
+      "sha256": "40c155f9f860cfeea24959ac04ced05bbe8245dff75168b4e2d28bbe12149493"
     },
     "feature-directed-lineage.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "b9f4998a051bad1a82721dfa01b8f60ebbff26063ce4fd04954527f4d2d305d8"
+      "sha256": "cda2791de3c6001d2c6b0e718ea3387a0275d89ad5b6b8fc1531fbe4cefcc100"
     },
     "feature-yaml-editor.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "4221d8bfc44f7ff56a6f0ac3d0ca4ad99ce30bf6ce056623c39aca289aa95ed5"
+      "sha256": "eaf583168445c3c7c22a5e35a4df23997e1fc921f9965731c5b3e8314084ef2f"
     },
     "feature-yaml-diff.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "6e84ef71751b6934f8940bdfe3b9e848d199087937a3e439f05012b617e4e38b"
+      "sha256": "b2b3fbe541daa08965433efa936c2e7113e4cd55f42174ae6be327e296170614"
     },
     "feature-yaml-preview.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "a338a52be6c7be2a25eac2596a0b112c862c6024035c5570a30dae041fa5960d"
+      "sha256": "ff4e1a832ae3a20494ce08a7df8ea3910bff52b3de8a38f2ed7a3d0954444096"
     },
     "feature-yaml-applied.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "a8d31ba9a7175d45b6ecd0ddaebb01c433e856a086fdf57641739ab6f080c200"
+      "sha256": "63c50b96aa10a7d756b62bc3e8f162a144aa963da7d737594738a74be007bc33"
     },
     "feature-overview.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "f16ba55463f93cfcd647b9bfc038ab6b5a21b93e5e015a22da8e1215080ee616"
+      "sha256": "fcff6353a9ae8ed92d9e66717d6016188f03dcfb9f15bdc72bd03f91423595e4"
     },
     "feature-product-guarantees.png": {
       "width": 1275,
       "height": 900,
-      "sha256": "4a0fa94da89dd7a8a639a797c15eff3d944dff5c839b98e999135e921fa9c1f2"
+      "sha256": "da09e29c4903756e5283c0face728417556e049b803930f1d9ea88042f795119"
     }
   }
 }
