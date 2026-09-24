@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           repository: dataraft-r/dataraft-positron
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || '56cecb736a94e1ef8c7e0aceec4e37e3f0a4c4c3' }}
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || '17e92c8955ce32573a12af67ae781756129392a4' }}
           path: extension
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
