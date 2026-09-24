@@ -27,11 +27,22 @@ jobs:
       - name: Obtain locked family sources
         working-directory: .
         run: python scripts/checkout-family.py
+      - name: Select matching extension branch or pinned release
+        id: extension-ref
+        working-directory: .
+        shell: bash
+        run: |
+          ref=17e92c8955ce32573a12af67ae781756129392a4
+          if [[ "$GITHUB_EVENT_NAME" == pull_request && -n "$FAMILY_BRANCH" ]] &&
+             git ls-remote --exit-code --heads https://github.com/dataraft-r/dataraft-positron.git "refs/heads/$FAMILY_BRANCH" >/dev/null; then
+            ref="$FAMILY_BRANCH"
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
       - name: Obtain pinned native UI test suite
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           repository: dataraft-r/dataraft-positron
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || '17e92c8955ce32573a12af67ae781756129392a4' }}
+          ref: ${{ steps.extension-ref.outputs.ref }}
           path: extension
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:

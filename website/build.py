@@ -113,22 +113,12 @@ result <- dr_run(orders,
 )
 
 dr_collect(result)'''
-home='''<section class="hero"><div><span class="eyebrow">THE DATA PRODUCT FRAMEWORK FOR R</span><h1>Good data.<br>By definition.</h1><p class="lead">Turn repeated deliveries into reusable data products. Define the contract, check the quality and keep the evidence.</p><div class="actions"><a class="button" href="/start/">Start with a data product <span>↗</span></a><a class="text-link" href="/packages/">Explore the packages</a></div><p class="fine">R first · Composable · Open source</p></div><div class="hero-code"><div class="code-title"><span>your-first-product.R</span><span>R</span></div>'''+code(intro)+'''<div class="code-result"><span>✓</span> Checked output, ready to inspect.</div></div></section><section class="principles"><div><span>01 / DEFINE</span><h3>Make expectations explicit.</h3><p>Column types, keys and business rules live with the product.</p></div><div><span>02 / CHECK</span><h3>Catch the bad delivery.</h3><p>Run the same preparation and checks before writing a target.</p></div><div><span>03 / RETAIN</span><h3>Know what went into it.</h3><p>Pin releases and retain evidence for repeatable reporting.</p></div></section><section class="section"><div class="section-heading"><div><span class="eyebrow">A CLEAR PATH IN</span><h2>Learn it one product at a time.</h2></div><p>Start in memory. Add storage and integrations when your workflow needs them.</p></div>'''+cards([
-('/start/','GET STARTED / 5 CHAPTERS','From your first check to a saved delivery','A guided path through products, contracts, quality and versioned RDS output.'),('/learn/','GO FURTHER','Build a real reporting workflow','Related tables, insurance deliveries, open contracts and adapter authoring.'),('/extension/','IN YOUR EDITOR','See your products in Positron','Inspect metadata, follow lineage and work with contract YAML.')])+'''</section><section class="install-band"><div><span class="eyebrow">START SMALL</span><h2>One family. Your choice of tools.</h2><p>Use the metapackage for the common API, or install only the component you need.</p></div>'''+code('install.packages("pak")\npak::pak("dataraft-r/dataraft")')+'''</section><p class="notice">Development software: APIs and integrations are experimental. Read the installation and compatibility guidance before pinning a production environment.</p>'''
-add('/','DataRaft',home,'Home','Checked data products, contracts and reproducible reporting in R.')
+home='''<section class="hero hero-simple"><div><span class="eyebrow">DATARAFT · DATA TOOLS FOR R</span><h1>Know which data<br>you can trust.</h1><p class="lead">Every month, a new file arrives. Is it complete? Is it the right version? Can you explain a number in your report later? DataRaft helps you check the data, save the accepted version and show what happened.</p><div class="actions"><a class="button" href="/about/">See a simple example <span>↗</span></a><a class="text-link" href="/start/">I use R: get started</a></div><p class="fine">An open source family of R packages · Start small · Add tools when you need them</p></div><div class="home-example" aria-label="Illustrative monthly report example"><span class="eyebrow">A MONTHLY REPORT, EXPLAINED</span><h2>“Why did September's report show 8.1%?”</h2><p>Months later, a colleague asks where a cancellation rate came from. You need to find the data used, the checks it passed and the agreed calculation.</p><ol><li><strong>Set the rules</strong><span>Which columns and values should the data contain?</span></li><li><strong>Check the delivery</strong><span>Find errors before they enter the report.</span></li><li><strong>Keep the accepted version</strong><span>Find the same input again when someone asks.</span></li></ol><p class="fine">8.1% is an illustrative figure, not a calculated result. Saving and calculating are separate steps you configure.</p></div></section><section class="section home-explainer"><div class="section-heading"><div><span class="eyebrow">WHY DATARAFT?</span><h2>A repeatable way to work with data.</h2></div><p>A report can change when its input, checks or calculation change. DataRaft keeps those decisions visible.</p></div><div class="principles"><div><span>01 / DESCRIBE</span><h3>Say what you expect.</h3><p>A data contract describes the fields your data should have. You decide the business rules.</p></div><div><span>02 / CHECK</span><h3>Spot problems early.</h3><p>Run quality checks on each delivery. Inspect a rejected result and correct it.</p></div><div><span>03 / REMEMBER</span><h3>Explain the result later.</h3><p>Save an accepted version with the chosen storage tool and keep evidence about the run.</p></div></div><p class="explain-link">DataRaft calls this reusable definition a <strong>data product</strong>. It brings the rules, checks and delivery steps together. <a href="/about/">Follow the full example and meet each package ↗</a></p></section><section class="section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR START</span><h2>Begin where you are.</h2></div><p>You can understand the idea before writing any R code.</p></div>'''+cards([
+('/about/','NEW TO DATA PRODUCTS','See the idea in plain English','Follow one monthly report from incoming data to an explainable result.'),('/start/','READY TO USE R','Make your first checked product','Five short chapters, beginning with an in-memory example.'),('/training/','LEARN BY DOING','Follow the full R course','Work through a downloadable script with guided exercises.')])+'''</section><section class="install-band"><div><span class="eyebrow">WHEN YOU ARE READY</span><h2>Try DataRaft in R.</h2><p>The metapackage gives you the common commands. Its specialist packages add storage, connections, metrics and editor support.</p><p><a href="/packages/">See the packages ↗</a> · <a href="/extension/">See the Positron extension ↗</a></p></div>'''+code('install.packages("pak")\npak::pak("dataraft-r/dataraft")')+'''</section><p class="notice">DataRaft is development software. Its APIs and integrations are experimental. Read the <a href="/learn/compatibility/">compatibility guide</a> before using it in a production environment.</p>'''
+add('/','DataRaft',home,'Home','Plain-English introduction to DataRaft: check recurring data deliveries and explain reported results.')
 plain_english=(ROOT/'content/guides/plain-english.md').read_text()
 add('/about/','What is DataRaft?',md(plain_english),'About',
     'A plain-English introduction to the DataRaft package family using a monthly insurance report.')
-pages['/']['body']=pages['/']['body'].replace(
-    '<section class="principles">',
-    '<section class="story-teaser"><div><span class="eyebrow">A REAL-WORLD QUESTION</span>'
-    '<h2>Why did September’s report say 8.1%?</h2>'
-    '<p>To answer, you need the data used at the time, the checks it passed and the agreed calculation. Follow one simple insurance example to see how the DataRaft tools fit together.</p>'
-    '<p class="fine">8.1% is an illustrative figure, not a calculated result.</p></div>'
-    '<a class="button" href="/about/">DataRaft in plain English <span>↗</span></a></section><section class="principles">')
-pages['/']['body']=pages['/']['body'].replace(
-    '<a class="text-link" href="/packages/">Explore the packages</a>',
-    '<a class="text-link" href="/about/">What is DataRaft?</a>')
 start_titles=['Install and orient','Define a product','Check a delivery','Save and pin a version','Put it together']
 start_bodies=[
 '''## Start without a database
@@ -160,21 +150,13 @@ A contract makes the schema explicit. Here each row represents one order and `id
 ```r
 library(dataraft)
 contract <- dr_contract("orders",
-  columns = c(id = "integer", amount = "numeric"), key = "id") |>
-  dataraft.core::dr_contract_meta(owner = "Analytics", grain = "One order")
-orders <- dr_product("orders", contract = contract) |>
+  columns = c(id = "integer", amount = "numeric"), key = "id")
+orders <- dr_product("orders", contract = contract, owner = "Analytics") |>
   dr_add_quality(dr_quality(~ amount >= 0, action = "block"))
 ```
-## Keep preparation reusable
-Attach a recipe when the same preparation should apply to every delivery. Ordinary dplyr verbs and transform functions also fit the product model.
-```r
-orders <- orders |>
-  dataraft.core::dr_add_recipe(
-    dataraft.core::dr_recipe() |>
-      dataraft.core::dr_step_mutate(amount = round(amount, 2))
-  )
-```
-## Inspect before execution
+The contract describes the columns and key. The quality rule rejects negative amounts. You can add preparation steps later if the data needs them.
+
+## Inspect the definition before execution
 ```r
 dataraft.core::dr_plan(orders)
 dataraft.core::dr_validate(orders)
@@ -189,7 +171,6 @@ checked <- dr_run(orders, data = bad_delivery,
   write = FALSE, stop_on_failure = FALSE)
 checked$status
 # "blocked"
-dataraft.core::dr_quality_rows(checked)
 dr_quality_report(checked)
 ```
 The rejected row has `id = 2` and `amount = -75`. The product definition stays reusable: fix the delivery, not the rule.
@@ -250,7 +231,7 @@ The [insurance walkthrough](/learn/relational-insurance/) uses synthetic data an
 ## Keep responsibilities clear
 DataRaft coordinates checked deliveries. `dm` expresses relational structure, dbt develops SQL models, targets schedules pipelines and pointblank supplies standalone validation. Add the integration that serves the use case; none of them is a prerequisite for the first product.
 ''']
-add('/start/','Get started', '<p class="lead">A guided introduction in five chapters. Start in memory and finish with a versioned, checked delivery.</p><p>New to R packages or data products? <a href="/about/">Read the plain-English overview first.</a></p>'+cards([(f'/start/{i+1}/',f'CHAPTER {i+1:02}',t, ['Install the development family and understand its objects.','Declare schema, keys and a reusable quality gate.','Inspect a blocked result and correct the delivery.','Publish locally and read the same snapshot again.','Move on to related tables and real reporting.'][i]) for i,t in enumerate(start_titles)]),'Get started')
+add('/start/','Get started', '<p class="lead">Make one checked delivery in five chapters. Start with a tiny example in R, then save a version you can find again.</p><p>Want the idea first? <a href="/about/">Follow the monthly report in plain English</a>. Prefer exercises? <a href="/training/">Open the hands-on R course</a>.</p>'+cards([(f'/start/{i+1}/',f'CHAPTER {i+1:02}',t, ['Install the development family and see a ready-made example.','Describe the expected columns and a quality rule.','See what happens when a delivery contains an error.','Save the corrected data and read that version again.','Use the same approach in a larger report.'][i]) for i,t in enumerate(start_titles)]),'Get started')
 for i,(title,body) in enumerate(zip(start_titles,start_bodies)):
  nav='<div class="chapter-nav">'+(f'<a href="/start/{i}/">← {start_titles[i-1]}</a>' if i else '<a href="/start/">All chapters</a>')+(f'<a href="/start/{i+2}/">{start_titles[i+1]} →</a>' if i<4 else '<a href="/learn/">Continue learning →</a>')+'</div>'
  add(f'/start/{i+1}/',title,md(body)+nav,'Get started',f'Chapter {i+1} of the DataRaft introduction.')
@@ -271,7 +252,10 @@ add('/learn/output-ports/','Publish to multiple output ports',md(ports),'Learn',
     'Release evidence, SLA checks and partial output failures.')
 learn.append(('/learn/output-ports/','DATA PRODUCTS','Publish to multiple output ports',
               'One checked delivery, multiple targets and explicit partial-failure evidence.'))
-add('/learn/','Go further with DataRaft','<p class="lead">Learn by task: model relationships, connect tools, preserve evidence and extend the framework.</p><p>For a first look at how the tools work together, <a href="/about/">follow the monthly report example</a>.</p>'+cards(learn),'Learn')
+add('/learn/','Learn DataRaft','<p class="lead">A clear path from the idea to a working data product.</p><h2>Choose where to begin</h2>'+cards([
+('/about/','NO R NEEDED','Understand the idea','A monthly report shows why data rules, checks and saved versions matter.'),
+('/start/','FIRST R EXAMPLE','Make a checked delivery','Five chapters from installation to reading a saved version.'),
+('/training/','PRACTICE','Work through the R course','Guided exercises and a complete downloadable script.')])+'<h2>Explore a specific task</h2><p>These guides go deeper when you need related tables, integrations, governance or technical reference.</p>'+cards(learn),'Learn')
 add('/packages/','One family. Clear responsibilities.','<p class="lead">Start with the common product API. Add storage, integrations and editor support independently.</p><p>What do these parts mean in practice? <a href="/about/#what-is-the-dataraft-metapackage">See each package in one monthly reporting example.</a></p>'+cards([(f'/packages/{p}/',tag,p,desc) for p,(_,tag,desc) in packages.items()]),'Packages')
 entry={'dataraft':['dr_product','dr_contract','dr_run','dr_collect','dr_demo'],'dataraft.core':['dr_product','dr_add_source','dr_recipe','dr_validate','dr_quality_rows'],'dataraft.lake':['dr_open_lake','dr_target_lake','dr_releases','dr_close_lake'],'dataraft.adapters':['dr_target_rds','dr_source_database','dr_contract_from_odcs','dr_catalog_openmetadata'],'dataraft.dbt':['dr_dbt_project','dr_dbt_build'],'dataraft.metrics':['dr_metric','dr_measure','dr_report_verify'],'dataraft.ide':['ide_context','ide_request']}
 for pkg,(title,tag,desc) in packages.items():
