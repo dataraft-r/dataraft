@@ -2,6 +2,12 @@
 
 A static English documentation site for the DataRaft package family and editor extension.
 
+The [plain-English overview](content/guides/plain-english.md) explains the whole
+family through one monthly insurance reporting example. `build.py` renders it at
+`/about/` and links it from the home page, package pages, learning path and
+extension page. Keep the illustrative cancellation rate distinct from a
+calculated package result when editing the story.
+
 ## Build
 
 ```sh
