@@ -73,7 +73,9 @@ jobs:
         shell: Rscript {0}
         run: |
           if (!requireNamespace('pak', quietly = TRUE)) {
-            install.packages('pak', repos = 'https://cloud.r-project.org')
+            pak_repo <- sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s',
+              .Platform$pkgType, R.Version()$os, R.Version()$arch)
+            install.packages('pak', repos = pak_repo)
           }
           source('scripts/build-family-binaries.R')
       - name: Verify archive format and architecture
