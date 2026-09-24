@@ -54,7 +54,7 @@ jobs:
               .Platform$pkgType, R.Version()$os, R.Version()$arch)
             install.packages("pak", repos = pak_repo)
           }
-          pak::pkg_install("dataraft", ask = FALSE)
+          pak::pkg_install(family, ask = FALSE)
           stopifnot(all(vapply(family, requireNamespace, logical(1), quietly = TRUE)))
           for (name in family) {
             stopifnot(identical(as.character(utils::packageVersion(name)), records[name, "Version"]))
