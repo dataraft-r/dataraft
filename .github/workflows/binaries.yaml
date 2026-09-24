@@ -126,13 +126,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="family-binaries-${GITHUB_SHA}"
-          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" \
+              --json isDraft --jq '.isDraft' 2>/dev/null | grep -qx false; then
             echo "A complete binary release already exists for this commit."
             exit 0
           fi
-          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "DataRaft family binaries ${GITHUB_SHA:0:12}" \
-            --notes "Seven packages, built for each listed R/OS/architecture. Assets are named by platform and R version."
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --draft --title "DataRaft family binaries ${GITHUB_SHA:0:12}" \
+              --notes "Seven packages, built for each listed R/OS/architecture. Assets are named by platform and R version."
+          fi
           python - <<'PY'
           from pathlib import Path
           import subprocess
@@ -145,5 +148,6 @@ jobs:
                   subprocess.run(['gh', 'release', 'upload',
                     'family-binaries-' + __import__('os').environ['GITHUB_SHA'],
                     str(target),
-                    '--repo', __import__('os').environ['GITHUB_REPOSITORY']], check=True)
+                    '--clobber', '--repo', __import__('os').environ['GITHUB_REPOSITORY']], check=True)
           PY
+          gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false
