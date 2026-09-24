@@ -127,9 +127,9 @@ portfolio_case <- function(output_root = tempfile("portfolio-case-")) {
     dataraft.core::dr_add_recipe(
       dataraft.core::dr_recipe() |>
         dataraft.core::dr_step_lookup(products$policies, by = "policy_id",
-                                       engine = "native", name = "policy_terms") |>
+                                       name = "policy_terms") |>
         dataraft.core::dr_step_lookup(products$brokers, by = "broker_id",
-                                       engine = "native", name = "broker_directory")
+                                       name = "broker_directory")
     ) |>
     dplyr::group_by(month, channel) |>
     dplyr::summarise(exposed = sum(exposed_at_start),
