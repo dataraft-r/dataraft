@@ -21,7 +21,7 @@ for (i in seq_len(nrow(matrix))) {
     kind <- "win.binary"
   } else {
     arch <- if (platform == "linux-arm64-noble") "arm64" else "x86_64"
-    destination <- file.path(output, "linux", paste0("noble-", arch), minor)
+    destination <- file.path(output, "linux", paste0("noble-", arch), minor, "src", "contrib")
     kind <- "source"
   }
   dir.create(destination, recursive = TRUE, showWarnings = FALSE)
