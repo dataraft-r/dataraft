@@ -21,6 +21,8 @@ jobs:
       DATARAFT_TEST_DUCKLAKE: "false"
       DATARAFT_COVERAGE_PACKAGE: ${{ matrix.package }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DATARAFT_FAMILY_MODE: ${{ github.event_name == 'pull_request' && 'head' || 'pinned' }}
+      FAMILY_BRANCH: ${{ github.head_ref }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Obtain pinned family sources

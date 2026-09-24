@@ -2,8 +2,11 @@
 import json, os, pathlib, re, subprocess, sys
 lock = json.loads(pathlib.Path("family-lock.json").read_text())
 mode = os.environ.get("DATARAFT_FAMILY_MODE", "pinned")
+branch = os.environ.get("FAMILY_BRANCH", "")
 if mode not in ("pinned", "head"):
     raise SystemExit("Unknown family mode")
+if branch and (not re.fullmatch(r"[A-Za-z0-9_./-]+", branch) or ".." in branch):
+    raise SystemExit("Invalid family branch")
 resolved_packages = {}
 component = sys.argv[1] if len(sys.argv) > 1 else "dataraft"
 for name, spec in lock["packages"].items():
@@ -15,6 +18,12 @@ for name, spec in lock["packages"].items():
         print(name + "=" + resolved, flush=True)
         continue
     ref = "refs/heads/main" if mode == "head" else spec["ref"]
+    if mode == "head" and branch:
+        candidate = "refs/heads/" + branch
+        remote = "https://github.com/" + spec["repository"] + ".git"
+        if subprocess.check_output(["git", "ls-remote", "--heads", remote,
+                                    candidate], text=True).strip():
+            ref = candidate
     if mode == "pinned" and not re.fullmatch(r"[0-9a-f]{40}", ref):
         raise SystemExit("Family refs must be full immutable commit SHAs")
     path = pathlib.Path("packages" if component == "dataraft" else "family") / name

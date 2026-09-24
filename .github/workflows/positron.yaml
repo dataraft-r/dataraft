@@ -20,6 +20,8 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       DATARAFT_EXPECT_R_VERSION: "4.5.1"
+      DATARAFT_FAMILY_MODE: ${{ github.event_name == 'pull_request' && 'head' || 'pinned' }}
+      FAMILY_BRANCH: ${{ github.head_ref }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v4
       - name: Obtain locked family sources
@@ -29,7 +31,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           repository: dataraft-r/dataraft-positron
-          ref: 56cecb736a94e1ef8c7e0aceec4e37e3f0a4c4c3
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || '56cecb736a94e1ef8c7e0aceec4e37e3f0a4c4c3' }}
           path: extension
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
