@@ -99,9 +99,36 @@ jobs:
           path: binary-output/
           if-no-files-found: error
           retention-days: 30
+  index:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: '4.6'
+          use-public-rspm: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: dataraft-*
+          path: matrix-assets
+      - name: Build and validate all platform package indices
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          assets = Path('assets')
+          assets.mkdir()
+          for directory in Path('matrix-assets').glob('dataraft-*'):
+              for item in directory.iterdir():
+                  if item.name != 'checksums.txt':
+                      (assets / (directory.name + '--' + item.name)).write_bytes(item.read_bytes())
+          assert len(list(assets.iterdir())) == 18 * 7
+          PY
+          Rscript scripts/assemble-binary-repository.R assets package-repository
+          Rscript -e 'indexes <- list.files("package-repository", "^PACKAGES$", recursive=TRUE, full.names=TRUE); stopifnot(length(indexes) == 18L); stopifnot(all(vapply(indexes, function(f) nrow(read.dcf(f)) == 7L, logical(1))))'
   release:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
+    needs: [build, index]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
