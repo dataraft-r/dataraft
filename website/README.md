@@ -38,7 +38,9 @@ MIT license. Package documentation and extension assets are by Jan-Hendrik Weine
 
 ## Extension feature gallery
 
-The feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, extension commit, original dimensions and SHA-256 for each PNG. The documentation captures are produced by the native Positron click suite in dataraft-positron. Images are not cropped or composited.
+The feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, extension commit, original dimensions and SHA-256 for each PNG. New images may override the gallery's original run and commit provenance per image. The documentation captures are produced by the native Positron click suite in dataraft-positron. Images are not cropped or composited.
+
+The portfolio guide uses the installed `inst/examples/portfolio-case.R` in both R regression tests and a real Positron session. Six related insurance tables, contracts, a relational model, a channel lapse-rate product and one deliberately invalid payment record provide a reproducible case for product, quality and lineage screenshots.
 
 ## Hands-on training
 
