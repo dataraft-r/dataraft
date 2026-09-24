@@ -19,6 +19,23 @@ objects. Inspect interrupted runs and use the lake recovery and cleanup function
 before retrying. Do not assume an external target adapter provides the same
 transaction or recovery guarantees as a managed lake.
 
+Output ports receive the same checked delivery in sequence. A successful primary
+port can remain committed if a later port fails; the run then reports an error
+and records each attempted port's status. Publication across ports is not atomic.
+Inspect `port_outputs` before retrying a partial delivery.
+
+Product policies and any additional policies from `options(dataraft.policies = ...)`
+are checked at their configured validate, publish or activate event. Publish
+decisions, including policy ID and version, are retained in run evidence. A policy
+check proves only that the required metadata was present at evaluation time;
+organization-wide options remain session state, so record and deploy them consistently.
+Blocked publication does not create a successful run record.
+
+An output SLA needs an explicit `business_date` and its evaluation is retained in
+run evidence. Meeting the calculated deadline reports when DataRaft published
+the output. It does not establish that a consumer could reach or read the output,
+or that a later dependency delivered it on time.
+
 Local lake writes require one coordinated writer. Do not run independent local
 writers against the same catalog. Shared writers require the supported PostgreSQL
 coordination configuration; using an object store alone does not provide locking.

@@ -43,17 +43,17 @@
   },
   {
     "slug": "guarantees",
-    "title": "Review contract, ports and delivery timing",
+    "title": "Review contracts, policies and delivery timing",
     "command": "Select a governed product in Data Products",
     "host": "Positron",
-    "summary": "Understand the declared schema, output port and SLA in one dashboard.",
+    "summary": "Inspect policy definitions, output ports and SLA in one dashboard.",
     "images": [
       [
         "feature-product-guarantees.png",
         "The governed.orders dashboard shows its contract columns, warehouse output port and 08:00 UTC delivery timing."
       ]
     ],
-    "body": "## What this does\nThe product dashboard renders bounded lifecycle, contract, port and SLA metadata as readable sections. You can see the delivery agreement without opening raw JSON.\n\n## Try it\n1. Refresh a workspace that contains a product with a contract or ports.\n2. Select the product in **Data Products**.\n3. Review **Contract**, **Columns**, **Input ports** and **Output ports**.\n\n## Read the screenshot\n`governed.orders` is a synthetic definition with a two-column contract and one output port named `warehouse`. Its SLA declares availability by 08:00 UTC. The preview shows the guarantee definition, not proof that the target was published on time.\n\n## Keep in mind\nThe bridge omits destination paths, credentials and row values. A declared SLA or contract is a promise to check in your workflow, not evidence of a successful release.\n"
+    "body": "## What this does\nThe product dashboard renders bounded lifecycle, contract, policy, port and SLA metadata as readable sections. You can see the delivery agreement without opening raw JSON.\n\n## Try it\n1. Refresh a workspace that contains a product with a contract or ports.\n2. Select the product in **Data Products**.\n3. Review **Contract**, **Columns**, **Policy checks**, **Input ports** and **Output ports**.\n\n## Read the screenshot\n`governed.orders` is a synthetic definition with a two-column contract and one output port named `warehouse`. Its SLA declares availability by 08:00 UTC. The preview shows the guarantee definition, not proof that the target was published on time.\n\n## Keep in mind\nThe bridge omits destination paths, credentials and row values. A listed policy is a definition, not a pass decision. A declared SLA or contract is a promise to check in your workflow, not evidence of a successful release.\n"
   },
   {
     "slug": "trials",

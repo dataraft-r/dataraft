@@ -1,5 +1,7 @@
 # Record the sources actually installed by install-family.R, not older extension pins.
 lock <- jsonlite::read_json("family-lock.json", simplifyVector = FALSE)
+mode <- Sys.getenv("DATARAFT_FAMILY_MODE", "pinned")
+resolved <- jsonlite::read_json("check/resolved-family.json", simplifyVector = FALSE)
 packages <- lapply(names(lock$packages), function(package) {
   entry <- lock$packages[[package]]
   path <- if (package == "dataraft") "." else file.path("packages", package)
@@ -8,7 +10,9 @@ packages <- lapply(names(lock$packages), function(package) {
     system2("git", c("rev-parse", "HEAD"), stdout = TRUE)
   )
   stopifnot(length(sha) == 1L)
-  if (entry$ref != "self") {
+  if (mode == "head") {
+    stopifnot(identical(sha, resolved$packages[[package]]$ref))
+  } else if (entry$ref != "self") {
     stopifnot(identical(sha, entry$ref))
   }
   stopifnot(identical(
