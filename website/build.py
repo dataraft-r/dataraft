@@ -150,21 +150,13 @@ A contract makes the schema explicit. Here each row represents one order and `id
 ```r
 library(dataraft)
 contract <- dr_contract("orders",
-  columns = c(id = "integer", amount = "numeric"), key = "id") |>
-  dataraft.core::dr_contract_meta(owner = "Analytics", grain = "One order")
-orders <- dr_product("orders", contract = contract) |>
+  columns = c(id = "integer", amount = "numeric"), key = "id")
+orders <- dr_product("orders", contract = contract, owner = "Analytics") |>
   dr_add_quality(dr_quality(~ amount >= 0, action = "block"))
 ```
-## Keep preparation reusable
-Attach a recipe when the same preparation should apply to every delivery. Ordinary dplyr verbs and transform functions also fit the product model.
-```r
-orders <- orders |>
-  dataraft.core::dr_add_recipe(
-    dataraft.core::dr_recipe() |>
-      dataraft.core::dr_step_mutate(amount = round(amount, 2))
-  )
-```
-## Inspect before execution
+The contract describes the columns and key. The quality rule rejects negative amounts. You can add preparation steps later if the data needs them.
+
+## Inspect the definition before execution
 ```r
 dataraft.core::dr_plan(orders)
 dataraft.core::dr_validate(orders)
@@ -179,7 +171,6 @@ checked <- dr_run(orders, data = bad_delivery,
   write = FALSE, stop_on_failure = FALSE)
 checked$status
 # "blocked"
-dataraft.core::dr_quality_rows(checked)
 dr_quality_report(checked)
 ```
 The rejected row has `id = 2` and `amount = -75`. The product definition stays reusable: fix the delivery, not the rule.
