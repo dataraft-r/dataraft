@@ -14,18 +14,46 @@
     "body": "## What this does\nThe extension attaches to an existing R console session. Your objects and retained trial results stay in that session. DataRaft does not start an R process on your behalf.\n\n## Try it\n1. Start an R console in Positron and load your DataRaft workspace.\n2. Install `dataraft.ide` in the R environment used by that session.\n3. Open the Command Palette and choose **DataRaft: Select R Session**.\n4. Select the session whose workspace contains your products.\n5. Use **DataRaft: Refresh Metadata** to populate the DataRaft views.\n\n## Read the screenshot\nThe picker identifies the existing R session. Selecting it establishes the execution context for subsequent explicit commands. The R session identifier is temporary and will be different in your own workspace.\n\n## Keep in mind\nLive R commands require Positron and a trusted workspace. In a remote workspace, the extension and R must run on the same host and share access to the temporary directory. Switching sessions invalidates responses still in flight. A busy session rejects execution requests; wait until it is ready before trying again.\n"
   },
   {
+    "slug": "overview",
+    "title": "Browse the workspace overview",
+    "command": "DataRaft: Open Data Product Overview",
+    "host": "Positron",
+    "summary": "Find products and see quality and run counts before opening details.",
+    "images": [
+      [
+        "feature-overview.png",
+        "The workspace overview lists three synthetic products with individual Inspect product actions."
+      ]
+    ],
+    "body": "## What this does\nThe overview gathers product definitions, warning or failed quality checks and recent run counts from the current metadata snapshot. Each product has an **Inspect product** action.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Run **Open Data Product Overview**.\n3. Select **Inspect product** on the product you want to understand.\n\n## Read the screenshot\nThe synthetic workspace contains three product definitions. Counts describe the current metadata snapshot and may change after a trial and another refresh.\n\n## Keep in mind\nThe overview does not run products. Refresh is explicit, and the summary shows only the bounded records returned by the bridge.\n"
+  },
+  {
     "slug": "products",
-    "title": "Inspect a data product",
+    "title": "Explore a data product",
     "command": "DataRaft: Inspect Product",
     "host": "Positron",
-    "summary": "Browse definitions and inspect the metadata behind a product.",
+    "summary": "Read product identity, rules, columns and available actions in a guided view.",
     "images": [
       [
         "feature-inspect-product.png",
-        "Selecting passing.orders opens its product metadata alongside the Data Products tree."
+        "The Positron product dashboard shows identity, contract, ports and quality rules for passing.orders."
       ]
     ],
-    "body": "## What this does\nThe **Data Products** tree makes workspace definitions discoverable. Selecting a product opens an inspectable metadata document. Expanding an uncached product requests its detail, including the available contract, columns, rules and sources.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Open the DataRaft activity-bar view.\n3. Select a product in **Data Products**, or use **Inspect Product** from the Command Palette.\n4. Expand the product to see the metadata available for that definition.\n\n## Read the screenshot\n`passing.orders` is a synthetic product with one source and one rule. The metadata includes its identity, version, definition status and available actions. This particular test fixture has `contract: null`: an inspectable product is not automatically a schema-validated product. Use an explicit contract in your own workflow when you need schema validation.\n\n## Keep in mind\nInspection returns metadata, not table cells. Refresh is manual and the views show their generation timestamps. A definition's existence does not mean it has passed its checks or been published.\n"
+    "body": "## What this does\nThe **Data Products** tree and **Open Data Product Overview** make workspace definitions discoverable. Inspect opens a structured dashboard with identity, governance, contract, input and output ports, columns, quality rules and sources. Available actions include trial, bounded row view, lineage and refresh.\n\n## Try it\n1. Select an R session and choose **Refresh Metadata**.\n2. Open **Open Data Product Overview** or select a product in **Data Products**.\n3. Read the product dashboard, then choose an explicit action when needed.\n\n## Read the screenshot\n`passing.orders` is a synthetic product with one quality rule. It has no declared contract or ports. The dashboard distinguishes a missing contract from a successful schema check.\n\n## Keep in mind\nInspection transfers bounded metadata, never table cells. Refresh is manual. A definition's existence does not imply successful checks or publication.\n"
+  },
+  {
+    "slug": "guarantees",
+    "title": "Review contract, ports and delivery timing",
+    "command": "Select a governed product in Data Products",
+    "host": "Positron",
+    "summary": "Understand the declared schema, output port and SLA in one dashboard.",
+    "images": [
+      [
+        "feature-product-guarantees.png",
+        "The governed.orders dashboard shows its contract columns, warehouse output port and 08:00 UTC delivery timing."
+      ]
+    ],
+    "body": "## What this does\nThe product dashboard renders bounded lifecycle, contract, port and SLA metadata as readable sections. You can see the delivery agreement without opening raw JSON.\n\n## Try it\n1. Refresh a workspace that contains a product with a contract or ports.\n2. Select the product in **Data Products**.\n3. Review **Contract**, **Columns**, **Input ports** and **Output ports**.\n\n## Read the screenshot\n`governed.orders` is a synthetic definition with a two-column contract and one output port named `warehouse`. Its SLA declares availability by 08:00 UTC. The preview shows the guarantee definition, not proof that the target was published on time.\n\n## Keep in mind\nThe bridge omits destination paths, credentials and row values. A declared SLA or contract is a promise to check in your workflow, not evidence of a successful release.\n"
   },
   {
     "slug": "trials",
@@ -36,14 +64,14 @@
     "images": [
       [
         "feature-trial-completed.png",
-        "The successful trial returns status completed and a retained result handle."
+        "The successful trial has a completed badge in the native Positron product dashboard."
       ],
       [
         "feature-trial-blocked.png",
-        "The failing trial returns status blocked for failing.orders."
+        "The failing trial has a blocked badge and its retained quality evidence can be inspected separately."
       ]
     ],
-    "body": "## What this does\n**Trial Product** explicitly executes a product through the R bridge. It retains a result that you can inspect afterwards. Configured framework destinations are not published by this command.\n\n## Try it\n1. Select the product definition, rather than a previous result.\n2. Run **DataRaft: Trial Product**.\n3. Read the returned status and result metadata.\n4. Refresh metadata, then inspect **Quality** and **Runs**.\n\n## Compare the two screenshots\nThe first delivery completes its trial. The second contains a negative amount that fails the `nonnegative` rule, so its result is blocked. Both outcomes are retained as evidence. A successful bridge request can therefore contain a blocked product result: read the result status, not just whether the command finished.\n\nThese fixtures deliberately have no explicit schema contract. `completed` describes execution; schema evidence can still be `unvalidated`.\n\n## Keep in mind\nA trial still reads sources and executes your transformations and checks. User functions can have side effects of their own. Cancellation or a timeout stops the extension waiting; it does not guarantee that R code already dispatched has stopped. The bridge retains up to 20 trial results in the session.\n"
+    "body": "## What this does\n**Trial Product** explicitly executes a product through the R bridge. It retains a result that you can inspect afterwards. Configured framework destinations are not published by this command.\n\n## Try it\n1. Select the product definition, rather than a previous result.\n2. Run **DataRaft: Trial Product**.\n3. Read the status badge and product detail in the trial dashboard.\n4. Refresh metadata, then inspect **Quality** and **Runs**.\n\n## Compare the two screenshots\nThe first delivery completes its trial. The second contains a negative amount that fails the `nonnegative` rule, so its result is blocked. Both outcomes are retained as evidence. A successful bridge request can therefore contain a blocked product result: read the result status, not just whether the command finished.\n\nThese fixtures deliberately have no explicit schema contract. `completed` describes execution; schema evidence can still be `unvalidated`.\n\n## Keep in mind\nA trial still reads sources and executes your transformations and checks. User functions can have side effects of their own. Cancellation or a timeout stops the extension waiting; it does not guarantee that R code already dispatched has stopped. The bridge retains up to 20 trial results in the session.\n"
   },
   {
     "slug": "quality",
@@ -57,7 +85,7 @@
         "The nonnegative rule failed for one of the two rows in failing.orders."
       ]
     ],
-    "body": "## What this does\nThe **Quality** view exposes evidence retained by previous execution. Selecting a rule result opens its metadata, including the affected asset, rule identifier, status and available counts.\n\n## Try it\n1. Run a trial and refresh metadata.\n2. Expand **Quality** in the DataRaft view.\n3. Select a failed rule for the product you want to investigate.\n4. Inspect the evidence before changing the delivery or the rule.\n\n## Read the screenshot\nThe selected result belongs to `failing.orders`. It reports `rule: nonnegative`, `status: failed`, `n_failed: 1` and `n_total: 2`. The **Runs** view distinguishes the completed and blocked trials. The **Incidents** view records the observed failed check.\n\n## Keep in mind\nCounts are metadata, not a preview of rejected rows. Use R-side diagnostics when you need retained row-level evidence. An incident here describes an observed failed or unchecked check; it does not represent a complete incident-management or resolution workflow.\n"
+    "body": "## What this does\nThe **Quality** view exposes evidence retained by previous execution. Selecting a rule result opens a readable detail panel, including the affected asset, rule identifier, status and available counts.\n\n## Try it\n1. Run a trial and refresh metadata.\n2. Expand **Quality** in the DataRaft view.\n3. Select a failed rule for the product you want to investigate.\n4. Inspect the evidence before changing the delivery or the rule.\n\n## Read the screenshot\nThe selected result belongs to `failing.orders`. It reports `rule: nonnegative`, `status: failed`, `n_failed: 1` and `n_total: 2`. The **Runs** view distinguishes the completed and blocked trials. The **Incidents** view records the observed failed check.\n\n## Keep in mind\nCounts are metadata, not a preview of rejected rows. Use R-side diagnostics when you need retained row-level evidence. An incident here describes an observed failed or unchecked check; it does not represent a complete incident-management or resolution workflow.\n"
   },
   {
     "slug": "diagnostics",
@@ -113,12 +141,12 @@
         "The production custom editor displays fields from native.contract.yaml."
       ]
     ],
-    "body": "## What this does\nThe custom editor helps you edit an ODCS 3.2 YAML contract. It preserves comments and unknown metadata. The YAML document remains the source of truth.\n\n## Try it\n1. Open a saved ODCS contract YAML file.\n2. Choose **DataRaft: Open Contract YAML Editor**.\n3. Edit a field, or use the controls for columns and quality rules.\n4. Choose **Preview field edits** before applying anything.\n\n## Read the screenshot\nThe form belongs to the actual `native.contract.yaml` file in the synthetic workspace. The screenshot is captured in Positron; the same offline YAML editor is available in VS Code without a live R session.\n\n## Keep in mind\nEditing a contract document does not validate a full dataset. The portable `dr_contract_yaml()` metadata export is not an executable ODCS contract. R-based validation and bounded sampling are separate explicit commands and require Positron.\n"
+    "body": "## What this does\nThe custom editor helps you edit an ODCS 3.2 YAML contract. Fields are grouped by identity, schema and quality, and the underlying YAML is available in a collapsible panel. It preserves comments and unknown metadata. The YAML document remains the source of truth.\n\n## Try it\n1. Open a saved ODCS contract YAML file.\n2. Choose **DataRaft: Open Contract YAML Editor**.\n3. Edit a field, or use the controls for columns and quality rules.\n4. Choose **Preview field edits** before applying anything.\n\n## Read the screenshot\nThe form belongs to the actual `native.contract.yaml` file in the synthetic workspace. The screenshot is captured in Positron; the same offline YAML editor is available in VS Code without a live R session.\n\n## Keep in mind\nEditing a contract document does not validate a full dataset. The portable `dr_contract_yaml()` metadata export is not an executable ODCS contract. R-based validation and bounded sampling are separate explicit commands and require Positron.\n"
   },
   {
     "slug": "yaml-preview",
     "title": "Review a proposed YAML change",
-    "command": "Preview field edits \u2192 review diff \u2192 apply or discard",
+    "command": "Preview field edits → review diff → apply or discard",
     "host": "Positron and VS Code",
     "summary": "Inspect the actual proposed diff before changing the document.",
     "images": [
@@ -131,7 +159,7 @@
         "The editor offers explicit Apply preview to document and Discard preview controls."
       ]
     ],
-    "body": "## What this does\nPreview creates a proposed edit and opens the native diff viewer. The document itself remains unchanged until you explicitly apply the preview.\n\n## Try it\n1. Change a contract field.\n2. Select **Preview field edits**.\n3. Inspect the proposed diff, including any formatting or metadata changes.\n4. Return to the contract editor and choose **Apply preview to document** or **Discard preview**.\n\n## Read the screenshots\nThe diff changes the synthetic contract name to `Applied form change`. The separate preview screenshot shows the apply/discard decision. The acceptance test verifies that preview alone leaves both the document and the saved file unchanged.\n\n## Keep in mind\nThe proposal is tied to a specific document version. A concurrent text edit invalidates it. Review the current state and create a new preview instead of applying a stale proposal.\n"
+    "body": "## What this does\nPreview creates a proposed edit and opens the native diff viewer. The document itself remains unchanged until you explicitly apply the preview.\n\n## Try it\n1. Change a contract field.\n2. Select **Preview field edits**.\n3. Inspect the proposed diff, including any formatting or metadata changes.\n4. Return to the contract editor and choose **Apply preview to document** or **Discard preview**.\n\n## Read the screenshots\nThe diff proposes changing the synthetic contract name to `Applied form change`. The separate preview screenshot shows the discard decision from another edit. The acceptance test verifies that preview alone leaves both the document and the saved file unchanged.\n\n## Keep in mind\nThe proposal is tied to a specific document version. A concurrent text edit invalidates it. Review the current state and create a new preview instead of applying a stale proposal.\n"
   },
   {
     "slug": "yaml-apply",

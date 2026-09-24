@@ -1,5 +1,8 @@
 from pathlib import Path
 import os
+import hashlib
+import json
+import struct
 from bs4 import BeautifulSoup
 from urllib.parse import urlsplit,unquote
 base=os.environ.get('BASE_PATH','').rstrip('/')
@@ -20,6 +23,18 @@ for f in root.rglob('*.html'):
    if not p.exists():bad.append((str(f.relative_to(root)),u))
 print('Checked',count,'pages;',len(bad),'broken local links/assets')
 for item in bad[:50]:print(item)
+
+# Every displayed screenshot must be the exact native capture in provenance.
+evidence=json.loads((Path(__file__).parent/'content/extension/screenshots.json').read_text())
+features=json.loads((Path(__file__).parent/'content/extension/features.json').read_text())
+for name in {name for feature in features for name,_ in feature['images']}:
+ assert name in evidence['images'],f'Missing capture provenance: {name}'
+ capture=(root/'assets'/name).read_bytes()
+ width,height=struct.unpack('>II',capture[16:24]) if capture[:8]==b'\x89PNG\r\n\x1a\n' else (0,0)
+ expected=evidence['images'][name]
+ assert (width,height)==(expected['width'],expected['height']),f'Capture dimensions changed: {name}'
+ assert hashlib.sha256(capture).hexdigest()==expected['sha256'],f'Capture bytes changed: {name}'
+print('Checked',len(evidence['images']),'native capture checksums and dimensions')
 
 # Course code and download must stay identical to the authoritative R source.
 import re
@@ -42,7 +57,6 @@ print('Checked',len(expected),'course modules: code, solutions, language and scr
 
 
 # Keep the generated reference and teaching code on the current public API.
-import json
 retired = ('dr_trial', 'dr_add_product', 'dr_update_product', 'dr_remove_product',
            'dr_extract_product', 'dr_replace_sources', 'dr_update_contract',
            'dr_remove_contract', 'dr_extract_contract', 'dr_update_source',
