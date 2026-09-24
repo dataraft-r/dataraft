@@ -121,8 +121,8 @@ add('/about/','What is DataRaft?',md(plain_english),'About',
     'A plain-English introduction to the DataRaft package family using a monthly insurance report.')
 pages['/']['body']=pages['/']['body'].replace(
     '<section class="principles">',
-    '<section class="story-teaser" aria-labelledby="story-title"><div><span class="eyebrow">A REAL-WORLD QUESTION</span>'
-    '<h2 id="story-title">Why did September’s report say 8.1%?</h2>'
+    '<section class="story-teaser"><div><span class="eyebrow">A REAL-WORLD QUESTION</span>'
+    '<h2>Why did September’s report say 8.1%?</h2>'
     '<p>To answer, you need the data used at the time, the checks it passed and the agreed calculation. Follow one simple insurance example to see how the DataRaft tools fit together.</p>'
     '<p class="fine">8.1% is an illustrative figure, not a calculated result.</p></div>'
     '<a class="button" href="/about/">DataRaft in plain English <span>↗</span></a></section><section class="principles">')
