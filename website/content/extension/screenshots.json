@@ -1,70 +1,80 @@
 {
-  "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35854562977",
-  "extension_commit": "19e1e4783c6c8d282224acf10c9fab26584e23ed",
-  "capture_commit": "c0f644867a5d0796dcd114443bb17b78e882f77b",
+  "run_url": "https://github.com/dataraft-r/dataraft-positron/actions/runs/35942174468",
+  "extension_commit": "fa33c697d8b8cbc80db83e8c7955a032fc7eea9e",
+  "capture_commit": "fa33c697d8b8cbc80db83e8c7955a032fc7eea9e",
   "host": "Positron 2026.09.1-2",
   "r_version": "4.5.1",
-  "captured_at": "2026-09-23",
+  "captured_at": "2026-09-24",
   "images": {
     "feature-select-session.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "aca470b96770c4f5f2e97bd56147438d32fda64a87639d097417dbb840694c99"
+      "width": 1275,
+      "height": 900,
+      "sha256": "b694aee238d62f12adf2dc1c6d2b6a4b98e20d2577c741663c1d6d9282ef3f8d"
     },
     "feature-inspect-product.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "84ab1f0eb5e898a376028006c9b0ebe6a91fecdd5dbf1477e5eb237521112b42"
+      "width": 1275,
+      "height": 900,
+      "sha256": "4113f8fc48eff6e9c64170e30484c199f224a29b2ab7879852c769579f3bee4a"
     },
     "feature-trial-completed.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "6f2a507028624e8275a57a5e2977db18d99d5fabc72b571903dea32c79441e0a"
+      "width": 1275,
+      "height": 900,
+      "sha256": "487f356a6eccdff3ee7ba86bbf8046a3bb89c4d22ba7f476288c40e0ccd14148"
     },
     "feature-trial-blocked.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "4a84b59f009fc829aa95f9b11c40d710bcfc614a555fab141ca30f27b639e591"
+      "width": 1275,
+      "height": 900,
+      "sha256": "0e0e1dd4d5f35549e33a0ebfd0cf57c7d57c125e93ca2866c179dc6cf2ac0cf5"
     },
     "feature-quality-evidence.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "bff73b5cecfdeb8dfafc882abcccc29484673db7cef718a7421797232c770ad8"
+      "width": 1275,
+      "height": 900,
+      "sha256": "3e2fcf8dea1e7a530bf8e0abce8f4857be9f742131b4d526fcddc5904d01d355"
     },
     "rule-diagnostic.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "745675ac51b56d23970a89e155a4500ec810bb94fc1a25c9eb725abb3bfd16c5"
+      "width": 1275,
+      "height": 900,
+      "sha256": "ceb20865272ae8796cfa73ed0a515858c8d12091252471f4797b7b143c7aae7c"
     },
     "bounded-data-explorer.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "7bef7e527b94972d71b952c3e6a9f8852d0f0a0575e26f14af4035e239a84ccc"
+      "width": 1275,
+      "height": 900,
+      "sha256": "b36c420610988bc8b40ccbb319bb54fcc9ec6b54d2bef07ebb89129eecb6b0dd"
     },
     "feature-directed-lineage.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "fa5443f3ade15d635f9dc94bc0d00f5279bb56501ff14eacefda9ca0a5837ca4"
+      "width": 1275,
+      "height": 900,
+      "sha256": "b9f4998a051bad1a82721dfa01b8f60ebbff26063ce4fd04954527f4d2d305d8"
     },
     "feature-yaml-editor.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "80ad5a15ac8b8520ac2a9862f1c8a5a54467699b63feed3c2099041894b0835f"
+      "width": 1275,
+      "height": 900,
+      "sha256": "4221d8bfc44f7ff56a6f0ac3d0ca4ad99ce30bf6ce056623c39aca289aa95ed5"
     },
     "feature-yaml-diff.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "5c695ab4330ae6b8832601df5af0f5038d69d1d717f67f983f5bd3f6c99e83b8"
+      "width": 1275,
+      "height": 900,
+      "sha256": "6e84ef71751b6934f8940bdfe3b9e848d199087937a3e439f05012b617e4e38b"
     },
     "feature-yaml-preview.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "680c38982c5fd308845a05d061dee767eb77205c1fc376bbe6f1ef2964baf84f"
+      "width": 1275,
+      "height": 900,
+      "sha256": "a338a52be6c7be2a25eac2596a0b112c862c6024035c5570a30dae041fa5960d"
     },
     "feature-yaml-applied.png": {
-      "width": 1600,
-      "height": 1000,
-      "sha256": "9775cd2519998ba5d49de8383d064e5f13896964d920604353a44cb53ca706f7"
+      "width": 1275,
+      "height": 900,
+      "sha256": "a8d31ba9a7175d45b6ecd0ddaebb01c433e856a086fdf57641739ab6f080c200"
+    },
+    "feature-overview.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "f16ba55463f93cfcd647b9bfc038ab6b5a21b93e5e015a22da8e1215080ee616"
+    },
+    "feature-product-guarantees.png": {
+      "width": 1275,
+      "height": 900,
+      "sha256": "4a0fa94da89dd7a8a639a797c15eff3d944dff5c839b98e999135e921fa9c1f2"
     }
   }
 }

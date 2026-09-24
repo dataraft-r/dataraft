@@ -18,7 +18,7 @@ The generated HTML in `dist/` is deployable on any static host. Every route has 
 
 The reference renderer preserves documented signatures, arguments, values, details, named sections and examples from Rd files. It does not execute R or claim examples have been rerun for this website build.
 
-Screenshots are original Positron captures from successful native extension-host CI run 35847997197, extension commit 19e1e4783c6c8d282224acf10c9fab26584e23ed. They show synthetic fixtures in the actual application, not a recreated UI. VS Code supports offline metadata and YAML editing; the native R flows shown require Positron.
+Screenshots are original Positron captures from successful native extension-host CI run 35942174468, extension commit fa33c697d8b8cbc80db83e8c7955a032fc7eea9e. They show synthetic fixtures in the actual application, not a recreated UI. VS Code supports offline metadata and YAML editing; the native R flows shown require Positron.
 
 ## Validation
 
@@ -32,7 +32,7 @@ MIT license. Package documentation and extension assets are by Jan-Hendrik Weine
 
 ## Extension feature gallery
 
-The ten feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, unchanged extension implementation commit, test-instrumentation commit, original dimensions and SHA-256 for each of the twelve original PNGs. The documentation captures are produced by native Positron tests on the `docs/feature-screenshots` branch of dataraft-positron. Images are not cropped or composited.
+The feature guides are maintained in `content/extension/features.json`. `content/extension/screenshots.json` records the successful native capture run, extension commit, original dimensions and SHA-256 for each PNG. The documentation captures are produced by the native Positron click suite in dataraft-positron. Images are not cropped or composited.
 
 ## Hands-on training
 
