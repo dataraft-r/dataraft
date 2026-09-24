@@ -1,6 +1,8 @@
 # Run only against the disposable S3-compatible service provisioned by CI.
 library(dataraft)
 
+check_s3 <- function() {
+
 endpoint <- Sys.getenv("DATARAFT_TEST_S3_ENDPOINT")
 bucket <- Sys.getenv("DATARAFT_TEST_S3_BUCKET")
 stopifnot(
@@ -46,3 +48,6 @@ stopifnot(
   nrow(dataraft.lake::dr_releases(lake)) == 2L
 )
 cat("S3 DuckLake publication, landing upload and fresh-connection read passed.\n")
+
+}
+check_s3()
