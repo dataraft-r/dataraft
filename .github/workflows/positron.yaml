@@ -32,7 +32,7 @@ jobs:
         working-directory: .
         shell: bash
         run: |
-          ref=17e92c8955ce32573a12af67ae781756129392a4
+          ref=57f8c8d7d5da53ab416804697843bdc1b7142b5c
           if [[ "$GITHUB_EVENT_NAME" == pull_request && -n "$FAMILY_BRANCH" ]] &&
              git ls-remote --exit-code --heads https://github.com/dataraft-r/dataraft-positron.git "refs/heads/$FAMILY_BRANCH" >/dev/null; then
             ref="$FAMILY_BRANCH"
