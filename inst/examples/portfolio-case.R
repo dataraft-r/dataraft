@@ -124,8 +124,13 @@ portfolio_case <- function(output_root = tempfile("portfolio-case-")) {
     owner = "Portfolio Analytics",
     description = "New lapses divided by policies exposed at the start of each month"
   ) |>
-    dataraft.core::dr_add_lookup(products$policies, by = "policy_id") |>
-    dataraft.core::dr_add_lookup(products$brokers, by = "broker_id") |>
+    dataraft.core::dr_add_recipe(
+      dataraft.core::dr_recipe() |>
+        dataraft.core::dr_step_lookup(products$policies, by = "policy_id",
+                                       engine = "native", name = "policy_terms") |>
+        dataraft.core::dr_step_lookup(products$brokers, by = "broker_id",
+                                       engine = "native", name = "broker_directory")
+    ) |>
     dplyr::group_by(month, channel) |>
     dplyr::summarise(exposed = sum(exposed_at_start),
                      lapses = sum(new_lapse), .groups = "drop") |>
