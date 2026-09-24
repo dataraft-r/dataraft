@@ -1,0 +1,145 @@
+name: Build DataRaft family binaries
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/binaries.yaml
+      - scripts/build-family-binaries.R
+      - scripts/checkout-family.py
+      - family-lock.json
+      - DESCRIPTION
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/binaries.yaml
+      - scripts/build-family-binaries.R
+      - scripts/checkout-family.py
+      - family-lock.json
+      - DESCRIPTION
+  schedule:
+    - cron: '17 5 * * 1'
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, platform: linux-x64-noble, r: '4.2'}
+          - {os: ubuntu-24.04, platform: linux-x64-noble, r: '4.3'}
+          - {os: ubuntu-24.04, platform: linux-x64-noble, r: '4.4'}
+          - {os: ubuntu-24.04, platform: linux-x64-noble, r: '4.5'}
+          - {os: ubuntu-24.04, platform: linux-x64-noble, r: '4.6'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64-noble, r: '4.2'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64-noble, r: '4.3'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64-noble, r: '4.4'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64-noble, r: '4.5'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64-noble, r: '4.6'}
+          - {os: windows-2022, platform: windows-x64, r: '4.2'}
+          - {os: windows-2022, platform: windows-x64, r: '4.3'}
+          - {os: windows-2022, platform: windows-x64, r: '4.4'}
+          - {os: windows-2022, platform: windows-x64, r: '4.5'}
+          - {os: windows-2022, platform: windows-x64, r: '4.6'}
+          # Native Windows ARM R only exists from R 4.4 onward.
+          - {os: windows-11-arm, platform: windows-arm64, r: '4.4'}
+          - {os: windows-11-arm, platform: windows-arm64, r: '4.5'}
+          - {os: windows-11-arm, platform: windows-arm64, r: '4.6'}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 80
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DATARAFT_BINARY_OUTPUT: binary-output
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain locked family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+      - name: Verify R version and native architecture
+        shell: Rscript {0}
+        run: |
+          stopifnot(startsWith(as.character(getRversion()), '${{ matrix.r }}'))
+          arch <- R.version$arch
+          if ('${{ matrix.platform }}' == 'windows-arm64') {
+            stopifnot(grepl('aarch64|arm64', arch, ignore.case = TRUE))
+          } else if ('${{ matrix.platform }}' == 'windows-x64') {
+            stopifnot(grepl('x86_64|x64', arch, ignore.case = TRUE))
+          }
+          cat(R.version.string, arch, '\n')
+      - name: Install pak and build all seven family archives
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace('pak', quietly = TRUE)) {
+            install.packages('pak', repos = 'https://cloud.r-project.org')
+          }
+          source('scripts/build-family-binaries.R')
+      - name: Verify archive format and architecture
+        shell: Rscript {0}
+        run: |
+          files <- list.files('binary-output', full.names = TRUE)
+          archives <- files[grepl('\\.(zip|tar\\.gz)$', files)]
+          stopifnot(length(archives) == 7L)
+          expected <- if (.Platform$OS.type == 'windows') '\\.zip$' else '\\.tar\\.gz$'
+          stopifnot(all(grepl(expected, archives)))
+          for (archive in archives) {
+            if (.Platform$OS.type == 'windows') {
+              stopifnot(any(grepl('/Meta/package.rds$', unzip(archive, list = TRUE)$Name)))
+            } else {
+              stopifnot(any(grepl('/Meta/package.rds$', untar(archive, list = TRUE))))
+            }
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dataraft-${{ matrix.platform }}-r${{ matrix.r }}
+          path: binary-output/
+          if-no-files-found: error
+          retention-days: 30
+  release:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: dataraft-*
+          path: release
+      - name: Refuse incomplete release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          dirs = list(Path('release').glob('dataraft-*'))
+          assert len(dirs) == 18, f'Expected 18 complete platform/R builds; found {len(dirs)}'
+          for d in dirs:
+              assert len(list(d.glob('dataraft_*.zip')) + list(d.glob('dataraft_*.tar.gz'))) == 1, d
+              assert len(list(d.glob('dataraft.*_*.zip')) + list(d.glob('dataraft.*_*.tar.gz'))) == 6, d
+          PY
+      - name: Publish immutable archives per commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="family-binaries-${GITHUB_SHA}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "A complete binary release already exists for this commit."
+            exit 0
+          fi
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "DataRaft family binaries ${GITHUB_SHA:0:12}" \
+            --notes "Seven packages, built for each listed R/OS/architecture. Assets are named by platform and R version."
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          for directory in sorted(Path('release').glob('dataraft-*')):
+              for archive in directory.iterdir():
+                  if archive.name == 'checksums.txt':
+                      continue
+                  subprocess.run(['gh', 'release', 'upload',
+                    'family-binaries-' + __import__('os').environ['GITHUB_SHA'],
+                    f'{archive}#{directory.name}--{archive.name}',
+                    '--repo', __import__('os').environ['GITHUB_REPOSITORY']], check=True)
+          PY
