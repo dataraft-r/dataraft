@@ -211,3 +211,51 @@ jobs:
         with:
           name: postgres-worker-results
           path: check/postgres/
+  s3:
+    name: DuckLake / real S3 API
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: dataraft-ci
+      AWS_SECRET_ACCESS_KEY: dataraft-ci-secret
+      AWS_REGION: us-east-1
+      DATARAFT_TEST_S3_ENDPOINT: http://127.0.0.1:9000
+      DATARAFT_TEST_S3_BUCKET: dataraft-ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Obtain pinned family sources
+        run: python scripts/checkout-family.py
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: '4.5.1'
+          use-public-rspm: false
+          cran: https://packagemanager.posit.co/cran/__linux__/noble/2026-09-18
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          extra-packages: |
+            any::duckdb
+            any::paws.storage
+            any::readr
+            local::packages/dataraft.core
+            local::packages/dataraft.lake
+            local::packages/dataraft.adapters
+            local::packages/dataraft.metrics
+            local::packages/dataraft.dbt
+            local::packages/dataraft.ide
+            local::.
+      - name: Start disposable S3 service
+        run: |
+          docker run -d --name dataraft-s3 -p 9000:9000 \
+            -e MINIO_ROOT_USER="$AWS_ACCESS_KEY_ID" \
+            -e MINIO_ROOT_PASSWORD="$AWS_SECRET_ACCESS_KEY" \
+            quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z server /data
+          python -m pip install 'minio==7.2.15'
+          python scripts/start-s3.py
+      - name: Exercise actual S3 writes and fresh reads
+        run: |
+          Rscript scripts/check-s3.R
+          python scripts/start-s3.py verify
+      - name: Show service logs on failure
+        if: failure()
+        run: docker logs dataraft-s3
