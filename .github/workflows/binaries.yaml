@@ -135,11 +135,13 @@ jobs:
           from pathlib import Path
           import subprocess
           for directory in sorted(Path('release').glob('dataraft-*')):
-              for archive in directory.iterdir():
+              for archive in list(directory.iterdir()):
                   if archive.name == 'checksums.txt':
                       continue
+                  target = directory / (directory.name + '--' + archive.name)
+                  archive.rename(target)
                   subprocess.run(['gh', 'release', 'upload',
                     'family-binaries-' + __import__('os').environ['GITHUB_SHA'],
-                    f'{archive}#{directory.name}--{archive.name}',
+                    str(target),
                     '--repo', __import__('os').environ['GITHUB_REPOSITORY']], check=True)
           PY
