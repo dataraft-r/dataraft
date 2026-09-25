@@ -19,7 +19,7 @@ options(repos = c(
 pak::pkg_install("dataraft")
 ```
 
-## Native Windows ARM64, R 4.4 to 4.6
+## Native Windows ARM64, R 4.6
 
 ```r
 stopifnot(grepl("aarch64|arm64", R.version$arch, ignore.case = TRUE))
@@ -29,6 +29,22 @@ options(repos = c(
 ))
 pak::pkg_install("dataraft")
 ```
+
+For native Windows ARM R 4.4 and 4.5, R selects source packages by default. Install
+the seven prebuilt ZIP archives explicitly with
+[`scripts/check-binary-install.R`](../scripts/check-binary-install.R) after
+checking out this repository:
+
+```r
+Sys.setenv(BINARY_PLATFORM = "windows-arm64",
+  BINARY_R_VERSION = paste(R.version$major, strsplit(R.version$minor, ".")[[1]][1], sep = "."))
+source("scripts/check-binary-install.R")
+```
+
+The script installs third-party dependencies separately, downloads each
+published DataRaft ZIP, installs it with `type = "win.binary"`, and checks
+the installed package metadata against the archive. R 4.6 uses the native
+`bin/windows/clang-aarch64/contrib` repository path above.
 
 R 4.2 and 4.3 have no native Windows ARM build. If you run x64 R in
 Windows ARM emulation, use the Windows x64 repository instead.

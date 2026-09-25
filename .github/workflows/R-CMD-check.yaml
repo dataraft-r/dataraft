@@ -61,6 +61,14 @@ jobs:
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -m pip install dbt-core==1.12.5 dbt-duckdb==1.10.1 duckdb==1.5.5
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -c "import dbt.cli.main, duckdb"
           echo "DATARAFT_DBT_EXECUTABLE=$RUNNER_TEMP/dataraft-dbt/bin/dbt" >> "$GITHUB_ENV"
+      - name: Install pinned OpenMetadata ingestion CLI and SDK
+        run: |
+          python -m venv "$RUNNER_TEMP/dataraft-openmetadata"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/python" -m pip install "openmetadata-ingestion[dbt]==1.13.6.0"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/python" -c "from metadata.config.common import load_config_file; from metadata.generated.schema.metadataIngestion.workflow import OpenMetadataWorkflowConfig"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/metadata" --help
+          echo "DATARAFT_OPENMETADATA_PYTHON=$RUNNER_TEMP/dataraft-openmetadata/bin/python" >> "$GITHUB_ENV"
+          echo "DATARAFT_OPENMETADATA_CLI=$RUNNER_TEMP/dataraft-openmetadata/bin/metadata" >> "$GITHUB_ENV"
       - name: Validate compatible family versions
         run: python scripts/check-family.py
       - name: Require every declared optional dependency
@@ -246,16 +254,22 @@ jobs:
             local::.
       - name: Start disposable S3 service
         run: |
-          docker run -d --name dataraft-s3 -p 9000:9000 \
-            -e MINIO_ROOT_USER="$AWS_ACCESS_KEY_ID" \
-            -e MINIO_ROOT_PASSWORD="$AWS_SECRET_ACCESS_KEY" \
-            quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z server /data
-          python -m pip install 'minio==7.2.15'
-          python scripts/start-s3.py
+          python -m venv "$RUNNER_TEMP/dataraft-s3-python"
+          "$RUNNER_TEMP/dataraft-s3-python/bin/python" -m pip install \
+            'moto[server,s3]==5.1.17' 'minio==7.2.15'
+          nohup "$RUNNER_TEMP/dataraft-s3-python/bin/moto_server" \
+            -H 127.0.0.1 -p 9000 > "$RUNNER_TEMP/dataraft-s3.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/dataraft-s3.pid"
+          "$RUNNER_TEMP/dataraft-s3-python/bin/python" scripts/start-s3.py
       - name: Exercise actual S3 writes and fresh reads
         run: |
           Rscript scripts/check-s3.R
-          python scripts/start-s3.py verify
+          "$RUNNER_TEMP/dataraft-s3-python/bin/python" scripts/start-s3.py verify
       - name: Show service logs on failure
         if: failure()
-        run: docker logs dataraft-s3
+        run: |
+          if [ -f "$RUNNER_TEMP/dataraft-s3.log" ]; then
+            cat "$RUNNER_TEMP/dataraft-s3.log"
+          else
+            echo 'S3 service was never started; inspect the installation error above.'
+          fi
