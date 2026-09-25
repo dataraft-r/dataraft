@@ -17,7 +17,15 @@ for (i in seq_len(nrow(matrix))) {
   if (length(selected) != 7L) stop("Incomplete binary release: ", prefix)
   if (startsWith(platform, "windows-")) {
     # Separate roots prevent x64 and ARM ZIP files from sharing an index.
-    destination <- file.path(output, platform, "bin", "windows", "contrib", minor)
+    # Native ARM R 4.5+ uses the clang-aarch64 binary repository layout.
+    # R 4.4 ARM defaults to source, so keep its explicit binary ZIP index
+    # under the traditional path for direct archive installation.
+    subdir <- if (platform == "windows-arm64" && minor != "4.4") {
+      c("clang-aarch64", "contrib")
+    } else {
+      "contrib"
+    }
+    destination <- do.call(file.path, as.list(c(output, platform, "bin", "windows", subdir, minor)))
     kind <- "win.binary"
   } else {
     arch <- if (platform == "linux-arm64-noble") "arm64" else "x86_64"

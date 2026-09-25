@@ -32,19 +32,27 @@ jobs:
           use-public-rspm: false
       - run: python -m pip install -r website/requirements.txt
       - run: python website/build.py
-      - name: Include most recent complete binary release in the site
+      - name: Include complete binary release for this commit in the site
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 30 \
-            --json tagName --jq '[.[].tagName | select(startswith("family-binaries-"))][0] // empty')
+          sha="$GITHUB_SHA"
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then
+            sha="${{ github.event.workflow_run.head_sha }}"
+          fi
+          tag="family-binaries-$sha"
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 30 \
+              --json tagName --jq '[.[].tagName | select(startswith("family-binaries-"))][0] // empty')
+          fi
           if [ -n "$tag" ]; then
             mkdir -p "$RUNNER_TEMP/dataraft-binaries"
             gh release download "$tag" --repo "$GITHUB_REPOSITORY" \
               --dir "$RUNNER_TEMP/dataraft-binaries" --pattern 'dataraft-*'
             Rscript scripts/assemble-binary-repository.R \
               "$RUNNER_TEMP/dataraft-binaries" website/dist/packages
+            printf '%s\n' "$tag" > website/dist/packages/RELEASE.txt
           fi
       - run: python website/check.py
       - run: node --check website/assets/site.js

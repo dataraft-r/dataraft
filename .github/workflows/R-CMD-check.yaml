@@ -246,11 +246,9 @@ jobs:
             local::.
       - name: Start disposable S3 service
         run: |
-          docker run -d --name dataraft-s3 -p 9000:9000 \
-            -e MINIO_ROOT_USER="$AWS_ACCESS_KEY_ID" \
-            -e MINIO_ROOT_PASSWORD="$AWS_SECRET_ACCESS_KEY" \
-            quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z server /data
-          python -m pip install 'minio==7.2.15'
+          python -m pip install 'moto[server,s3]==5.1.17' 'minio==7.2.15'
+          nohup moto_server -H 127.0.0.1 -p 9000 > "$RUNNER_TEMP/dataraft-s3.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/dataraft-s3.pid"
           python scripts/start-s3.py
       - name: Exercise actual S3 writes and fresh reads
         run: |
@@ -258,4 +256,9 @@ jobs:
           python scripts/start-s3.py verify
       - name: Show service logs on failure
         if: failure()
-        run: docker logs dataraft-s3
+        run: |
+          if [ -f "$RUNNER_TEMP/dataraft-s3.log" ]; then
+            cat "$RUNNER_TEMP/dataraft-s3.log"
+          else
+            echo 'S3 service was never started; inspect the installation error above.'
+          fi

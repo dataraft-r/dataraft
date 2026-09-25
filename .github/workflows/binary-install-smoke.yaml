@@ -1,12 +1,16 @@
 name: Install published DataRaft binaries with pak
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [DataRaft website]
+    types: [completed]
   push:
-    paths: [.github/workflows/binary-install-smoke.yaml]
+    paths: [.github/workflows/binary-install-smoke.yaml, scripts/check-binary-install.R]
 permissions:
   contents: read
 jobs:
   install:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     strategy:
       fail-fast: false
       matrix:
@@ -16,8 +20,19 @@ jobs:
           - {os: windows-2022, platform: windows-x64, r: '4.6'}
           - {os: windows-11-arm, platform: windows-arm64, r: '4.6'}
           - {os: ubuntu-24.04, platform: linux-x64, r: '4.2'}
+          - {os: ubuntu-24.04, platform: linux-x64, r: '4.3'}
+          - {os: ubuntu-24.04, platform: linux-x64, r: '4.4'}
+          - {os: ubuntu-24.04, platform: linux-x64, r: '4.5'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64, r: '4.2'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64, r: '4.3'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64, r: '4.4'}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64, r: '4.5'}
           - {os: windows-2022, platform: windows-x64, r: '4.2'}
+          - {os: windows-2022, platform: windows-x64, r: '4.3'}
+          - {os: windows-2022, platform: windows-x64, r: '4.4'}
+          - {os: windows-2022, platform: windows-x64, r: '4.5'}
           - {os: windows-11-arm, platform: windows-arm64, r: '4.4'}
+          - {os: windows-11-arm, platform: windows-arm64, r: '4.5'}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
@@ -26,36 +41,9 @@ jobs:
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
-      - name: Install pak and DataRaft from published binaries
+      - name: Install published archives and verify installed bytes
         shell: Rscript {0}
         env:
           BINARY_PLATFORM: ${{ matrix.platform }}
-        run: |
-          platform <- Sys.getenv("BINARY_PLATFORM")
-          base <- "https://dataraft-r.github.io/dataraft/packages"
-          minor <- paste(R.version$major, strsplit(R.version$minor, ".", fixed = TRUE)[[1]][1], sep = ".")
-          stopifnot(identical(minor, "${{ matrix.r }}"))
-          if (startsWith(platform, "windows-")) {
-            repo <- paste0(base, "/", platform)
-            if (platform == "windows-arm64") {
-              stopifnot(grepl("aarch64|arm64", R.version$arch, ignore.case = TRUE))
-            }
-          } else {
-            arch <- if (platform == "linux-arm64") "arm64" else "x86_64"
-            repo <- paste0(base, "/linux/noble-", arch, "/", minor)
-          }
-          options(repos = c(DataRaft = repo, CRAN = getOption("repos")[["CRAN"]]))
-          index <- contrib.url(repo, type = if (.Platform$OS.type == "windows") "win.binary" else "source")
-          records <- available.packages(contriburl = index)
-          family <- c("dataraft", paste0("dataraft.", c("core", "lake", "adapters", "metrics", "dbt", "ide")))
-          stopifnot(all(family %in% rownames(records)))
-          if (!requireNamespace("pak", quietly = TRUE)) {
-            pak_repo <- sprintf("https://r-lib.github.io/p/pak/stable/%s/%s/%s",
-              .Platform$pkgType, R.Version()$os, R.Version()$arch)
-            install.packages("pak", repos = pak_repo)
-          }
-          pak::pkg_install(family, ask = FALSE)
-          stopifnot(all(vapply(family, requireNamespace, logical(1), quietly = TRUE)))
-          for (name in family) {
-            stopifnot(identical(as.character(utils::packageVersion(name)), records[name, "Version"]))
-          }
+          BINARY_R_VERSION: ${{ matrix.r }}
+        run: source("scripts/check-binary-install.R")

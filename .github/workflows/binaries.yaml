@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/binaries.yaml
       - scripts/build-family-binaries.R
+      - scripts/assemble-binary-repository.R
       - scripts/checkout-family.py
       - family-lock.json
       - DESCRIPTION
@@ -13,6 +14,7 @@ on:
     paths:
       - .github/workflows/binaries.yaml
       - scripts/build-family-binaries.R
+      - scripts/assemble-binary-repository.R
       - scripts/checkout-family.py
       - family-lock.json
       - DESCRIPTION
