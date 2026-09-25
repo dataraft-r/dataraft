@@ -27,6 +27,13 @@ The SLA check uses the successful publication time and the explicit business dat
 
 Outputs commit in order. They do not share a transaction across destinations. If a later writer fails, the run has status `error`, while `result$port_outputs` names the committed and failed ports. The primary release remains available. Inspect each destination and the saved run evidence before retrying, especially when a target appends data. Use `stop_on_failure = FALSE` to receive the result directly; the default error includes it as `condition$result`.
 
+A failed writer may have committed before its acknowledgement failed. Treat its
+state as **unknown** until the destination has been checked. Do not rerun the
+whole product against an append target: that repeats the already committed
+ports. Reconcile each destination against `result$run_id` and the saved
+evidence, then use an idempotent writer or explicitly repair only the missing
+destination. DataRaft does not infer that a failed port is safe to retry.
+
 ```r
 result <- dataraft.core::dr_run(product,
   business_date = as.character(Sys.Date()),

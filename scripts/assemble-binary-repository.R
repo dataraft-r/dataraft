@@ -16,8 +16,15 @@ for (i in seq_len(nrow(matrix))) {
   selected <- assets[startsWith(basename(assets), prefix)]
   if (length(selected) != 7L) stop("Incomplete binary release: ", prefix)
   if (startsWith(platform, "windows-")) {
-    # Separate roots prevent x64 and ARM ZIP files from sharing an index.
-    destination <- file.path(output, platform, "bin", "windows", "contrib", minor)
+    # R 4.6 names the native ARM package type windows.binary.clang-aarch64.
+    # Older ARM builds use the conventional Windows binary path with explicit
+    # archive installation because their package manager lacks that type.
+    windows_build <- if (platform == "windows-arm64" && minor == "4.6") {
+      file.path("windows", "clang-aarch64")
+    } else {
+      "windows"
+    }
+    destination <- file.path(output, platform, "bin", windows_build, "contrib", minor)
     kind <- "win.binary"
   } else {
     arch <- if (platform == "linux-arm64-noble") "arm64" else "x86_64"

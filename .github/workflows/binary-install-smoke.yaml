@@ -3,12 +3,16 @@ on:
   workflow_dispatch:
   pull_request:
     paths: [.github/workflows/binary-install-smoke.yaml, family-lock.json]
+  workflow_run:
+    workflows: [DataRaft website]
+    types: [completed]
   push:
     paths: [.github/workflows/binary-install-smoke.yaml]
 permissions:
   contents: read
 jobs:
   install:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     strategy:
       fail-fast: false
       matrix:
@@ -47,7 +51,16 @@ jobs:
             repo <- paste0(base, "/linux/noble-", arch, "/", minor)
           }
           options(repos = c(DataRaft = repo, CRAN = getOption("repos")[["CRAN"]]))
-          index <- contrib.url(repo, type = if (.Platform$OS.type == "windows") "win.binary" else "source")
+          modern_arm <- FALSE
+          if (platform == "windows-arm64" && minor == "4.6") {
+            stopifnot(grepl("clang-aarch64", .Platform$pkgType, fixed = TRUE))
+            modern_index <- contrib.url(repo, type = .Platform$pkgType)
+            modern_arm <- tryCatch(nrow(available.packages(contriburl = modern_index)) == 7L,
+              error = function(e) FALSE)
+          }
+          package_type <- if (modern_arm) .Platform$pkgType else if (
+            .Platform$OS.type == "windows") "win.binary" else "source"
+          index <- contrib.url(repo, type = package_type)
           records <- available.packages(contriburl = index)
           family <- c("dataraft", paste0("dataraft.", c("core", "lake", "adapters", "metrics", "dbt", "ide")))
           stopifnot(all(family %in% rownames(records)))
@@ -56,12 +69,24 @@ jobs:
               .Platform$pkgType, R.Version()$os, R.Version()$arch)
             install.packages("pak", repos = pak_repo)
           }
-          # pak does not reliably discover custom Windows ARM repositories.
-          # Explicit archives also prove which binary files all Windows
-          # installations use, without any source-repository fallback.
-          if (startsWith(platform, "windows-")) {
-            archives <- paste0(index, "/", family, "_", records[family, "Version"], ".zip")
-            pak::pkg_install(paste0("url::", archives), ask = FALSE)
+          if (platform == "windows-arm64" && !modern_arm) {
+            # R 4.4/4.5 do not provide the native ARM binary package type.
+            # R 4.6 also uses this route until the new index is published.
+            # pak rejects native ARM ZIP URLs as another platform.
+            fields <- as.character(records[family, c("Depends", "Imports")])
+            fields <- fields[!is.na(fields)]
+            dependencies <- unique(trimws(sub("\\s*\\(.*", "",
+              unlist(strsplit(paste(fields, collapse = ","), ",", fixed = TRUE)))))
+            dependencies <- setdiff(dependencies[nzchar(dependencies)],
+              c("R", family, rownames(installed.packages())))
+            if (length(dependencies)) pak::pkg_install(dependencies, ask = FALSE)
+            archive_files <- records[family, "File"]
+            stopifnot(all(!is.na(archive_files)),
+              all(archive_files == paste0(family, "_", records[family, "Version"], ".zip")))
+            order <- c("dataraft.core", "dataraft.lake", "dataraft.adapters",
+              "dataraft.metrics", "dataraft.dbt", "dataraft.ide", "dataraft")
+            archives <- paste0(index, "/", archive_files[match(order, family)])
+            utils::install.packages(archives, repos = NULL, type = "win.binary")
           } else {
             pak::pkg_install(family, ask = FALSE)
           }

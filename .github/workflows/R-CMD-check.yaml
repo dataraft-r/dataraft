@@ -250,6 +250,8 @@ jobs:
             -e MINIO_ROOT_USER="$AWS_ACCESS_KEY_ID" \
             -e MINIO_ROOT_PASSWORD="$AWS_SECRET_ACCESS_KEY" \
             alpine/minio@sha256:cf23643a6cf9ce159c57643ceb88279e431262282428c9e0bf3a7ef1a97e84b4 server /data
+      - name: Create isolated S3 test bucket
+        run: |
           python -m pip install 'minio==7.2.15'
           python scripts/start-s3.py
       - name: Exercise actual S3 writes and fresh reads
