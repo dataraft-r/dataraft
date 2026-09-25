@@ -8,10 +8,10 @@ if (windows) {
   repo <- paste0(base, "/", platform)
   if (platform == "windows-arm64") {
     stopifnot(grepl("aarch64|arm64", R.version$arch, ignore.case = TRUE))
-    subdir <- if (minor == "4.6") "bin/windows/clang-aarch64/contrib" else "bin/windows/contrib"
+    subdir <- if (minor == "4.6") paste0("bin/windows/clang-aarch64/contrib/", minor) else paste0("bin/windows/contrib/", minor)
   } else {
     stopifnot(grepl("x86_64|x64", R.version$arch, ignore.case = TRUE))
-    subdir <- "bin/windows/contrib"
+    subdir <- paste0("bin/windows/contrib/", minor)
   }
 } else {
   arch <- if (platform == "linux-arm64") "arm64" else "x86_64"
@@ -50,10 +50,48 @@ for (name in family) {
     grepl(if (windows) "\\.zip$" else "\\.tar\\.gz$", filename))
   archive <- file.path(archive_dir, filename)
   url <- paste(index, filename, sep = "/")
-  status <- download.file(url, archive, mode = "wb", quiet = TRUE)
-  stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
-  if ("MD5sum" %in% colnames(records) && !is.na(records[name, "MD5sum"])) {
-    stopifnot(identical(unname(tools::md5sum(archive)), records[name, "MD5sum"]))
+  # A Pages deployment can briefly serve an old index and a new archive.
+  # Refresh both URLs on a mismatch; never accept an unverified archive.
+  for (attempt in seq_len(6L)) {
+    if (attempt > 1L) {
+      Sys.sleep(10)
+      nonce <- paste0(as.integer(Sys.time()), "-", attempt)
+      index_file <- tempfile("packages-index-")
+      download.file(paste0(index, "/PACKAGES?ci=", nonce),
+        index_file, mode = "wb", quiet = TRUE)
+      fresh <- read.dcf(index_file)
+      unlink(index_file)
+      rownames(fresh) <- fresh[, "Package"]
+      stopifnot(all(family %in% rownames(fresh)))
+      records <- fresh
+      filename <- records[name, "File"]
+      if (is.na(filename) || !nzchar(filename)) {
+        filename <- paste0(name, "_", records[name, "Version"],
+          if (windows) ".zip" else ".tar.gz")
+      }
+      stopifnot(identical(basename(filename), filename),
+        grepl(if (windows) "\\.zip$" else "\\.tar\\.gz$", filename))
+      archive <- file.path(archive_dir, filename)
+      url <- paste(index, filename, sep = "/")
+      fetch_url <- paste0(url, "?ci=", nonce)
+    } else {
+      fetch_url <- url
+    }
+    status <- download.file(fetch_url, archive, mode = "wb", quiet = TRUE)
+    stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
+    # Windows binary PACKAGES indices do not always publish MD5sum.
+    # In that case the archive metadata is checked against the installed bytes below.
+    expected_md5 <- if ("MD5sum" %in% colnames(records)) {
+      records[name, "MD5sum"]
+    } else {
+      NA_character_
+    }
+    actual_md5 <- unname(tools::md5sum(archive))
+    if (is.na(expected_md5) || !nzchar(expected_md5) ||
+        identical(actual_md5, expected_md5)) break
+    message("Published index/archive mismatch for ", name, " (attempt ",
+      attempt, "/6): expected ", expected_md5, ", downloaded ", actual_md5)
+    if (attempt == 6L) stop("Published binary checksum did not converge: ", url)
   }
   # The archive must already contain installed-package metadata, so a source
   # tarball with the same version can never satisfy this smoke test.
