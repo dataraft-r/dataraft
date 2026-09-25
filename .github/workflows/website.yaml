@@ -48,8 +48,17 @@ jobs:
           fi
           if [ -n "$tag" ]; then
             mkdir -p "$RUNNER_TEMP/dataraft-binaries"
-            gh release download "$tag" --repo "$GITHUB_REPOSITORY" \
-              --dir "$RUNNER_TEMP/dataraft-binaries" --pattern 'dataraft-*'
+            for attempt in 1 2 3 4 5; do
+              if gh release download "$tag" --repo "$GITHUB_REPOSITORY" \
+                  --dir "$RUNNER_TEMP/dataraft-binaries" --pattern 'dataraft-*' --clobber; then
+                break
+              fi
+              if [ "$attempt" -eq 5 ]; then
+                echo "Could not download all release assets after five attempts" >&2
+                exit 1
+              fi
+              sleep $((attempt * 10))
+            done
             Rscript scripts/assemble-binary-repository.R \
               "$RUNNER_TEMP/dataraft-binaries" website/dist/packages
             printf '%s\n' "$tag" > website/dist/packages/RELEASE.txt
