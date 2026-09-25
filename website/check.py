@@ -5,6 +5,20 @@ import json
 import struct
 from bs4 import BeautifulSoup
 from urllib.parse import urlsplit,unquote
+site=Path(__file__).parent
+sources=json.loads((site/'content/sources.json').read_text())
+lock=json.loads((site.parent/'family-lock.json').read_text())
+for name,spec in lock['packages'].items():
+ if name != 'dataraft':
+  assert sources[name]==spec['ref'],f'Website and family lock differ: {name}'
+manifest=json.loads((site/'content/source-manifest.json').read_text())
+assert set(manifest)==set(sources), 'Missing source provenance entries'
+for name,files in manifest.items():
+ folder=site/'content/upstream'/name
+ actual={str(file.relative_to(folder)):hashlib.sha256(file.read_bytes()).hexdigest()
+         for file in folder.rglob('*') if file.is_file()}
+ assert files==actual,f'Website source snapshot changed without refresh: {name}'
+print('Checked',len(sources),'source snapshots against lock and file hashes')
 base=os.environ.get('BASE_PATH','').rstrip('/')
 root=Path(__file__).parent/'dist';bad=[];count=0
 for f in root.rglob('*.html'):

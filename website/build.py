@@ -271,6 +271,22 @@ add('/learn/output-ports/','Publish to multiple output ports',md(ports),'Learn',
     'Release evidence, SLA checks and partial output failures.')
 learn.append(('/learn/output-ports/','DATA PRODUCTS','Publish to multiple output ports',
               'One checked delivery, multiple targets and explicit partial-failure evidence.'))
+policies=(ROOT/'content/guides/product-policies.md').read_text()
+add('/learn/product-policies/','Set product policies',md(policies),'Learn',
+    'Versioned metadata requirements for product publication.')
+learn.append(('/learn/product-policies/','GOVERNANCE','Set product policies',
+              'Require an owner or other metadata before publishing.'))
+lock=json.loads((ROOT.parent/'family-lock.json').read_text())
+family_rows=[]
+for name in packages:
+ ref=lock['packages'][name]['ref']
+ display='this repository' if ref=='self' else f'<code>{esc(ref[:12])}</code>'
+ family_rows.append(f'<tr><td>{esc(name)}</td><td>{display}</td><td><code>{esc(sha[name][:12])}</code></td><td><a href="https://github.com/dataraft-r/{name}/commits/main">main history</a></td></tr>')
+family_body='<p class="lead">This page uses a development compatibility lock. It is not a published release.</p><p>The lock fixes the R package family used by pinned CI. The website renders copied documentation from the source commits shown here. The main branches can change after this snapshot; follow their history to inspect current development.</p><table><thead><tr><th>Package</th><th>Family lock</th><th>Documentation source</th><th>Development</th></tr></thead><tbody>'+''.join(family_rows)+'</tbody></table><p>Editor screenshots have their own <a href="/extension/">capture provenance</a>, which can predate the documentation source. Published binary builds are separately identified by their release tag.</p>'
+add('/learn/family-state/','Family versions and documentation sources',family_body,'Learn',
+    'Compare locked package commits and website source commits.')
+learn.append(('/learn/family-state/','VERSIONS','Family and website sources',
+              'See the fixed package commits and documentation sources.'))
 add('/learn/','Learn DataRaft','<p class="lead">A clear path from the idea to a working data product.</p><h2>Choose where to begin</h2>'+cards([
 ('/about/','NO R NEEDED','Understand the idea','A monthly report shows why data rules, checks and saved versions matter.'),
 ('/start/','FIRST R EXAMPLE','Make a checked delivery','Five chapters from installation to reading a saved version.'),

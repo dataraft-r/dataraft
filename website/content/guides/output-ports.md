@@ -33,6 +33,15 @@ result <- dataraft.core::dr_run(product,
   stop_on_failure = FALSE, evidence = "run-evidence")
 result$status
 result$port_outputs
+# After repairing the failed destination, resume only unpublished ports:
+resumed <- dataraft.core::dr_retry_ports(product, result,
+  evidence = "run-evidence")
+resumed$port_outputs
 ```
+
+Keep the original in-memory `result`: the saved JSON evidence contains no data rows.
+The retry retains the run ID and never rewrites a port marked `published`.
+If an unpublished port has an SLA, provide `business_date` again. If a writer
+fails during retry, its receipt stays `failed` and later ports remain pending.
 
 Cache reuse is disabled for products with multiple output ports, so an unchanged primary release cannot silently skip a secondary publication. RDS, database and Parquet targets are available through `dataraft.adapters`; choose a target with publication behavior that fits each consumer.
