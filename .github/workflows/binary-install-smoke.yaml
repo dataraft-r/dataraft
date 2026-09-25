@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows: [DataRaft website]
     types: [completed]
-  push:
-    paths: [.github/workflows/binary-install-smoke.yaml, scripts/check-binary-install.R]
 permissions:
   contents: read
 jobs:
