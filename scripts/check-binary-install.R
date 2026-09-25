@@ -79,11 +79,16 @@ for (name in family) {
     }
     status <- download.file(fetch_url, archive, mode = "wb", quiet = TRUE)
     stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
-    stopifnot("MD5sum" %in% colnames(records))
-    expected_md5 <- records[name, "MD5sum"]
-    stopifnot(!is.na(expected_md5), nzchar(expected_md5))
+    # Windows binary PACKAGES indices do not always publish MD5sum.
+    # In that case the archive metadata is checked against the installed bytes below.
+    expected_md5 <- if ("MD5sum" %in% colnames(records)) {
+      records[name, "MD5sum"]
+    } else {
+      NA_character_
+    }
     actual_md5 <- unname(tools::md5sum(archive))
-    if (identical(actual_md5, expected_md5)) break
+    if (is.na(expected_md5) || !nzchar(expected_md5) ||
+        identical(actual_md5, expected_md5)) break
     message("Published index/archive mismatch for ", name, " (attempt ",
       attempt, "/6): expected ", expected_md5, ", downloaded ", actual_md5)
     if (attempt == 6L) stop("Published binary checksum did not converge: ", url)
