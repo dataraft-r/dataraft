@@ -1,6 +1,8 @@
 name: Install published DataRaft binaries with pak
 on:
   workflow_dispatch:
+  pull_request:
+    paths: [.github/workflows/binary-install-smoke.yaml, family-lock.json]
   push:
     paths: [.github/workflows/binary-install-smoke.yaml]
 permissions:
@@ -54,10 +56,10 @@ jobs:
               .Platform$pkgType, R.Version()$os, R.Version()$arch)
             install.packages("pak", repos = pak_repo)
           }
-          # Native Windows ARM is not reliably discovered by pak from a
-          # custom CRAN-style binary repository. Give pak the seven exact
-          # binary archives from the index that was checked above.
-          if (platform == "windows-arm64") {
+          # pak does not reliably discover custom Windows ARM repositories.
+          # Explicit archives also prove which binary files all Windows
+          # installations use, without any source-repository fallback.
+          if (startsWith(platform, "windows-")) {
             archives <- paste0(index, "/", family, "_", records[family, "Version"], ".zip")
             pak::pkg_install(paste0("url::", archives), ask = FALSE)
           } else {
