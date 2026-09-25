@@ -249,7 +249,7 @@ jobs:
           docker run -d --name dataraft-s3 -p 9000:9000 \
             -e MINIO_ROOT_USER="$AWS_ACCESS_KEY_ID" \
             -e MINIO_ROOT_PASSWORD="$AWS_SECRET_ACCESS_KEY" \
-            quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z server /data
+            alpine/minio@sha256:cf23643a6cf9ce159c57643ceb88279e431262282428c9e0bf3a7ef1a97e84b4 server /data
           python -m pip install 'minio==7.2.15'
           python scripts/start-s3.py
       - name: Exercise actual S3 writes and fresh reads
@@ -258,4 +258,4 @@ jobs:
           python scripts/start-s3.py verify
       - name: Show service logs on failure
         if: failure()
-        run: docker logs dataraft-s3
+        run: docker logs dataraft-s3 || true

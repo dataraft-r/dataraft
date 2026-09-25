@@ -54,7 +54,15 @@ jobs:
               .Platform$pkgType, R.Version()$os, R.Version()$arch)
             install.packages("pak", repos = pak_repo)
           }
-          pak::pkg_install(family, ask = FALSE)
+          # Native Windows ARM is not reliably discovered by pak from a
+          # custom CRAN-style binary repository. Give pak the seven exact
+          # binary archives from the index that was checked above.
+          if (platform == "windows-arm64") {
+            archives <- paste0(index, "/", family, "_", records[family, "Version"], ".zip")
+            pak::pkg_install(paste0("url::", archives), ask = FALSE)
+          } else {
+            pak::pkg_install(family, ask = FALSE)
+          }
           stopifnot(all(vapply(family, requireNamespace, logical(1), quietly = TRUE)))
           for (name in family) {
             stopifnot(identical(as.character(utils::packageVersion(name)), records[name, "Version"]))

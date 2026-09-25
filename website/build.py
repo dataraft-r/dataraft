@@ -1,11 +1,15 @@
 from pathlib import Path
-import re,json,html,markdown,shutil,os
+import re,json,html,markdown,shutil,os,subprocess
 from bs4 import BeautifulSoup
 ROOT=Path(__file__).parent; OUT=ROOT/'dist'; UP=ROOT/'content/upstream'
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(exist_ok=True)
 shutil.copytree(ROOT/'assets',OUT/'assets',dirs_exist_ok=True)
 sha=json.loads((ROOT/'content/sources.json').read_text()); esc=html.escape
+# The umbrella checkout is the source of its own pages. An older recorded SHA
+# would link the current website to documentation from a previous commit.
+sha['dataraft']=os.environ.get('GITHUB_SHA') or subprocess.check_output(
+  ['git','rev-parse','HEAD'],cwd=ROOT.parent,text=True).strip()
 packages={
 'dataraft':('The family, together','Start here','A focused entry point to checked data products. The metapackage exposes 17 product verbs and dr_demo(); specialist functions stay in their component namespaces.'),
 'dataraft.core':('Define and check','Core','Products, contracts, preparation and quality gates. Start in memory, compose ordinary R transformations, and inspect every execution result.'),
@@ -355,7 +359,7 @@ for url,p in pages.items():
   seen.add(ident);h['id']=ident
   if h.name=='h2':toc.append((ident,h.get_text()))
  body=str(soup);title=p['title'];source=p['source']
- sourcehtml=f'<div class="source-note">Documentation snapshot: 23 September 2026 · <a href="https://github.com/dataraft-r/{source[0]}/blob/{sha[source[0]]}/{source[1]}">View source at {sha[source[0]][:7]} ↗</a><br>Code examples are documented source examples; they are not executed in this website build.</div>' if source else ''
+ sourcehtml=f'<div class="source-note">Documentation source: <a href="https://github.com/dataraft-r/{source[0]}/blob/{sha[source[0]]}/{source[1]}">View source at {sha[source[0]][:7]} ↗</a><br>Code examples are documented source examples; they are not executed in this website build.</div>' if source else ''
  header='<header><a class="brand" href="/" aria-label="DataRaft home"><span class="brand-mark">D<span>R</span></span>DataRaft<span class="brand-docs">/ docs</span></a><nav aria-label="Main">'+''.join(f'<a href="{u}" class="{"active" if url.startswith(u) else ""}">{t}</a>' for u,t in nav)+'</nav><div class="header-actions"><button id="search-open" aria-label="Search documentation">Search <kbd>/</kbd></button><a class="github" href="https://github.com/dataraft-r">GitHub ↗</a><button id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button></div></header>'
  toc_html='<aside class="toc"><span class="side-label">ON THIS PAGE</span>'+''.join(f'<a href="#{i}">{esc(t)}</a>' for i,t in toc)+'</aside>'
  main=f'<main id="main" class="home">{body}</main>' if url=='/' else f'<div class="doc-layout">{side(url,p["section"])}<main id="main" class="article"><div class="breadcrumb">Documentation <span>/</span> {p["section"]}</div><h1>{esc(title)}</h1>{body}{sourcehtml}</main>{toc_html}</div>'

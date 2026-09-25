@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlsplit,unquote
 base=os.environ.get('BASE_PATH','').rstrip('/')
 root=Path(__file__).parent/'dist';bad=[];count=0
+sources=json.loads((Path(__file__).parent/'content/sources.json').read_text())
+family=json.loads((Path(__file__).parent.parent/'family-lock.json').read_text())['packages']
+for name, spec in family.items():
+ if name != 'dataraft':
+  assert sources[name] == spec['ref'], f'Website snapshot and family lock differ: {name}'
 for f in root.rglob('*.html'):
  soup=BeautifulSoup(f.read_text(),'html.parser');count+=1
  for tag,attr in [('a','href'),('img','src'),('link','href'),('script','src')]:
