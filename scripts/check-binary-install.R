@@ -50,10 +50,43 @@ for (name in family) {
     grepl(if (windows) "\\.zip$" else "\\.tar\\.gz$", filename))
   archive <- file.path(archive_dir, filename)
   url <- paste(index, filename, sep = "/")
-  status <- download.file(url, archive, mode = "wb", quiet = TRUE)
-  stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
-  if ("MD5sum" %in% colnames(records) && !is.na(records[name, "MD5sum"])) {
-    stopifnot(identical(unname(tools::md5sum(archive)), records[name, "MD5sum"]))
+  # A Pages deployment can briefly serve an old index and a new archive.
+  # Refresh both URLs on a mismatch; never accept an unverified archive.
+  for (attempt in seq_len(6L)) {
+    if (attempt > 1L) {
+      Sys.sleep(10)
+      nonce <- paste0(as.integer(Sys.time()), "-", attempt)
+      index_file <- tempfile("packages-index-")
+      download.file(paste0(index, "/PACKAGES?ci=", nonce),
+        index_file, mode = "wb", quiet = TRUE)
+      fresh <- read.dcf(index_file)
+      unlink(index_file)
+      rownames(fresh) <- fresh[, "Package"]
+      stopifnot(all(family %in% rownames(fresh)))
+      records <- fresh
+      filename <- records[name, "File"]
+      if (is.na(filename) || !nzchar(filename)) {
+        filename <- paste0(name, "_", records[name, "Version"],
+          if (windows) ".zip" else ".tar.gz")
+      }
+      stopifnot(identical(basename(filename), filename),
+        grepl(if (windows) "\\.zip$" else "\\.tar\\.gz$", filename))
+      archive <- file.path(archive_dir, filename)
+      url <- paste(index, filename, sep = "/")
+      fetch_url <- paste0(url, "?ci=", nonce)
+    } else {
+      fetch_url <- url
+    }
+    status <- download.file(fetch_url, archive, mode = "wb", quiet = TRUE)
+    stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
+    stopifnot("MD5sum" %in% colnames(records))
+    expected_md5 <- records[name, "MD5sum"]
+    stopifnot(!is.na(expected_md5), nzchar(expected_md5))
+    actual_md5 <- unname(tools::md5sum(archive))
+    if (identical(actual_md5, expected_md5)) break
+    message("Published index/archive mismatch for ", name, " (attempt ",
+      attempt, "/6): expected ", expected_md5, ", downloaded ", actual_md5)
+    if (attempt == 6L) stop("Published binary checksum did not converge: ", url)
   }
   # The archive must already contain installed-package metadata, so a source
   # tarball with the same version can never satisfy this smoke test.
