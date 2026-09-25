@@ -61,6 +61,14 @@ jobs:
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -m pip install dbt-core==1.12.5 dbt-duckdb==1.10.1 duckdb==1.5.5
           "$RUNNER_TEMP/dataraft-dbt/bin/python" -c "import dbt.cli.main, duckdb"
           echo "DATARAFT_DBT_EXECUTABLE=$RUNNER_TEMP/dataraft-dbt/bin/dbt" >> "$GITHUB_ENV"
+      - name: Install pinned OpenMetadata ingestion CLI and SDK
+        run: |
+          python -m venv "$RUNNER_TEMP/dataraft-openmetadata"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/python" -m pip install "openmetadata-ingestion[dbt]==1.13.6.0"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/python" -c "from metadata.config.common import load_config_file; from metadata.generated.schema.metadataIngestion.workflow import OpenMetadataWorkflowConfig"
+          "$RUNNER_TEMP/dataraft-openmetadata/bin/metadata" --help
+          echo "DATARAFT_OPENMETADATA_PYTHON=$RUNNER_TEMP/dataraft-openmetadata/bin/python" >> "$GITHUB_ENV"
+          echo "DATARAFT_OPENMETADATA_CLI=$RUNNER_TEMP/dataraft-openmetadata/bin/metadata" >> "$GITHUB_ENV"
       - name: Validate compatible family versions
         run: python scripts/check-family.py
       - name: Require every declared optional dependency
