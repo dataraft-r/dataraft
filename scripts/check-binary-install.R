@@ -52,6 +52,9 @@ for (name in family) {
   url <- paste(index, filename, sep = "/")
   status <- download.file(url, archive, mode = "wb", quiet = TRUE)
   stopifnot(identical(status, 0L), file.info(archive)$size > 0L)
+  if ("MD5sum" %in% colnames(records) && !is.na(records[name, "MD5sum"])) {
+    stopifnot(identical(unname(tools::md5sum(archive)), records[name, "MD5sum"]))
+  }
   # The archive must already contain installed-package metadata, so a source
   # tarball with the same version can never satisfy this smoke test.
   member <- paste0(name, "/Meta/package.rds")
@@ -72,7 +75,8 @@ for (name in family) {
   installed <- system.file("Meta", "package.rds", package = name)
   stopifnot(nzchar(installed),
     identical(unname(tools::md5sum(expected)), unname(tools::md5sum(installed))),
-    identical(as.character(utils::packageVersion(name)), records[name, "Version"]))
+    identical(as.character(utils::packageVersion(name)), records[name, "Version"]),
+    requireNamespace(name, quietly = TRUE))
   cat("Verified published binary:", name, url, "\n")
   unlink(extraction, recursive = TRUE)
 }
