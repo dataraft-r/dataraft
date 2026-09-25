@@ -78,11 +78,41 @@ options(repos = c(
   ),
   CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/latest"
 ))
-pak::pkg_install("dataraft")
+repo <- getOption("repos")[["DataRaft"]]
+index <- contrib.url(repo, type = "source")
+records <- available.packages(contriburl = index)
+family <- c("dataraft.core", "dataraft.lake", "dataraft.adapters",
+            "dataraft.metrics", "dataraft.dbt", "dataraft.ide", "dataraft")
+stopifnot(all(family %in% rownames(records)))
+fields <- as.character(records[family, c("Depends", "Imports")])
+fields <- fields[!is.na(fields)]
+deps <- unique(trimws(sub("\\s*\\(.*", "",
+  unlist(strsplit(paste(fields, collapse = ","), ",", fixed = TRUE)))))
+deps <- setdiff(deps[nzchar(deps)], c("R", family, rownames(installed.packages())))
+if (length(deps)) pak::pkg_install(deps)
+for (name in family) {
+  file <- records[name, "File"]
+  stopifnot(grepl("_R_.*[.]tar[.]gz$", file))
+  archive <- tempfile(fileext = ".tar.gz")
+  download.file(paste0(index, "/", file), archive, mode = "wb")
+  stopifnot(identical(unname(tools::md5sum(archive)),
+                      unname(records[name, "MD5sum"])))
+  members <- utils::untar(archive, list = TRUE)
+  stopifnot(length(members) > 0L,
+            all(startsWith(members, paste0(name, "/"))),
+            !any(grepl("(^|/)\\.\\.(/|$)", members)))
+  utils::untar(archive, exdir = .libPaths()[[1L]])
+  unlink(archive)
+}
+stopifnot(all(vapply(family, requireNamespace, logical(1), quietly = TRUE)))
 ```
 
 Linux binaries are tied to the distribution ABI. The Noble builds are not
 promised to work on Debian, Fedora, other Ubuntu releases, or custom R builds.
+These tarballs contain installed packages. Because a Linux repository stores
+them under `src/contrib`, `pak::pkg_install("dataraft")` treats them as source
+and rebuilds them. The explicit archive installation above verifies the MD5
+published in the index and extracts the binary package trees without a build.
 CRAN dependencies can still require source installation if a compatible
 third-party binary is unavailable. A binary-only installation of the entire
 dependency graph must be tested separately for each platform.

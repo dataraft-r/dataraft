@@ -69,10 +69,8 @@ jobs:
               .Platform$pkgType, R.Version()$os, R.Version()$arch)
             install.packages("pak", repos = pak_repo)
           }
-          if (platform == "windows-arm64" && !modern_arm) {
-            # R 4.4/4.5 do not provide the native ARM binary package type.
-            # R 4.6 also uses this route until the new index is published.
-            # pak rejects native ARM ZIP URLs as another platform.
+          if (startsWith(platform, "linux-") ||
+              (platform == "windows-arm64" && !modern_arm)) {
             fields <- as.character(records[family, c("Depends", "Imports")])
             fields <- fields[!is.na(fields)]
             dependencies <- unique(trimws(sub("\\s*\\(.*", "",
@@ -80,11 +78,36 @@ jobs:
             dependencies <- setdiff(dependencies[nzchar(dependencies)],
               c("R", family, rownames(installed.packages())))
             if (length(dependencies)) pak::pkg_install(dependencies, ask = FALSE)
+          }
+          order <- c("dataraft.core", "dataraft.lake", "dataraft.adapters",
+            "dataraft.metrics", "dataraft.dbt", "dataraft.ide", "dataraft")
+          if (startsWith(platform, "linux-")) {
+            # A Linux installed-package tarball appears under src/contrib,
+            # where pak would rebuild it as source. Verify the published
+            # archive and unpack its installed package tree directly.
+            files <- records[order, "File"]
+            stopifnot(all(!is.na(files)), all(grepl("_R_.*[.]tar[.]gz$", files)),
+              all(grepl(if (platform == "linux-arm64") "aarch64|arm64" else "x86_64", files)))
+            for (i in seq_along(order)) {
+              name <- order[[i]]
+              archive <- tempfile(fileext = ".tar.gz")
+              download.file(paste0(index, "/", files[[i]]), archive, mode = "wb")
+              stopifnot(identical(unname(tools::md5sum(archive)),
+                unname(records[name, "MD5sum"])))
+              members <- utils::untar(archive, list = TRUE)
+              stopifnot(length(members) > 0L,
+                all(startsWith(members, paste0(name, "/"))),
+                !any(grepl("(^|/)\\.\\.(/|$)", members)))
+              utils::untar(archive, exdir = .libPaths()[[1L]])
+              unlink(archive)
+            }
+          } else if (platform == "windows-arm64" && !modern_arm) {
+            # R 4.4/4.5 do not provide the native ARM binary package type.
+            # R 4.6 also uses this route until the new index is published.
+            # pak rejects native ARM ZIP URLs as another platform.
             archive_files <- records[family, "File"]
             stopifnot(all(!is.na(archive_files)),
               all(archive_files == paste0(family, "_", records[family, "Version"], ".zip")))
-            order <- c("dataraft.core", "dataraft.lake", "dataraft.adapters",
-              "dataraft.metrics", "dataraft.dbt", "dataraft.ide", "dataraft")
             archives <- paste0(index, "/", archive_files[match(order, family)])
             utils::install.packages(archives, repos = NULL, type = "win.binary")
           } else {
