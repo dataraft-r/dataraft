@@ -1,6 +1,11 @@
 name: Install published DataRaft binaries with pak
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/binary-install-smoke.yaml
+      - scripts/check-binary-install.R
   pull_request:
     paths:
       - .github/workflows/binary-install-smoke.yaml
