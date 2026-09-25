@@ -17,10 +17,10 @@ for (i in seq_len(nrow(matrix))) {
   if (length(selected) != 7L) stop("Incomplete binary release: ", prefix)
   if (startsWith(platform, "windows-")) {
     # Separate roots prevent x64 and ARM ZIP files from sharing an index.
-    # Native ARM R 4.5+ uses the clang-aarch64 binary repository layout.
-    # R 4.4 ARM defaults to source, so keep its explicit binary ZIP index
+    # Native ARM R 4.6 uses the clang-aarch64 binary repository layout.
+    # R 4.4 and 4.5 ARM default to source, so keep their binary ZIP indices
     # under the traditional path for direct archive installation.
-    subdir <- if (platform == "windows-arm64" && minor != "4.4") {
+    subdir <- if (platform == "windows-arm64" && minor == "4.6") {
       c("clang-aarch64", "contrib")
     } else {
       "contrib"

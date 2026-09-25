@@ -8,7 +8,7 @@ if (windows) {
   repo <- paste0(base, "/", platform)
   if (platform == "windows-arm64") {
     stopifnot(grepl("aarch64|arm64", R.version$arch, ignore.case = TRUE))
-    subdir <- if (minor == "4.4") "bin/windows/contrib" else "bin/windows/clang-aarch64/contrib"
+    subdir <- if (minor == "4.6") "bin/windows/clang-aarch64/contrib" else "bin/windows/contrib"
   } else {
     stopifnot(grepl("x86_64|x64", R.version$arch, ignore.case = TRUE))
     subdir <- "bin/windows/contrib"
