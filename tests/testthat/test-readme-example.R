@@ -8,6 +8,9 @@ test_that("README first example runs", {
     test_path("..", "..", "README.md")
   }
   if (!file.exists(readme)) skip("README source is unavailable here")
+  description <- file.path(dirname(readme), "DESCRIPTION")
+  expect_true(file.exists(description))
+  expect_identical(read.dcf(description, fields = "Package")[1L], "dataraft")
   lines <- readLines(readme, warn = FALSE)
   heading <- match("## See a delivery pass or fail", lines)
   expect_false(is.na(heading))
