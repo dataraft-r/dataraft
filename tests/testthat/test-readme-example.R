@@ -1,8 +1,11 @@
 test_that("README first example runs", {
-  # Check the snippet readers copy from GitHub.
-  readme <- test_path("..", "..", "README.md")
-  if (!file.exists(readme)) {
-    readme <- file.path(Sys.getenv("GITHUB_WORKSPACE"), "README.md")
+  # The CI workspace points to the checked-out source, while R CMD check can
+  # place test files beside a different README in its temporary directory.
+  workspace <- Sys.getenv("GITHUB_WORKSPACE")
+  readme <- if (nzchar(workspace)) {
+    file.path(workspace, "README.md")
+  } else {
+    test_path("..", "..", "README.md")
   }
   if (!file.exists(readme)) skip("README source is unavailable here")
   lines <- readLines(readme, warn = FALSE)
