@@ -4,7 +4,7 @@
 
 A monthly report can run successfully and still use the wrong columns or a bad value. Later, it can be hard to tell which input and rules produced a number. DataRaft lets you define a named delivery, check its contract and quality rules, and inspect the result. Add a destination when you want to keep a version of the accepted data.
 
-[Get started](https://dataraft-r.github.io/dataraft/articles/get-started.html) · [Plain-English tour](https://dataraft-r.github.io/dataraft/about/) · [Package website](https://dataraft-r.github.io/dataraft/)
+[Get started](https://dataraft-r.github.io/dataraft/articles/get-started.html) · [Plain-English tour](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html) · [Package website](https://dataraft-r.github.io/dataraft/)
 
 ## See a delivery pass or fail
 
