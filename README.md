@@ -6,6 +6,15 @@ A monthly report can run successfully and still use the wrong columns or a bad v
 
 [Get started](https://dataraft-r.github.io/dataraft/articles/get-started.html) · [Plain-English tour](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html) · [Package website](https://dataraft-r.github.io/dataraft/)
 
+## Install
+
+Requires R 4.2 or later. Install the development metapackage from GitHub:
+
+```r
+install.packages("pak")
+pak::pak("dataraft-r/dataraft")
+```
+
 ## See a delivery pass or fail
 
 This example runs in memory. It needs no database or lake.
@@ -34,7 +43,7 @@ good <- dr_run(
 dr_collect(good)
 ```
 
-The negative amount blocks the first delivery. The corrected delivery passes. `write = FALSE` prevents DataRaft's configured writer from running; user-supplied source and transformation code can still have effects. To retain a checked version, choose a target and publish it. See the [RDS example](https://github.com/dataraft-r/dataraft.adapters#try-it) for a file-based starting point or the [lake guide](https://github.com/dataraft-r/dataraft.lake) for DuckDB and DuckLake.
+The negative amount blocks the first delivery. The corrected delivery passes. `write = FALSE` prevents DataRaft's configured writer from running; user-supplied source and transformation code can still have effects. To retain a checked version, choose a target and publish it. See the [complete checked delivery](https://github.com/dataraft-r/dataraft-example), the [RDS adapter](https://github.com/dataraft-r/dataraft.adapters#try-it), or the [lake guide](https://github.com/dataraft-r/dataraft.lake).
 
 ## Choose the piece you need
 
@@ -49,14 +58,5 @@ The negative amount blocks the first delivery. The corrected delivery passes. `w
 | [`dataraft-positron`](https://github.com/dataraft-r/dataraft-positron) | Inspect products visually and edit contract YAML in Positron. Optional extension. |
 
 `dataraft` is the entry point and re-exports common commands. Start with [`dataraft.core`](https://github.com/dataraft-r/dataraft.core) if you only need in-memory checks. There is no active `dataraft.catalog` package; catalog integrations live in `dataraft.adapters`.
-
-## Install
-
-Install the development metapackage from GitHub:
-
-```r
-install.packages("pak")
-pak::pak("dataraft-r/dataraft")
-```
 
 This project is experimental. Optional engines and integrations have their own requirements. Read the [guided introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html), [guarantees and limits](https://dataraft-r.github.io/dataraft/articles/guarantees.html), [compatibility policy](FAMILY_COMPATIBILITY.md) and [roadmap](ROADMAP.md) before relying on a particular workflow.
