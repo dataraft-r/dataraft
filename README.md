@@ -1,143 +1,62 @@
-
 # DataRaft
 
-For Positron, see the [IDE integration guide](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/examples/positron-ide/README.md)
-and [phase checklist](https://github.com/dataraft-r/dataraft/blob/feat/positron-ide/docs/plans/positron-ide.md). IDE metadata and the separate
-extension are optional; existing R workflows remain usable without them.
+**Turn recurring R data work into checked, explainable data products.**
 
-[![R-CMD-check](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/R-CMD-check.yaml)
-[![Coverage](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml/badge.svg)](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+A monthly report can run successfully and still use the wrong columns or a bad value. Later, it can be hard to tell which input and rules produced a number. DataRaft lets you define a named delivery, check its contract and quality rules, and inspect the result. Add a destination when you want to keep a version of the accepted data.
 
-Keep R-based reports reproducible with checked data and pinned input
-versions. DataRaft is the contract, quality and reproducibility layer
-for teams whose business logic lives in R. Use your existing database or
-an open lakehouse, or start with compiler-free RDS releases. A changed
-column type or a negative amount blocks a delivery before its target is
-written. The result retains the checks and offending rows for diagnosis.
+[Get started](https://dataraft-r.github.io/dataraft/articles/get-started.html) · [Plain-English tour](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html) · [Package website](https://dataraft-r.github.io/dataraft/)
 
-See the [one-page cheatsheet](CHEATSHEET.md), [roadmap](ROADMAP.md) and
-[security policy](SECURITY.md). Numeric coverage is published per
-component and commit in the [Coverage workflow
-summaries](https://github.com/dataraft-r/dataraft/actions/workflows/coverage.yaml).
+## See a delivery pass or fail
 
-DataRaft is under development. The hardening focus is `dataraft.core`,
-`dataraft.lake` and `dataraft.adapters`. The dbt and metrics
-integrations are experimental and can change independently. Metrics
-provides governed, frozen metric results; it is not a general-purpose
-semantic modeling engine. No stable public release is claimed by the
-development compatibility lock.
+This example runs in memory. It needs no database or lake.
 
-Start without a database: `library(dataraft); demo <- dr_demo()`.
-Inspect `dataraft.core::dr_quality_rows(demo$blocked)` and `dr_collect(demo$passed)`.
-See the [insurance
-walkthrough](https://github.com/dataraft-r/dataraft/blob/main/examples/insurance-delivery.md)
-and the [family compatibility policy](FAMILY_COMPATIBILITY.md). The
-[review implementation
-status](https://github.com/dataraft-r/dataraft/blob/main/docs/review-hardening.md)
-records changes and the remaining scope boundaries.
-
-``` r
+```r
 library(dataraft)
 
 orders <- dr_product("orders") |>
   dr_add_contract(c(id = "integer", amount = "numeric")) |>
   dr_add_quality(~ amount >= 0)
 
-orders <- orders |>
-  dataraft.core::dr_add_recipe(dataraft.core::dr_recipe() |> dataraft.core::dr_step_mutate(amount = round(amount, 2)))
+bad <- dr_run(
+  orders,
+  data = data.frame(id = 1:2, amount = c(25, -5)),
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+bad$status
+dataraft.core::dr_quality_rows(bad)
 
-bad_delivery <- data.frame(id = 1:3, amount = c(25, -75, 50))
-checked <- dr_run(orders, data = bad_delivery, write = FALSE, stop_on_failure = FALSE)
-checked$status
-#> [1] "blocked"
-dataraft.core::dr_quality_rows(checked)
-#> # A tibble: 1 × 2
-#>      id amount
-#>   <int>  <dbl>
-#> 1     2    -75
+good <- dr_run(
+  orders,
+  data = data.frame(id = 1:2, amount = c(25, 5)),
+  write = FALSE
+)
+dr_collect(good)
 ```
 
-Correct the delivery and reuse the same product:
+The negative amount blocks the first delivery. The corrected delivery passes. `write = FALSE` prevents DataRaft's configured writer from running; user-supplied source and transformation code can still have effects. To retain a checked version, choose a target and publish it. See the [RDS example](https://github.com/dataraft-r/dataraft.adapters#try-it) for a file-based starting point or the [lake guide](https://github.com/dataraft-r/dataraft.lake) for DuckDB and DuckLake.
 
-``` r
-next_delivery <- data.frame(id = 1:3, amount = c(25, 75, 50))
-result <- dr_run(orders, data = next_delivery, write = FALSE)
-dr_collect(result)
-#> # A tibble: 3 × 2
-#>      id amount
-#>   <int>  <dbl>
-#> 1     1     25
-#> 2     2     75
-#> 3     3     50
-```
+## Choose the piece you need
 
-A **product** contains the delivery, transformations, contract, checks and target.
-`dr_run(write = FALSE)` checks it without invoking framework writers;
-`dr_run()` executes its configured destination. `dr_collect()` retrieves checked
-output. Source reads and user callbacks still run in both modes.
+| Repository | What it adds |
+|---|---|
+| [`dataraft.core`](https://github.com/dataraft-r/dataraft.core) | Define products, contracts, preparation and checks; run them in memory. |
+| [`dataraft.adapters`](https://github.com/dataraft-r/dataraft.adapters) | Read and write files, databases and APIs; connect metadata tools. |
+| [`dataraft.lake`](https://github.com/dataraft-r/dataraft.lake) | Publish and inspect versioned releases with DuckDB or DuckLake. |
+| [`dataraft.metrics`](https://github.com/dataraft-r/dataraft.metrics) | Define measures and retain evidence for frozen reports. Experimental. |
+| [`dataraft.dbt`](https://github.com/dataraft-r/dataraft.dbt) | Connect an existing dbt project and its artifacts. Experimental. |
+| [`dataraft.ide`](https://github.com/dataraft-r/dataraft.ide) | Supply bounded R metadata to editor clients. Optional and experimental. |
+| [`dataraft-positron`](https://github.com/dataraft-r/dataraft-positron) | Inspect products visually and edit contract YAML in Positron. Optional extension. |
 
-## Start with the essentials
+`dataraft` is the entry point and re-exports common commands. Start with [`dataraft.core`](https://github.com/dataraft-r/dataraft.core) if you only need in-memory checks. There is no active `dataraft.catalog` package; catalog integrations live in `dataraft.adapters`.
 
-Use `dr_product()`, `dr_contract()`, `dataraft.core::dr_add_source()`, `dr_add_quality()`,
-`dr_quality()`, `dr_set_target()`, `dr_run()` and `dr_collect()` first.
-Ordinary dplyr verbs and optional recipes prepare the delivery. Use
-`dataraft.core::dr_contract_policy()` and `dataraft.core::dr_contract_meta()` when more policy or metadata is
-needed. Compose directly on products; check without writing with `dr_run(write = FALSE)`.
+## Install
 
-Without a declared contract, inferred schema checks and validation reports say
-`unvalidated`. Successful execution alone is not a validation guarantee.
-See the [current API guide](https://github.com/dataraft-r/dataraft/blob/main/docs/plans/current-api.md)
-for composition rules and execution guarantees.
+Install the development metapackage from GitHub:
 
-Start with [why
-DataRaft](https://dataraft-r.github.io/dataraft/articles/why-dataraft.html)
-and the [guided
-introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html).
-
-## Packages
-
-| Package             | Responsibility                                                     |
-|---------------------|--------------------------------------------------------------------|
-| `dataraft`          | Metapackage and shared introduction                                |
-| `dataraft.core`     | Products, contracts, recipes, workflows and quality                |
-| `dataraft.lake`     | Lake storage, releases, coordinated publication and recovery       |
-| `dataraft.adapters` | Database, API, RDS, Parquet and pins adapters; targets integration |
-| `dataraft.dbt`      | dbt execution and artifacts                                        |
-| `dataraft.metrics`  | Metrics and frozen report evidence                                 |
-| `dataraft.ide` | Optional Positron metadata bridge and contract editor requests |
-
-Use `library(dataraft.core)` for in-memory work without the extensions.
-Each extension can be installed with its declared dependencies. The
-metapackage re-exports the public family API; its own R code contains no
-engine.
-
-Install the development version:
-
-``` r
+```r
 install.packages("pak")
 pak::pak("dataraft-r/dataraft")
 ```
 
-## When to use it
-
-Use DataRaft when repeated deliveries need a reusable preparation
-definition, quality gates and an inspectable execution result. Use
-pointblank for standalone data validation, targets for pipeline
-scheduling, pins for board-based object storage and dbt for SQL model
-development. DataRaft adapters connect these tools to a checked delivery
-workflow.
-
-See the
-[introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html),
-[integration
-guide](https://dataraft-r.github.io/dataraft/articles/integrations.html)
-and [guarantees and
-limits](https://dataraft-r.github.io/dataraft/articles/guarantees.html).
-
-For persistence without an optional storage engine, use
-`dr_publish(flow, data = delivery, to = dataraft.adapters::dr_target_rds("data/orders"))`.
-The result’s `outputs$version` pins that delivery for `dataraft.adapters::dr_source_rds()`.
-After a failed pipe, `dr_last_failure()` retrieves the failed result for
-diagnosis.
+This project is experimental. Optional engines and integrations have their own requirements. Read the [guided introduction](https://dataraft-r.github.io/dataraft/articles/get-started.html), [guarantees and limits](https://dataraft-r.github.io/dataraft/articles/guarantees.html), [compatibility policy](FAMILY_COMPATIBILITY.md) and [roadmap](ROADMAP.md) before relying on a particular workflow.
