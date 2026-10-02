@@ -18,13 +18,13 @@ required_runnable = [
 
 for path in qmds:
     text = path.read_text(encoding="utf-8")
-    executable_cells += len(re.findall(r"^\\`\\`\\`\\{r(?:\\s[^}]*)?\\}\\s*$", text, flags=re.M))
+    executable_cells += len(re.findall(r"^```\{r(?:\s[^}]*)?\}\s*$", text, flags=re.M))
     if "sandbox:/mnt/data/" in text or "/mnt/data/" in text:
         errors.append(f"{path.relative_to(ROOT)} contains a local build path")
     if "\u2014" in text:
         errors.append(f"{path.relative_to(ROOT)} contains an em dash")
 
-    for match in re.finditer(r"!\\[[^\\]]*\\]\\(([^)]+)\\)(\\{[^}]*\\})?", text):
+    for match in re.finditer(r"!\[[^\]]*\]\(([^)]+)\)(\{[^}]*\})?", text):
         target, attrs = match.group(1), match.group(2) or ""
         if re.match(r"^[a-z]+://", target):
             continue
@@ -36,7 +36,7 @@ for path in qmds:
 
 for rel in required_runnable:
     text = (ROOT / rel).read_text(encoding="utf-8")
-    if not re.search(r"^\\`\\`\\`\\{r(?:\\s[^}]*)?\\}\\s*$", text, flags=re.M):
+    if not re.search(r"^```\{r(?:\s[^}]*)?\}\s*$", text, flags=re.M):
         errors.append(f"{rel} must contain at least one executable R cell")
 
 if executable_cells < 8:
@@ -45,7 +45,7 @@ if executable_cells < 8:
     )
 
 config = (ROOT / "_quarto.yml").read_text(encoding="utf-8")
-for rel in re.findall(r"(?m)^\\s*-?\\s*(?:part:\\s*)?([A-Za-z0-9_./-]+\\.qmd)\\s*$", config):
+for rel in re.findall(r"(?m)^\s*-?\s*(?:part:\s*)?([A-Za-z0-9_./-]+\.qmd)\s*$", config):
     if not (ROOT / rel).exists():
         errors.append(f"_quarto.yml references missing file {rel}")
 
@@ -55,12 +55,12 @@ retired = {
     "dr_remove_contract", "dr_extract_contract", "dr_update_source",
     "dr_remove_source", "dr_extract_source"
 }
-code_pattern = r"\\`\\`\\`(?:\\{r(?:\\s[^}]*)?\\}|\\{\\.r\\}|r)\\s*\\n(.*?)\\`\\`\\`"
+code_pattern = r"```(?:\{r(?:\s[^}]*)?\}|\{\.r\}|r)\s*\n(.*?)```"
 for path in qmds:
     text = path.read_text(encoding="utf-8")
     for block in re.findall(code_pattern, text, flags=re.S):
         for name in retired:
-            if re.search(rf"\\b{re.escape(name)}\\s*\\(", block):
+            if re.search(rf"\b{re.escape(name)}\s*\(", block):
                 errors.append(f"{path.relative_to(ROOT)} uses retired call {name}()")
 
 for rel in ["data/policies.csv", "data/brokers.csv", "data/payments.csv"]:
