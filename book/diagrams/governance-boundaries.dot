@@ -1,0 +1,15 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.55, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=11, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.4, arrowsize=0.7, fontname="Arial", fontsize=9, fontcolor="#52606D"];
+  product [label="Product definition", fillcolor="#E8EEF6"];
+  policy [label="Policy gate"];
+  port [label="Output port"];
+  sla [label="SLA evidence"];
+  release [label="Durable release", fillcolor="#E7F2F2", color="#2A7F7F"];
+  external [label="External governance\nIAM, retention, approvals", fillcolor="#FFF4E5", color="#A46500"];
+  product -> policy -> port -> release;
+  port -> sla;
+  external -> port [style=dashed, label="separate controls"];
+  external -> release [style=dashed];
+}
