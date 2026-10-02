@@ -1,0 +1,14 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.55, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=11, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.4, arrowsize=0.7, fontname="Arial", fontsize=9, fontcolor="#52606D"];
+  grain [label="Grain\nwhat one row means", fillcolor="#E8EEF6"];
+  identity [label="Identity\nkeys and stable fields", fillcolor="#E8EEF6"];
+  meaning [label="Business meaning\nownership + descriptions", fillcolor="#E7F2F2", color="#2A7F7F"];
+  contract [label="Executable contract", fillcolor="#E7F2F2", color="#2A7F7F"];
+  semantic [label="Broader semantic layer\nmetrics, joins, time grains", fillcolor="#FFF4E5", color="#A46500"];
+  grain -> contract;
+  identity -> contract;
+  meaning -> contract;
+  contract -> semantic [label="integrates when needed"];
+}
