@@ -31,7 +31,6 @@ for f in files:
     s=re.sub(r'^#\|.*$', '', s, flags=re.M)
     # Resolve project assets after concatenating nested chapters.
     s=s.replace('../diagrams/', 'diagrams/')
-    s=re.sub(r'(diagrams/[^)\s]+)\.svg', r'\1.png', s)
     # Remove Quarto callout wrappers while retaining text.
     s=re.sub(r'^:::\s*\{[^}]+\}\s*$', '', s, flags=re.M)
     s=re.sub(r'^:::\s*$', '', s, flags=re.M)
