@@ -19,6 +19,10 @@ testthat::test_that("the complete local platform produces a checked result", {
     )
   )
   testthat::expect_equal(nrow(output), 4L)
+
+  lineage <- dataraft::dr_lineage(result)
+  testthat::expect_gt(nrow(lineage), 0L)
+  testthat::expect_true(all(lineage$to_id == "monthly_performance"))
 })
 
 testthat::test_that("a bad policy delivery is blocked before reuse", {
@@ -40,16 +44,53 @@ testthat::test_that("a bad policy delivery is blocked before reuse", {
   testthat::expect_equal(rows$premium, -1)
 })
 
-testthat::test_that("RDS publication creates a versioned readable release", {
+testthat::test_that("publication records release, policy and SLA evidence", {
   products <- insurance_products(book_root)
   path <- withr::local_tempdir()
-  published <- products$monthly_performance |>
-    dataraft::dr_set_target(dataraft.adapters::dr_target_rds(path)) |>
-    dataraft::dr_publish()
+  publishable <- insurance_release_product(products, path)
+
+  policy_decisions <- dataraft.core::dr_check_policies(
+    publishable,
+    event = "publish"
+  )
+  testthat::expect_identical(policy_decisions$decision, "pass")
+
+  published <- dataraft::dr_publish(
+    publishable,
+    business_date = "2026-10-02"
+  )
+
   testthat::expect_identical(published$status, "published")
+  testthat::expect_identical(
+    published$port_outputs$reporting_extract$status,
+    "published"
+  )
+  testthat::expect_identical(
+    published$metadata$policies$decision,
+    "pass"
+  )
+  testthat::expect_true(
+    published$metadata$sla$reporting_extract$status[[1]] %in%
+      c("met", "late")
+  )
+
   version <- published$outputs$version
   reread <- dataraft.core::dr_read_source(
     dataraft.adapters::dr_source_rds(path, version)
   )
   testthat::expect_equal(nrow(reread), 4L)
+})
+
+testthat::test_that("the complete project exposes explicit product lineage", {
+  products <- insurance_products(book_root)
+  result <- dataraft::dr_run(
+    products$monthly_performance,
+    write = FALSE
+  )
+
+  lineage <- dataraft::dr_lineage(result)
+  testthat::expect_true(
+    all(c("from_id", "to_id", "relation") %in% names(lineage))
+  )
+  testthat::expect_true("monthly_performance" %in% lineage$to_id)
 })
