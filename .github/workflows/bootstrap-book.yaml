@@ -1,7 +1,9 @@
 name: Bootstrap book sources
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [book-v3-publish]
+    paths: ['.bootstrap/**', '.github/workflows/bootstrap-book.yaml']
 
 permissions:
   contents: write
