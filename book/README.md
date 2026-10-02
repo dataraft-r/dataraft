@@ -8,6 +8,7 @@ This directory contains the Quarto source, runnable local case study, architectu
 
 - 22 chapters in seven parts plus eight appendices
 - one continuous synthetic insurance example
+- executable core teaching examples rendered by Quarto
 - a runnable local platform project in `examples/insurance-platform/`
 - source-controlled Graphviz diagrams with checked-in SVG renders
 - exact DataRaft source revisions in `AUDIT.md`
@@ -35,7 +36,7 @@ Then render:
 quarto render
 ```
 
-The HTML book is the primary format. PDF is also configured.
+The HTML book is the primary format. PDF is also configured. During a native Quarto build, the core local teaching cells execute against the pinned DataRaft family, so API drift in those examples fails the build.
 
 ## Runnable companion project
 
@@ -55,7 +56,7 @@ When Quarto or R is unavailable:
 bash scripts/build-fallback.sh
 ```
 
-The fallback concatenates the QMD sources, uses the checked-in static SVG diagrams, applies citations with Pandoc, creates HTML and DOCX, and converts the DOCX to PDF with LibreOffice. It does **not** execute R code, so it proves manuscript renderability rather than DataRaft execution.
+The fallback concatenates the QMD sources, uses the checked-in static SVG diagrams, applies citations with Pandoc, creates HTML and DOCX, and converts the DOCX to PDF with LibreOffice. It does **not** execute R code, so it proves manuscript renderability rather than DataRaft execution. Use the native Quarto build or CI for executable verification.
 
 ## Source of truth
 
