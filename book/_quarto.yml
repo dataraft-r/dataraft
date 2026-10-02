@@ -7,7 +7,7 @@ book:
   title: "Data Platforms with R"
   subtitle: "From scripts to governed data products with DataRaft"
   author: "DataRaft Contributors"
-  date: today
+  date: 2026-10-02
   site-url: https://dataraft-r.github.io/dataraft/book/
   repo-url: https://github.com/dataraft-r/dataraft
   repo-subdir: book
