@@ -73,7 +73,7 @@ warning_rule <- dataraft.core::dr_quality_rule(
   "small_negative_share",
   ~ premium >= 0,
   action = "warn",
-  threshold = 0.25
+  threshold = 0.10
 )
 
 warning_product <- dr_product("policies_warning") |>
