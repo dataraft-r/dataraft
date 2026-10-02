@@ -1,77 +1,72 @@
 # DataRaft and the Modern Data Stack {#sec-modern-stack}
 
-DataRaft is most useful when its role is described in terms of responsibilities rather than tool competition.
+DataRaft is easiest to place in a larger architecture by assigning responsibilities rather than comparing tools as if one system should replace all the others.
+
+## Responsibility map
+
+| Responsibility | DataRaft role | Common surrounding systems |
+|---|---|---|
+| product definition | core concept | dbt contracts, platform catalogs |
+| R preparation | recipes and ordinary R | dplyr |
+| SQL modeling | optional integration | dbt |
+| quality gate | native rules, optional Pointblank | Pointblank, dbt tests, warehouse checks |
+| local execution and analytics | delegated or embedded | DuckDB |
+| governed release history | adapters or DataRaft lake | lakehouse or warehouse systems |
+| shared metadata | publish through adapters | OpenMetadata |
+| lineage exchange | publish supported evidence | OpenLineage |
+| semantic query layer | deliberately not owned | dedicated semantic systems |
+| scheduling | deliberately not owned | Posit Connect, GitHub Actions, Airflow, Dagster, targets |
+
+Several systems can be present at once. The goal is to avoid duplicate ownership.
 
 ## DuckDB and DuckLake
 
-DuckDB is an execution and storage engine. DataRaft can use it through the lake component and adapters. DuckLake adds catalog and data-lake semantics on top of DuckDB-oriented workflows. DataRaft contributes product definitions, quality gates, release evidence, and lifecycle behavior around those physical systems.
+DuckDB is an analytical database and execution engine [@duckdb]. DataRaft can use it through lake and adapter workflows.
+
+DuckLake provides lake-oriented metadata and storage semantics around DuckDB-oriented workflows [@ducklake]. DataRaft contributes the product definition, acceptance gate, release evidence, and lifecycle behavior around those physical components.
+
+Neither technology is the DataRaft product model itself.
 
 ## dbt
 
-The experimental `dataraft.dbt` package can describe a dbt project, run builds, inspect artifacts, import bounded contract information, and publish checked outputs through a configured DataRaft lake.
+dbt is often the right center when SQL models, warehouse-native execution, and analytics engineering workflows dominate [@dbt].
 
-The integration does not claim that a normal dbt run is automatically an atomic DataRaft release. Managed publication is a separate step.
+The experimental `dataraft.dbt` package can run or inspect dbt projects and artifacts and connect selected outputs to DataRaft publication. A normal dbt run does not automatically become an atomic DataRaft release.
 
-Use dbt as the primary transformation system when SQL models, warehouse-native workflows, and a cross-language analytics engineering team are the center of gravity. Use DataRaft when R-defined products and R-side checks, diagnostics, or publication evidence are important. The two can coexist.
+Do not rewrite a successful SQL estate into R merely to make DataRaft appear central.
 
 ## Pointblank
 
-Pointblank is a specialized data validation engine. DataRaft can use it for checks while retaining its own product-level gate and evidence model.
+Pointblank is a specialized data validation engine. DataRaft can delegate checks to it while retaining the product-level acceptance decision and evidence model.
+
+This is an example of a healthy integration boundary: the specialized tool owns its validation vocabulary, while DataRaft owns whether the product may progress.
 
 ## OpenMetadata and OpenLineage
 
-OpenMetadata is an external metadata/catalog system. OpenLineage is a lineage event standard. DataRaft adapters can publish to both. Neither replaces the local executable definition.
+OpenMetadata can serve the shared metadata plane [@openmetadata]. OpenLineage provides an interoperable lineage-event model [@openlineage].
+
+DataRaft adapters can publish to both. Neither service needs to become a required dependency of local product definitions.
 
 ## Semantic layers
 
-`dataraft.metrics` is experimental and explicitly not a general semantic modeling engine. If the organization needs universal metrics across BI tools with join semantics, time grains, access policies, and SQL generation, use a purpose-built semantic layer and integrate it at the product boundary.
+The experimental `dataraft.metrics` package is deliberately narrower than a universal semantic layer.
+
+DataRaft can carry product grain, contract metadata, and retained metric evidence. A purpose-built semantic layer should remain responsible when an organization needs cross-tool join semantics, additive behavior, query-time time grains, access rules, and SQL generation.
+
+This division is important. Product semantics and enterprise query semantics overlap, but they are not the same problem.
 
 ## Orchestration
 
-DataRaft defines and executes product workflows, but it is not a general scheduler. Use GitHub Actions, Posit Connect, Airflow, Dagster, targets, or another orchestrator for recurring triggers when those capabilities are needed.
+A DataRaft product graph can execute dependencies, but DataRaft is not a general scheduler.
 
-::: {.callout-note title="A useful test"}
-If another tool already owns a concern well, ask whether DataRaft should integrate with it rather than reproduce it. Modularity is valuable only when the boundaries stay clear.
+Use an orchestrator when you need timers, event triggers, queues, resource management, retries across machines, or organization-wide dependency scheduling. The orchestrator can decide **when** to run. DataRaft can still decide **what counts as an acceptable delivery**.
+
+::: {.callout-note title="Integration test"}
+If another tool already owns a responsibility well, prefer a narrow integration boundary over a second implementation of the same responsibility.
 :::
-
-## Integration by responsibility
-
-It is easier to position DataRaft by asking which responsibility a tool owns.
-
-| Responsibility | DataRaft role | Other common tools |
-|---|---|---|
-| product definition | core concept | contracts in dbt or platform catalogs |
-| preparation | R recipes and transforms | dplyr, SQL, dbt |
-| quality | native rules, optional Pointblank | Pointblank, dbt tests, warehouse checks |
-| durable release history | DataRaft lake or adapters | lakehouse and warehouse systems |
-| metadata export | adapters | OpenMetadata, OpenLineage |
-| SQL project execution | optional dbt integration | dbt |
-| metric evidence | experimental metrics package | semantic/metrics layers |
-| scheduling | delegated | GitHub Actions, Posit Connect, orchestrators |
-
-The table is not a scorecard. In a mature environment, several of these tools can be present at the same time.
-
-### dbt
-
-`dataraft.dbt` is explicitly experimental. It can describe and run dbt projects, inspect artifacts, derive bounded contract information from manifests, expose lineage, and publish checked outputs through a configured DataRaft lake. Running dbt by itself does not create an atomic DataRaft release.
-
-Use the integration when SQL models already belong in dbt. Do not rewrite a successful dbt project into R merely to make DataRaft the center of every transformation.
-
-### DuckDB and DuckLake
-
-DuckDB is an execution and storage engine used by the lake implementation and some optional workflows. DuckLake adds a lake-oriented metadata/storage architecture. Neither is the DataRaft product model itself. This distinction keeps DataRaft from becoming synonymous with a single backend.
-
-### Semantic layers and metrics
-
-`dataraft.metrics` is experimental and deliberately states that it is not a general semantic modeling engine. It can define metrics, retain the exact checked release used for a measurement, store runtime evidence, and verify frozen report values. Joins, additivity, time-grain semantics, and general SQL semantic modeling remain with the product or an external semantic system.
-
-### Orchestration
-
-DataRaft has an execution graph, but it does not attempt to replace a full scheduler. Use an external scheduler when you need retries across machines, event triggers, queues, resource management, or organization-wide dependency scheduling. The DataRaft command invoked by that scheduler can still own the product-level acceptance gate.
 
 ## Exercises
 
-1. For a stack containing dbt, DuckDB, OpenMetadata, and DataRaft, assign one primary responsibility to each component. Avoid giving the same responsibility to two tools.
-2. Choose a workflow where dbt should be the primary modeling tool and explain what DataRaft could still add around checked releases.
-3. Choose a workflow where DataRaft alone is enough and adding a catalog or orchestrator would be premature.
-
+1. Design a stack with dbt, DuckDB, OpenMetadata, and DataRaft. Give each component one primary responsibility.
+2. Describe a workflow where a dedicated semantic layer should own query semantics while DataRaft still owns a recurring R product boundary.
+3. Choose one surrounding system and write the minimum metadata or artifact that should cross the integration boundary.
