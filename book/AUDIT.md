@@ -60,9 +60,11 @@ Lake publication adds immutable landing/candidate/release behavior, registry met
 - RDS checksums detect accidental modification, not malicious replacement by an actor able to rewrite both data and evidence.
 - Experimental packages may evolve faster than the core surface.
 
-## Verification limitation of this generated artifact
+## Verification model
 
-The execution environment used to assemble this edition does not include R or the Quarto CLI. The book therefore includes a separate runnable example project and tests, plus CI that installs the audited DataRaft revisions before running `scripts/verify-examples.R` and rendering HTML/PDF with Quarto. The local HTML/PDF artifacts supplied with this delivery are generated with the Pandoc/LibreOffice fallback. They prove manuscript and static-diagram renderability, not R execution. Upstream DataRaft repositories independently test their README examples and package behavior.
+The book has two executable verification layers. First, the companion insurance project is tested with testthat, including a blocked delivery, product lineage, governed RDS publication, publish-policy evidence, an output port, and SLA evidence. Second, selected core teaching examples are native Quarto R cells and execute while HTML and PDF are rendered in CI against the pinned DataRaft revisions.
+
+The Pandoc/LibreOffice fallback remains available for environments without R or Quarto. Fallback artifacts prove manuscript and static-diagram renderability only; they do not execute R. Upstream DataRaft repositories independently test their package behavior and README examples.
 
 
 ## Audited source revisions
