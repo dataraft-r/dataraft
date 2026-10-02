@@ -61,6 +61,8 @@ This separation keeps three questions visible:
 
 ## Semantics before schema
 
+![Grain, identity, and business meaning feed the executable contract, while broader cross-tool query semantics remain a separate integration boundary.](../diagrams/semantic-boundary.svg){#fig-semantic-boundary fig-alt="Three inputs named grain, identity, and business meaning feed an executable contract, which can integrate with a broader semantic layer for metrics, joins, and time grains."}
+
 A schema says that `premium` is numeric. It does not say whether the value is annual premium, monthly premium, gross premium, or net premium.
 
 For a reusable product, establish at least four semantic facts:
