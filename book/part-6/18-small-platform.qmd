@@ -16,7 +16,7 @@ The project contains three source deliveries:
 
 The first architectural decision is not where these files will be stored. It is what reusable products they represent and at what grain.
 
-The project therefore defines five logical products:
+The project therefore defines six logical products:
 
 | Product | Grain | Main responsibility |
 |---|---|---|
@@ -182,33 +182,51 @@ For the shipped fixtures the expected status is `completed`. If a contract or qu
 
 This separation is the core safety property of the example. Writing is not the way you discover whether a delivery was valid. Validation and quality happen before a durable target is committed.
 
-## Step 6: add the smallest durable target
+## Step 6: add a governed durable output
 
-The local example uses the RDS adapter because it requires no external service:
+The local example keeps RDS as the physical target, but publication now goes through a declared output port with an SLA. The logical product remains unchanged.
 
 ```r
 release_root <- "examples/insurance-platform/releases/monthly-performance"
 
-published <- products$monthly_performance |>
-  dataraft::dr_set_target(
-    dataraft.adapters::dr_target_rds(release_root)
-  ) |>
-  dataraft::dr_publish()
+publishable <- insurance_release_product(
+  products,
+  release_root
+)
+
+published <- dataraft::dr_publish(
+  publishable,
+  business_date = "2026-10-02"
+)
 ```
 
-Each successful RDS write creates a new version directory and checksum metadata. Existing versions are not overwritten by the adapter. This is local filesystem versioning, not a database transaction or a distributed lock service. The distinction is documented by the adapter itself.
+The helper attaches an internal `reporting_extract` output port backed by the RDS target and a daily 09:00 UTC SLA. The product also carries a publish policy requiring owner metadata.
+
+Each successful RDS write still creates a versioned local release. The additional controls answer different questions: did the product satisfy its publish policy, did the output port publish, and what does the SLA evidence say about delivery time?
 
 A later move to `dataraft.lake` changes the physical release mechanism and adds registry, lifecycle, recovery, and integrity features. It does not require redefining what `monthly_performance` means.
 
-## Step 7: test behavior, not only syntax
+## Step 7: inspect product lineage
 
-The example contains three tests:
+The root result records which product inputs contributed to `monthly_performance`.
 
-1. the complete graph returns a checked `monthly_performance` result;
+```r
+lineage <- dataraft::dr_lineage(checked)
+lineage
+```
+
+This is dataset-level evidence for the executed graph. It does not claim complete column or business lineage.
+
+## Step 8: test behavior, controls, and evidence
+
+The companion project tests four concerns:
+
+1. the complete graph returns a checked `monthly_performance` result and explicit lineage;
 2. a negative policy premium is blocked before reuse;
-3. RDS publication creates a version that can be read back.
+3. publication creates a readable RDS release and records policy, port, and SLA evidence;
+4. the executed root exposes a product-lineage edge into `monthly_performance`.
 
-The first is a mezzo test: several definitions execute together using local fixtures. The second targets the acceptance decision directly. The third tests the persistence boundary with disposable storage.
+These are deliberately different scales. The first proves composition, the second proves the acceptance boundary, the third proves governed publication, and the fourth proves that lineage is observable rather than only described in prose.
 
 This follows the Posit testing guidance used in this project: keep tests self-contained, use temporary paths for side effects, and assert specific behavior rather than relying on one large end-to-end test [@positTesting].
 
@@ -230,6 +248,8 @@ Nothing in this chapter is large. There is no cluster, scheduler, data catalog, 
 - storage is replaceable behind a target boundary;
 - failures return diagnostic evidence;
 - durable releases are versioned rather than silently overwritten;
+- publication policy, output-port state, and SLA evidence are inspectable;
+- product lineage is tested from the executed result;
 - the same definitions are testable in CI.
 
 That is enough to support a team more safely than a collection of unrelated scripts.
