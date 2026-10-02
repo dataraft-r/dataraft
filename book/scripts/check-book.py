@@ -63,6 +63,11 @@ for path in qmds:
             if re.search(rf"\b{re.escape(name)}\s*\(", block):
                 errors.append(f"{path.relative_to(ROOT)} uses retired call {name}()")
 
+for svg in sorted((ROOT / "diagrams").glob("*.svg")):
+    dot = svg.with_suffix(".dot")
+    if not dot.exists():
+        errors.append(f"Diagram source is missing for {svg.name}: expected {dot.name}")
+
 for rel in ["data/policies.csv", "data/brokers.csv", "data/payments.csv"]:
     if not (ROOT / rel).exists():
         errors.append(f"Runnable companion fixture is missing: {rel}")
