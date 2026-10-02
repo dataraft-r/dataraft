@@ -1,0 +1,89 @@
+# Transformations and Recipes {#sec-recipes}
+
+A recipe records ordered preparation separately from product identity, contracts, and destinations. It does not replace ordinary R transformation code. It makes a preparation sequence inspectable and reusable when that is valuable.
+
+## Prepare the policy delivery
+
+```{r}
+library(dataraft)
+
+preparation <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_mutate(
+    premium = round(premium, 2)
+  ) |>
+  dataraft.core::dr_step_filter(
+    status != "cancelled"
+  )
+
+preparation
+```
+
+A recipe can be attached without executing it.
+
+```{r}
+policies <- dr_product(
+  "policies",
+  read.csv("data/policies.csv")
+) |>
+  dataraft.core::dr_add_recipe(preparation)
+
+result <- dr_run(policies, write = FALSE)
+dr_collect(result)
+```
+
+The current recipe API includes familiar mutate, filter, select, rename, arrange, summarise, and distinct steps. `dr_step_transform()` provides an escape hatch for custom functions.
+
+## Lookups make dependencies explicit
+
+The book's broker reference data is a meaningful dependency of the portfolio product.
+
+```{r}
+brokers <- read.csv("data/brokers.csv")
+
+portfolio_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_lookup(
+    brokers,
+    by = "broker_id",
+    name = "brokers"
+  )
+```
+
+The output contract belongs to the data after preparation. If the lookup adds `region`, the published interface should say whether `region` is part of the product.
+
+## Recipes and static column lineage
+
+For a bounded set of mutate, select, and rename operations, DataRaft can inspect direct field dependencies without running the recipe.
+
+```{r}
+lineage_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_mutate(
+    rounded_premium = round(premium, 0)
+  ) |>
+  dataraft.core::dr_step_select(
+    policy_id,
+    rounded_premium
+  )
+
+dataraft.core::dr_column_lineage(
+  lineage_recipe,
+  c("policy_id", "premium")
+)
+```
+
+Unsupported transformations return `complete = FALSE` rather than a guessed map.
+
+## Keep ordinary code ordinary
+
+Use a recipe when the ordered preparation itself should be inspectable, composed, tested, or connected to lineage. Use an ordinary R function when a local transformation is clearer that way.
+
+If a recipe grows into many transformations with several independently useful outputs, that is often a sign that the workflow contains more than one product.
+
+::: {.callout-note title="Reproducibility boundary"}
+Recipe expressions retain their R environments. Prefer explicit product sources for business data and stable constants for configuration. A recipe is inspectable preparation, not an isolation sandbox.
+:::
+
+## Exercises
+
+1. Add a rename step and inspect the resulting column lineage.
+2. Replace one declarative step with a custom function. What can static inspection no longer prove?
+3. Decide whether the payment aggregation in the running example belongs inside a policy recipe or deserves a separate product at a new grain.

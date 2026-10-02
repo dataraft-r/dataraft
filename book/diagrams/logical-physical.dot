@@ -1,0 +1,16 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.55, fontname="Arial"];
+  node [shape=box, style="rounded,filled", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=10, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.3, arrowsize=0.7];
+  logical [label="Logical product\nidentity + contract + quality + preparation + metadata", fillcolor="#E7F2F2", color="#2A7F7F"];
+  adapter [label="Target protocol / adapter", fillcolor="#E8EEF6"];
+  rds [label="RDS releases", fillcolor="#F4F6F8"];
+  db [label="Database", fillcolor="#F4F6F8"];
+  parquet [label="Parquet / pins", fillcolor="#F4F6F8"];
+  lake [label="DuckDB / DuckLake", fillcolor="#F4F6F8"];
+  logical -> adapter;
+  adapter -> rds;
+  adapter -> db;
+  adapter -> parquet;
+  adapter -> lake;
+}

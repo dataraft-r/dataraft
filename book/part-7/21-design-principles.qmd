@@ -1,0 +1,143 @@
+# Why DataRaft Is Modular {#sec-design}
+
+The package family is not split into components because more repositories are inherently better. The split follows responsibilities that change for different reasons: product meaning, execution, storage, external integration, reporting evidence, and editor tooling.
+
+Several design principles explain both the current code and the learning path used in this book.
+
+## 1. Product first
+
+The durable concept is the data product, not the storage engine. `dataraft.core` can define and execute a checked product entirely in memory.
+
+That choice has practical consequences. A contract can be tested before a database exists. A business rule can be reviewed without credentials. A storage migration does not need to redefine what a row means.
+
+The product-first principle is visible in `dataraft.core/R/products.R`: `dr_product()` constructs a reusable definition and accepts an optional target rather than making persistence the constructor's central concern.
+
+## 2. WHAT and HOW should be separable
+
+A contract and product identity describe **what** the delivery means. Recipes, adapters, and backends describe **how** the delivery is prepared and realized.
+
+The distinction is not absolute. A transformation can affect meaning, and a storage choice can constrain behavior. The goal is not philosophical purity. The goal is to make changes attributable.
+
+If a physical source renames a column while the logical interface stays the same, preparation can normalize it. If the product's public field is renamed, the contract changes. The same physical event leads to different treatment because the logical boundary is explicit.
+
+## 3. Compose concerns that change independently
+
+The current contract constructor is intentionally narrow. `dr_contract()` owns identity, columns, keys, rules, and version. Business metadata is added through `dr_contract_meta()`. Validation policy is added through `dr_contract_policy()`.
+
+The same pattern appears on products: sources, recipes, quality, targets, policies, ports, and other capabilities are composed with separate verbs.
+
+This avoids a constructor with dozens of unrelated arguments and supports progressive disclosure. A new user can understand product, contract, quality, and run before learning SLA or catalog configuration.
+
+## 4. Optional infrastructure should remain optional
+
+Pointblank, DuckDB, DuckLake, PostgreSQL, S3, OpenMetadata, OpenLineage, dbt, and Positron can all extend the workflow. None is required to understand the acceptance model.
+
+This is more than a convenience for tutorials. It gives architecture teams a way to keep the product definition testable even when an external service is unavailable.
+
+A useful rule is:
+
+> The inability to reach an optional platform service should not make the core product meaning impossible to inspect.
+
+That does not mean every production workflow must work offline. It means the logical model should not be hidden inside external infrastructure.
+
+## 5. Backends should own backend guarantees
+
+A local RDS directory, a transactional database, a lake, and several output ports do not provide the same guarantees.
+
+DataRaft's adapter protocols give these implementations a common boundary without pretending they are equivalent. Capability inspection and backend-specific documentation remain important.
+
+Examples from the audited code include:
+
+- RDS releases use local filesystem locking and rename semantics;
+- lake publication has its own release, registry, and recovery behavior;
+- multiple output ports commit sequentially and are explicitly not one distributed transaction;
+- external metadata services have availability and authentication concerns outside core.
+
+Abstraction should make differences manageable, not invisible.
+
+## 6. Unknown is better than guessed
+
+Static column lineage intentionally returns `complete = FALSE` when it encounters transformations it cannot prove. Volatile rules are marked. Metrics documentation separates integrity checks from stronger security claims. The RDS adapter distinguishes accidental modification detection from malicious tampering.
+
+These examples share one principle: **the evidence model should preserve uncertainty**.
+
+This matters because data platforms often become less trustworthy when they present incomplete observability as complete certainty. A lineage graph with an explicit unknown section can be more useful than a beautiful but incorrect graph.
+
+## 7. Results carry evidence
+
+A run is not just a table. The current core execution model carries status, validation status, quality evidence, inputs, outputs, timestamps, warnings, lifecycle state, and supported backend metadata.
+
+This design enables diagnostics to begin from the acceptance decision rather than from console text. It also makes external observability easier because the product result already has structured facts to export.
+
+The same idea extends to releases. A durable output should be identifiable as a particular accepted publication, not merely as "whatever rows are currently in the table."
+
+## 8. Definition and delivery versioning are different
+
+A product definition can stay at version 1 while many monthly releases are published. Conversely, a contract may move to version 2 before any new release is accepted.
+
+Conflating these concepts creates ambiguous questions such as "which version is this?" DataRaft separates definition identity from backend release identity so reproducibility can name both.
+
+This also helps change management. A historical report may need a specific release produced under a specific definition. Both identifiers matter.
+
+## 9. R-first should not mean R-only infrastructure
+
+R is the authoring and composition surface. The surrounding system can include SQL engines, object stores, metadata services, dbt projects, GitHub Actions, and enterprise schedulers.
+
+The package family is most useful when R expresses the product boundary clearly and then delegates specialized responsibilities to specialized systems.
+
+This is why `dataraft.dbt` is an integration rather than an attempt to reimplement dbt, and why OpenMetadata support lives in an adapter rather than a local imitation of an enterprise catalog.
+
+## 10. Progressive disclosure is an architecture property
+
+Progressive disclosure is often discussed as a documentation technique. In DataRaft it is also an API design goal.
+
+A beginner can stop at:
+
+```text
+product -> contract -> quality -> run
+```
+
+A local team can add:
+
+```text
+recipe -> RDS target -> tests
+```
+
+A platform team can later add:
+
+```text
+lake -> policies -> ports -> SLA -> metadata integrations
+```
+
+Experimental components sit even farther from the required path. This structure reduces the cost of adoption and makes it easier to say no to infrastructure that does not solve a current problem.
+
+## The architecture test
+
+When adding a feature or integration, ask:
+
+1. Does this change product meaning or only physical realization?
+2. Which package should own the responsibility?
+3. Can the simplest local workflow remain independent of it?
+4. What guarantees can the implementation actually prove?
+5. What evidence should a run or release retain?
+6. What happens when the component is unavailable?
+7. Is the new concept important enough to appear in the beginner-facing API?
+
+These questions are useful beyond DataRaft. They are a way to keep a growing platform understandable.
+
+## From modular code to modular ownership
+
+Technical module boundaries can also support team boundaries, but they do not create them automatically. An adapter package can be maintained by a platform team while a domain team owns contracts and quality rules. A catalog can expose shared metadata while product ownership remains with the producer.
+
+The architecture works best when code ownership reflects real responsibility. Putting every rule in a central platform repository would technically use DataRaft while recreating the same organizational bottleneck the product model is meant to avoid.
+
+## Where next
+
+A good architecture also needs a clear boundary. The final chapter asks when these abstractions are worth their cost and when a script, dbt project, managed platform, or different compute engine is the better primary tool.
+
+## Exercises
+
+1. Pick one DataRaft component and identify the stable abstraction it depends on from the core.
+2. Find an optional dependency in the package family and explain how progressive disclosure keeps it out of the beginner path.
+3. Propose one new integration. Describe the smallest extension protocol it should implement without adding the integration to `dataraft.core`.
+

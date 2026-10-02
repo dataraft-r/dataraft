@@ -1,0 +1,17 @@
+meta:
+  name: DataRaft Book
+color:
+  palette:
+    navy: "#183153"
+    ink: "#20252B"
+    mist: "#F4F6F8"
+    teal: "#2A7F7F"
+  foreground: ink
+  background: white
+  primary: navy
+  secondary: teal
+typography:
+  base:
+    family: "Source Sans 3"
+  headings:
+    family: "Source Sans 3"

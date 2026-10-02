@@ -1,0 +1,33 @@
+# Further Reading {.unnumbered}
+
+This book draws on three different kinds of source: R teaching, data architecture, and the official documentation of systems DataRaft can integrate with.
+
+## Teaching R systems
+
+*R for Data Science* is the main reference for progressive, workflow-first R teaching [@wickham2023r4ds].
+
+*Tidy Modeling with R* is the model for teaching both a methodology and a family of cooperating R packages without turning the book into function-by-function documentation [@kuhn2022tmwr].
+
+The Posit skills repository documents current R package development, testing, and Quarto authoring practices used while preparing this project [@positTesting; @positSkills].
+
+## Architecture
+
+*The Rise of Logical Data Management* motivates the broader architectural progression from physical integration toward a logical access and governance layer [@gardner2025logical]. DataRaft applies only a narrower R-first interpretation of that lesson.
+
+For data mesh as an organizational and product-oriented architecture concept, see Dehghani [@dehghani2022datamesh].
+
+## Interoperability and infrastructure
+
+For contracts, see the Open Data Contract Standard project [@odcs].
+
+For external lineage events, see OpenLineage [@openlineage]. For metadata catalog integration, see OpenMetadata [@openmetadata].
+
+For the SQL transformation ecosystem that the experimental DataRaft bridge integrates with, see dbt documentation [@dbt].
+
+For the local analytical database and lake technology used by `dataraft.lake`, see DuckDB and DuckLake documentation [@duckdb; @ducklake].
+
+## DataRaft itself
+
+For implementation details, prefer the current GitHub repositories and generated pkgdown references over this appendix. DataRaft is still a development package family, and experimental components may evolve faster than this book.
+
+`AUDIT.md` records the exact source revisions used for this edition.

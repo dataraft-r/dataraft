@@ -1,0 +1,72 @@
+# DataRaft and the Modern Data Stack {#sec-modern-stack}
+
+DataRaft is easiest to place in a larger architecture by assigning responsibilities rather than comparing tools as if one system should replace all the others.
+
+## Responsibility map
+
+| Responsibility | DataRaft role | Common surrounding systems |
+|---|---|---|
+| product definition | core concept | dbt contracts, platform catalogs |
+| R preparation | recipes and ordinary R | dplyr |
+| SQL modeling | optional integration | dbt |
+| quality gate | native rules, optional Pointblank | Pointblank, dbt tests, warehouse checks |
+| local execution and analytics | delegated or embedded | DuckDB |
+| governed release history | adapters or DataRaft lake | lakehouse or warehouse systems |
+| shared metadata | publish through adapters | OpenMetadata |
+| lineage exchange | publish supported evidence | OpenLineage |
+| semantic query layer | deliberately not owned | dedicated semantic systems |
+| scheduling | deliberately not owned | Posit Connect, GitHub Actions, Airflow, Dagster, targets |
+
+Several systems can be present at once. The goal is to avoid duplicate ownership.
+
+## DuckDB and DuckLake
+
+DuckDB is an analytical database and execution engine [@duckdb]. DataRaft can use it through lake and adapter workflows.
+
+DuckLake provides lake-oriented metadata and storage semantics around DuckDB-oriented workflows [@ducklake]. DataRaft contributes the product definition, acceptance gate, release evidence, and lifecycle behavior around those physical components.
+
+Neither technology is the DataRaft product model itself.
+
+## dbt
+
+dbt is often the right center when SQL models, warehouse-native execution, and analytics engineering workflows dominate [@dbt].
+
+The experimental `dataraft.dbt` package can run or inspect dbt projects and artifacts and connect selected outputs to DataRaft publication. A normal dbt run does not automatically become an atomic DataRaft release.
+
+Do not rewrite a successful SQL estate into R merely to make DataRaft appear central.
+
+## Pointblank
+
+Pointblank is a specialized data validation engine. DataRaft can delegate checks to it while retaining the product-level acceptance decision and evidence model.
+
+This is an example of a healthy integration boundary: the specialized tool owns its validation vocabulary, while DataRaft owns whether the product may progress.
+
+## OpenMetadata and OpenLineage
+
+OpenMetadata can serve the shared metadata plane [@openmetadata]. OpenLineage provides an interoperable lineage-event model [@openlineage].
+
+DataRaft adapters can publish to both. Neither service needs to become a required dependency of local product definitions.
+
+## Semantic layers
+
+The experimental `dataraft.metrics` package is deliberately narrower than a universal semantic layer.
+
+DataRaft can carry product grain, contract metadata, and retained metric evidence. A purpose-built semantic layer should remain responsible when an organization needs cross-tool join semantics, additive behavior, query-time time grains, access rules, and SQL generation.
+
+This division is important. Product semantics and enterprise query semantics overlap, but they are not the same problem.
+
+## Orchestration
+
+A DataRaft product graph can execute dependencies, but DataRaft is not a general scheduler.
+
+Use an orchestrator when you need timers, event triggers, queues, resource management, retries across machines, or organization-wide dependency scheduling. The orchestrator can decide **when** to run. DataRaft can still decide **what counts as an acceptable delivery**.
+
+::: {.callout-note title="Integration test"}
+If another tool already owns a responsibility well, prefer a narrow integration boundary over a second implementation of the same responsibility.
+:::
+
+## Exercises
+
+1. Design a stack with dbt, DuckDB, OpenMetadata, and DataRaft. Give each component one primary responsibility.
+2. Describe a workflow where a dedicated semantic layer should own query semantics while DataRaft still owns a recurring R product boundary.
+3. Choose one surrounding system and write the minimum metadata or artifact that should cross the integration boundary.

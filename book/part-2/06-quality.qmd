@@ -1,0 +1,120 @@
+# Data Quality as an Execution Gate {#sec-quality}
+
+Contracts describe the interface. Quality rules decide whether the current delivery is acceptable.
+
+## Start from one decision
+
+```{r}
+library(dataraft)
+
+policy_delivery <- read.csv("data/policies.csv")
+
+policies <- dr_product("policies") |>
+  dr_add_contract(dr_contract(
+    "policies",
+    columns = c(
+      policy_id = "integer",
+      broker_id = "integer",
+      premium = "numeric",
+      status = "character"
+    ),
+    key = "policy_id"
+  )) |>
+  dr_add_quality(dataraft.core::dr_quality_rule(
+    "premium_non_negative",
+    ~ premium >= 0,
+    action = "block",
+    threshold = 0,
+    dimension = "accuracy"
+  ))
+```
+
+A rule should exist because its result changes what happens next.
+
+## Block, warn, or quarantine
+
+The current API supports three actions:
+
+- `block`: reject the delivery under the current rule;
+- `warn`: permit the delivery but retain a warning;
+- `quarantine`: remove failing rows before writing and retain the rejected rows locally on the result.
+
+Quarantine is intentionally narrow. It is available when DataRaft can identify the failing rows of a native row predicate. It is not a generic mechanism for ignoring errors.
+
+## Inspect a blocked result
+
+```{r}
+bad_delivery <- policy_delivery
+bad_delivery$premium[3] <- -5
+
+blocked <- dr_run(
+  policies,
+  data = bad_delivery,
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+
+blocked$status
+dr_quality_report(blocked)
+dataraft.core::dr_quality_rows(
+  blocked,
+  rule = "premium_non_negative"
+)
+```
+
+The report answers which checks passed or failed. The row view answers which records were involved when row evidence exists.
+
+## Thresholds change policy
+
+A threshold is the permitted fraction of failed test units. A zero threshold requires every evaluated unit to pass.
+
+```{r}
+warning_rule <- dataraft.core::dr_quality_rule(
+  "small_negative_share",
+  ~ premium >= 0,
+  action = "warn",
+  threshold = 0.10
+)
+
+warning_product <- dr_product("policies_warning") |>
+  dr_add_quality(warning_rule)
+
+warning_result <- dr_run(
+  warning_product,
+  data = bad_delivery,
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+
+dr_quality_report(warning_result)
+```
+
+Changing a threshold can change which deliveries reach consumers. Treat it as an acceptance-policy change, not merely tuning.
+
+## Structural checks and business checks
+
+A missing required column means the interface is broken. A negative premium means values violate a business expectation. Both may block publication, but they point to different owners and different fixes.
+
+This distinction improves diagnosis:
+
+| Question | Best home |
+|---|---|
+| Is the required field present? | contract |
+| Is the key unique and non-null? | contract |
+| Is premium non-negative? | quality rule or stable constraint |
+| Is a small amount of drift tolerable? | quality policy |
+| Who owns the meaning? | metadata |
+
+## Optional Pointblank execution
+
+Pointblank is a specialized validation engine. DataRaft can use it for checks while retaining its own product-level gate and evidence model. That keeps the core workflow usable without Pointblank and lets richer validation remain an optional responsibility.
+
+::: {.callout-important title="Failure evidence is part of the product story"}
+A useful quality system explains a rejected delivery. The failed result, rule identity, affected rows, and retained evidence are as important as the passing case.
+:::
+
+## Exercises
+
+1. Run the same defect with `block` and `warn`. Compare the result status and quality report.
+2. Choose a real rule where quarantine would have a clear business meaning. Explain why dropping the row would be safer than blocking the whole delivery.
+3. Change a threshold from zero to a positive value and describe the governance decision you have made.

@@ -1,0 +1,11 @@
+# VI. A complete project {.unnumbered}
+
+This part combines the earlier ideas into one synthetic insurance project. Policies, brokers, and payments become reusable products. Their grains are explicit, their dependencies are visible, and the final monthly performance product can be checked locally before it is published.
+
+The second chapter changes the inputs and contracts on purpose. The third treats the project as something a team must operate repeatedly, not merely demo once.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to structure a small DataRaft project, test its behavioral guarantees, reason about breaking changes, and define an operating loop for recurring deliveries.
+:::
+
+If you read only one part after the introductory workflow, make it this one. It is where the individual abstractions become a system.

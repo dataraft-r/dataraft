@@ -1,0 +1,37 @@
+# Backend Compatibility {.unnumbered}
+
+This matrix summarizes categories verified in the audited source. Backend-specific guarantees still belong to each adapter's reference documentation.
+
+| Backend / integration | Package | Status | Read | Write | Main guarantee / boundary |
+|---|---|---|---:|---:|---|
+| in-memory data frame | core | Implemented | yes | n/a | simplest checked workflow |
+| local RDS releases | adapters | Implemented | yes | yes | immutable version directories with checksum metadata; local filesystem semantics |
+| DBI database | adapters | Implemented | yes | yes | database-specific transaction behavior |
+| Parquet / Arrow | adapters | Implemented | yes | yes | optional Arrow dependency; file/object semantics |
+| pins | adapters | Implemented | yes | yes | optional pins dependency; board-specific semantics |
+| API | adapters | Implemented | source | no | external service can be volatile or unavailable |
+| Iceberg | adapters | Experimental | yes | yes | current write path is explicitly described as experimental |
+| local DuckDB lake | lake | Implemented | yes | yes | governed releases with registry and local backend |
+| DuckLake | lake | Implemented | yes | yes | configuration-dependent governed lake publication |
+| S3 data storage | lake | Implemented | yes | yes | object storage plus local landing/staging requirements |
+| PostgreSQL registry | lake | Implemented | yes | yes | optional RPostgres; coordinated writers must use the protocol |
+| OpenMetadata | adapters | Integration implemented | metadata | metadata | external service required |
+| OpenLineage | adapters | Integration implemented | n/a | events | external endpoint required |
+| dbt | dbt | Experimental | artifacts | build/publish | real dbt project and executable required |
+| metrics | metrics | Experimental | lake inputs | retained report evidence | not a full semantic layer |
+| Positron views | ide + extension | Experimental / optional | metadata | limited edits/actions | editor convenience, not publication authority |
+
+## Capability questions to ask
+
+Before choosing a backend, ask:
+
+- Is the source lazy or materialized?
+- Are writes immutable, append-only, replace, or mutable?
+- What transaction boundary exists?
+- Can a failed write leave partial state?
+- Can the exact accepted version be reopened?
+- What integrity evidence is retained?
+- Does the adapter support concurrent writers, and under what lock model?
+- Which credentials or services are external to DataRaft?
+
+A stable product abstraction does not make these differences disappear. It gives the differences a boundary where they can be documented and tested.

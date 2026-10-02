@@ -1,0 +1,90 @@
+project:
+  type: book
+  output-dir: _book
+  execute-dir: project
+
+book:
+  title: "Data Platforms with R"
+  subtitle: "From scripts to governed data products with DataRaft"
+  author: "DataRaft Contributors"
+  date: 2026-10-02
+  site-url: https://dataraft-r.github.io/dataraft/book/
+  repo-url: https://github.com/dataraft-r/dataraft
+  repo-subdir: book
+  repo-actions: [edit, issue]
+  search: true
+  chapters:
+    - index.qmd
+    - part: part-1/index.qmd
+      chapters:
+        - part-1/01-bigger-than-a-data-frame.qmd
+        - part-1/02-from-scripts-to-products.qmd
+        - part-1/03-architecture.qmd
+    - part: part-2/index.qmd
+      chapters:
+        - part-2/04-first-workflow.qmd
+        - part-2/05-contracts.qmd
+        - part-2/06-quality.qmd
+    - part: part-3/index.qmd
+      chapters:
+        - part-3/07-recipes.qmd
+        - part-3/08-execution.qmd
+        - part-3/09-storage.qmd
+        - part-3/10-composition.qmd
+    - part: part-4/index.qmd
+      chapters:
+        - part-4/11-diagnostics.qmd
+        - part-4/12-lineage.qmd
+        - part-4/13-metadata.qmd
+        - part-4/14-governance.qmd
+    - part: part-5/index.qmd
+      chapters:
+        - part-5/15-logical-physical.qmd
+        - part-5/16-modern-stack.qmd
+        - part-5/17-environments-testing-cicd.qmd
+    - part: part-6/index.qmd
+      chapters:
+        - part-6/18-small-platform.qmd
+        - part-6/19-change-safely.qmd
+        - part-6/20-operating-platform.qmd
+    - part: part-7/index.qmd
+      chapters:
+        - part-7/21-design-principles.qmd
+        - part-7/22-when-not-to-use.qmd
+    - part: "Appendices"
+      chapters:
+        - appendices/a-installation.qmd
+        - appendices/b-package-map.qmd
+        - appendices/c-api-map.qmd
+        - appendices/d-configuration.qmd
+        - appendices/e-compatibility.qmd
+        - appendices/f-troubleshooting.qmd
+        - appendices/g-glossary.qmd
+        - appendices/h-further-reading.qmd
+    - references.qmd
+
+bibliography: references.bib
+lang: en
+
+execute:
+  warning: false
+  message: false
+  freeze: auto
+
+format:
+  html:
+    theme:
+      - cosmo
+      - custom.scss
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    number-sections: true
+  pdf:
+    documentclass: scrreprt
+    papersize: a4
+    toc: true
+    number-sections: true
+
+editor: source

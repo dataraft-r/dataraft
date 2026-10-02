@@ -1,0 +1,11 @@
+# II. Your first governed data product {.unnumbered}
+
+This part turns the mental model into a working local workflow. Everything stays in memory so that storage does not distract from the acceptance logic.
+
+You will define one product, attach a contract, add a quality rule, run both a bad and a good delivery, and inspect the result. The examples are intentionally small, but the order of operations is the same one used later in the complete project.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to take a recurring table, state its structural expectations, encode a business quality rule, and decide from the run evidence whether the delivery is accepted.
+:::
+
+The important habit is to keep the definition separate from each execution. You will reuse the same product definition while the incoming data changes.

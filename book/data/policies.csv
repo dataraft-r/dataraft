@@ -1,0 +1,5 @@
+policy_id,broker_id,premium,status
+1,10,1200.50,active
+2,20,950.25,paid_up
+3,10,600.75,lapsed
+4,30,1500.00,active

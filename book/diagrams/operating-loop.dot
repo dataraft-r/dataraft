@@ -1,0 +1,14 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.32, ranksep=0.5, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=10, margin="0.14,0.09"];
+  edge [color="#52606D", penwidth=1.4, arrowsize=0.7, fontname="Arial", fontsize=9, fontcolor="#52606D"];
+  define [label="Define", fillcolor="#E8EEF6"];
+  test [label="Test"];
+  execute [label="Execute"];
+  inspect [label="Inspect"];
+  publish [label="Publish", fillcolor="#E7F2F2", color="#2A7F7F"];
+  observe [label="Observe"];
+  repair [label="Repair", fillcolor="#FFF4E5", color="#A46500"];
+  change [label="Change"];
+  define -> test -> execute -> inspect -> publish -> observe -> repair -> change -> define;
+}

@@ -351,8 +351,8 @@ add('/extension/reference/','Extension installation & reference',md(s,'dataraft-
 from training import register
 training_nav=register(add,pages,OUT,code)
 pages['/learn/']['body']='<p class="notice">Learn by doing: <a href="/training/">DataRaft step by step</a>, the complete hands-on course with a downloadable R script.</p>'+pages['/learn/']['body']
-pages['/']['body']=pages['/']['body'].replace('<section class="install-band">', '<section class="section"><span class="eyebrow">HANDS-ON COURSE</span><h2>DataRaft step by step.</h2><p>From local data and quality checks to DuckLake and Positron. Small exercises, one continuous example and a complete R script.</p><a class="button" href="/training/">Explore the course →</a></section><section class="install-band">')
-nav=[('/about/','What is DataRaft?'),('/start/','Get started'),('/training/','Training'),('/learn/','Learn'),('/packages/','Packages'),('/reference/','Reference'),('/extension/','Positron + VS Code')]
+pages['/']['body']=pages['/']['body'].replace('<section class="install-band">', '<section class="section"><span class="eyebrow">COMPANION BOOK</span><h2>Data Platforms with R.</h2><p>From scripts to governed data products with DataRaft. A complete technical book with architecture, runnable workflows, exercises and an end-to-end insurance case.</p><a class="button" href="/book/">Read the book →</a></section><section class="section"><span class="eyebrow">HANDS-ON COURSE</span><h2>DataRaft step by step.</h2><p>From local data and quality checks to DuckLake and Positron. Small exercises, one continuous example and a complete R script.</p><a class="button" href="/training/">Explore the course →</a></section><section class="install-band">')
+nav=[('/about/','What is DataRaft?'),('/start/','Get started'),('/book/','Book'),('/training/','Training'),('/learn/','Learn'),('/packages/','Packages'),('/reference/','Reference'),('/extension/','Positron + VS Code')]
 def side(url,section):
  links='<span class="side-label">DOCUMENTATION</span>'+''.join(f'<a class="{"active" if url.startswith(u) else ""}" href="{u}">{t}</a>' for u,t in nav)
  if section=='Training':

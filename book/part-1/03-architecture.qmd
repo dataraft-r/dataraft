@@ -1,0 +1,71 @@
+# The DataRaft Architecture {#sec-architecture}
+
+The architecture is easiest to understand as three layers, not as a list of packages.
+
+## Three layers
+
+**Meaning** describes what a product is. It includes product identity, grain, contracts, business metadata, policies, and declared interfaces.
+
+**Execution** describes how one delivery is prepared and judged. It includes sources, recipes, quality rules, run state, diagnostics, and lineage evidence.
+
+**Physical realization** describes where accepted data is read from or written to. It includes RDS releases, databases, Parquet, pins, DuckDB, DuckLake, S3, registries, and external metadata services.
+
+![The current DataRaft package family with core at the center and adapters, lake, experimental extensions, and Positron tooling around it.](../diagrams/package-architecture.svg){#fig-package-architecture fig-alt="A package dependency diagram. dataraft exposes the common surface, dataraft.core holds the logical model, adapters and lake extend core, metrics and dbt are experimental extensions, and the Positron extension uses the experimental IDE bridge."}
+
+The important boundary is not the repository boundary. It is the direction of dependency: meaning should stay understandable when physical realization changes.
+
+## The beginner path
+
+A first DataRaft workflow needs only four ideas:
+
+```text
+product -> contract -> quality -> run
+```
+
+The `dataraft` metapackage exposes the common beginner-facing surface. `dataraft.core` contains the logical model and execution protocols behind it.
+
+Only add physical components when the workflow needs them:
+
+- add `dataraft.adapters` for RDS, databases, Parquet, pins, APIs, or metadata integrations;
+- add `dataraft.lake` when release history, registry state, recovery, or governed lake publication is required.
+
+The experimental metrics, dbt, and IDE packages sit farther from the required path.
+
+## Packages implement responsibilities
+
+The package family is modular because the responsibilities change for different reasons.
+
+| Component | Status | Responsibility |
+|---|---|---|
+| `dataraft` | Implemented | common entry point |
+| `dataraft.core` | Implemented | product meaning, execution, diagnostics, governance |
+| `dataraft.adapters` | Implemented | physical sources, targets, and metadata integrations |
+| `dataraft.lake` | Implemented | governed versioned releases |
+| `dataraft.metrics` | Experimental | retained metric and report evidence |
+| `dataraft.dbt` | Experimental | dbt execution and artifact bridge |
+| `dataraft.ide` | Experimental | bounded IDE metadata bridge |
+| `dataraft-positron` | Optional | Positron visual tooling |
+
+The former `dataraft.catalog` repository is historical. Current catalog integrations belong to `dataraft.adapters`.
+
+## Extension protocols
+
+Physical components plug into core through S3 protocols for reading sources, writing targets, inspecting components, and publishing metadata. That lets a product ask for a capability without embedding one storage technology in its definition.
+
+This is the practical value of the three-layer model. The contract can remain stable while a target moves from local RDS to a database or lake. A quality rule can be tested without credentials. A catalog outage does not make the product meaning impossible to inspect.
+
+## What belongs in the main book
+
+You do not need the full repository map to learn DataRaft. The detailed package and API maps live in Appendices B and C. Return to them when you are extending the framework or tracing an implementation responsibility.
+
+For now, remember the architecture rule:
+
+> Keep meaning stable, make execution observable, and let physical components own their real guarantees.
+
+The next chapter proves that rule with one complete in-memory workflow before any storage layer is introduced.
+
+## Exercises
+
+1. Classify these concerns as meaning, execution, or physical realization: product grain, an S3 bucket, a quality result, a contract key, and a PostgreSQL registry.
+2. Describe what should stay unchanged when a product moves from RDS to a lake.
+3. Pick one optional component and explain why the simplest in-memory workflow should remain understandable without it.

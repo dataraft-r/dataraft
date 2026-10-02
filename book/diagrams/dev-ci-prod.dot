@@ -1,0 +1,12 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.65, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=10, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.3, arrowsize=0.7];
+  dev [label="Local development\ndefine + run + diagnose", fillcolor="#E8EEF6"];
+  git [label="Git commit\ncontract + code + tests"];
+  ci [label="CI\ninstall pinned family\nrun tests\nrender book", fillcolor="#E7F2F2", color="#2A7F7F"];
+  publish [label="Publication\ncontrolled target"];
+  prod [label="Production releases\nimmutable evidence"];
+  dev -> git -> ci -> publish -> prod;
+  prod -> dev [label="incidents / change", style=dashed];
+}

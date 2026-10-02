@@ -1,0 +1,100 @@
+# Lineage: Where Did This Number Come From? {#sec-lineage}
+
+Lineage is useful only when the question being answered is clear. DataRaft distinguishes product dependency evidence, release evidence, static column dependencies, and broader business interpretation.
+
+![Four useful lineage views converge on an evidence boundary that must preserve what is known and what remains incomplete.](../diagrams/lineage-layers.svg){#fig-lineage-layers fig-alt="Four boxes for product lineage, static column lineage, backend lineage, and business lineage point to an evidence boundary labeled known, unknown, and incomplete."}
+
+## Dataset lineage from an executed graph
+
+```{r}
+library(dataraft)
+
+policies <- dr_product(
+  "policies",
+  data.frame(
+    policy_id = 1:2,
+    premium = c(120, 80)
+  )
+)
+
+portfolio <- dr_product("portfolio", policies) |>
+  dataraft.core::dr_add_recipe(
+    dataraft.core::dr_recipe() |>
+      dataraft.core::dr_step_select(
+        policy_id,
+        premium
+      )
+  )
+
+portfolio_result <- dr_run(
+  portfolio,
+  write = FALSE
+)
+
+dr_lineage(portfolio_result)
+```
+
+This records the dependency observed for that execution. It is not a claim that DataRaft reconstructed every dependency that may exist elsewhere in the organization.
+
+## Static column lineage
+
+```{r}
+lineage_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_mutate(
+    net_premium = premium / 1.19
+  ) |>
+  dataraft.core::dr_step_select(
+    policy_id,
+    net_premium
+  )
+
+dataraft.core::dr_column_lineage(
+  lineage_recipe,
+  c("policy_id", "premium")
+)
+```
+
+The analyzer follows a bounded set of direct field references through supported mutate, select, and rename steps.
+
+## Incomplete is a result
+
+Now add an opaque transformation:
+
+```{r}
+opaque_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_transform(
+    function(data) {
+      data$net_premium <- pmax(data$premium, 0)
+      data
+    }
+  )
+
+dataraft.core::dr_column_lineage(
+  opaque_recipe,
+  c("policy_id", "premium")
+)
+```
+
+Unsupported transformations return `complete = FALSE` rather than a guessed graph. Absence of a proven edge is not proof of independence.
+
+## Release and external lineage
+
+Lake releases can retain exact product and input relationships. The experimental dbt integration can read lineage from dbt artifacts. `dataraft.adapters` can publish lineage events to OpenLineage [@openlineage] and metadata to OpenMetadata [@openmetadata].
+
+These mechanisms see different boundaries. Do not combine them into an unsupported claim of "complete lineage."
+
+## Business lineage
+
+A technical dependency from `premium` to `net_premium` still does not explain why the organization calls the result net premium, which business decision uses it, or which owner approves its definition.
+
+Business interpretation belongs in contracts, descriptions, metric definitions, governance metadata, and surrounding documentation.
+
+::: {.callout-important title="Lineage is evidence, not omniscience"}
+A trustworthy lineage view preserves unknown and incomplete states instead of turning partial observation into false certainty.
+:::
+
+## Exercises
+
+1. Add a rename to the executable recipe and inspect the field mapping.
+2. Compare dataset lineage for the product graph with static column lineage. Which questions can each answer?
+3. Give one business-lineage question that neither technical view can answer on its own.

@@ -1,0 +1,9 @@
+# III. Building the workflow {.unnumbered}
+
+A useful data product rarely stops at one input table. This part adds reusable preparation, execution semantics, persistence, and dependencies between products.
+
+The sequence matters. First make transformations explicit. Then understand what `dr_run()`, `dr_collect()`, and `dr_publish()` mean. Only after that choose a storage boundary. Finally compose multiple products so their dependencies become part of the graph rather than hidden setup code.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to build a small product graph, run it without writing, publish an accepted result, and explain which parts of the workflow are logical definitions and which parts are physical execution choices.
+:::

@@ -1,0 +1,108 @@
+# Governance, Policies, Ports, and SLAs {#sec-governance}
+
+Governance becomes useful when it changes a decision at a product boundary. DataRaft implements several deliberately bounded controls rather than claiming to be a general enterprise policy engine.
+
+![DataRaft product governance flows from the definition through a policy gate and output port to a durable release, while SLA evidence and external controls remain distinct responsibilities.](../diagrams/governance-boundaries.svg){#fig-governance-boundaries fig-alt="A product definition passes through a policy gate and output port to a durable release. The output port also produces SLA evidence, while external governance such as IAM, retention, and approvals remains separate."}
+
+## Require evidence before publication
+
+```{r}
+library(dataraft)
+
+contract <- dr_contract(
+  "policies",
+  columns = c(
+    policy_id = "integer",
+    premium = "numeric"
+  ),
+  key = "policy_id"
+) |>
+  dataraft.core::dr_contract_meta(
+    owner = "Risk Analytics",
+    grain = "One row per policy"
+  )
+
+product <- dr_product("policies") |>
+  dr_add_contract(contract)
+
+owner_policy <- dataraft.core::dr_policy(
+  "require-owner",
+  when = "publish",
+  require = "owner",
+  action = "block"
+)
+
+governed <- product |>
+  dataraft.core::dr_add_policy(owner_policy)
+
+dataraft.core::dr_check_policies(
+  governed,
+  event = "publish"
+)
+```
+
+The same mechanism can warn instead of block and can target selected classifications. Organization-wide policies can also be supplied through the `dataraft.policies` option.
+
+This is a local product policy mechanism. It is not IAM, legal approval, or a replacement for a general authorization engine.
+
+## Ports describe product interfaces
+
+`dr_input()` and `dr_output()` describe consumer-facing interfaces around a product.
+
+An output port can carry a contract version, descriptive access classification, and an SLA. The `access` field is metadata, not an authorization grant.
+
+Multiple outputs are written sequentially. They are explicitly not one distributed transaction. If a later destination fails after an earlier one commits, the result records partial publication and `dr_retry_ports()` can resume unpublished secondary outputs from the retained in-memory result.
+
+Honest partial state is stronger than pretending heterogeneous systems share atomicity they do not provide.
+
+## SLA evidence is about delivery
+
+The current SLA model supports daily and weekly delivery expectations.
+
+```{r}
+daily_sla <- dataraft.core::dr_sla(
+  freshness = 24,
+  refresh = "daily",
+  available_by = "09:00",
+  timezone = "UTC"
+)
+
+delivered <- as.POSIXct(
+  "2026-10-02 08:30:00",
+  tz = "UTC"
+)
+
+dataraft.core::dr_check_sla(
+  daily_sla,
+  business_date = "2026-10-02",
+  delivered_at = delivered,
+  at = delivered
+)
+```
+
+A quality check can pass while the delivery is late. That is why quality status and SLA status remain different evidence.
+
+When an SLA is attached to an output port, publication requires an explicit `business_date` and records the evaluation in run metadata.
+
+## Durable lifecycle belongs to the lake
+
+`dataraft.lake` adds persisted lifecycle operations such as promotion, deprecation, retirement, and backfill. A retired product cannot accept new lake releases.
+
+This creates a layered governance model:
+
+| Layer | Responsibility |
+|---|---|
+| contract and quality | acceptance expectations |
+| policy | bounded organization rule at a lifecycle event |
+| port | declared consumer interface |
+| SLA | delivery promise and evidence |
+| lake lifecycle | persisted release and product state |
+| external governance | IAM, legal controls, retention, approvals |
+
+The layers can work together without pretending one mechanism owns all governance.
+
+## Exercises
+
+1. Remove the owner metadata from the executable example and inspect the policy decision.
+2. Explain what should happen operationally if a primary output commits and a secondary output fails.
+3. Evaluate the SLA with a delivery after 09:00. Why is that different from a failed quality rule?

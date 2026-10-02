@@ -1,0 +1,9 @@
+# VII. Design principles {.unnumbered}
+
+The final part steps away from syntax. It explains why the package family is modular, why the core stays smaller than the surrounding integrations, and where the abstraction stops being useful.
+
+A credible framework needs boundaries. Some jobs need only a script. Some teams should center dbt. Some workloads need distributed compute or a managed platform. DataRaft is most useful when R is an important implementation language and the team wants executable product expectations around recurring deliveries.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to evaluate DataRaft as an architectural choice rather than as a list of functions, including cases where a different primary tool is the better fit.
+:::

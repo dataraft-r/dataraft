@@ -1,0 +1,9 @@
+# IV. Trust and understanding {.unnumbered}
+
+A product is not trustworthy merely because it published successfully once. Teams need to explain failures, understand dependencies, discover ownership, and apply organizational rules without hiding them in prose.
+
+This part focuses on evidence around the delivery: diagnostics, lineage, metadata, policies, output ports, and service-level expectations. It also draws careful boundaries around what the current implementation can prove. Incomplete lineage is reported as incomplete. A descriptive access label is not an IAM grant. A policy check is not a substitute for organizational authorization.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to diagnose a blocked run, distinguish several kinds of lineage, attach business metadata, and describe how policies, ports, and SLAs extend a product definition.
+:::

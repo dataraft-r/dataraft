@@ -1,0 +1,96 @@
+# Storage and Persistence {#sec-storage}
+
+Storage is a physical capability attached to a product. It should not be the only place where the product's meaning exists.
+
+## Add the smallest durable target
+
+The local RDS adapter is useful for learning because it needs no service or credentials.
+
+```{r}
+library(dataraft)
+
+policy_delivery <- read.csv("data/policies.csv")
+
+policies <- dr_product("policies", policy_delivery) |>
+  dr_add_contract(dr_contract(
+    "policies",
+    columns = c(
+      policy_id = "integer",
+      broker_id = "integer",
+      premium = "numeric",
+      status = "character"
+    ),
+    key = "policy_id"
+  )) |>
+  dr_add_quality(~ premium >= 0)
+
+release_root <- tempfile("policy-releases-")
+
+published <- policies |>
+  dr_set_target(dataraft.adapters::dr_target_rds(release_root)) |>
+  dr_publish()
+
+published$status
+published$outputs
+```
+
+Each successful RDS write creates a new immutable version directory and checksum metadata. Publication uses local filesystem locking and staging rename semantics. Those are useful local guarantees, not a distributed transaction.
+
+## Read an exact release
+
+A versioned destination becomes more valuable when a consumer can name the exact accepted output it used.
+
+```{r}
+version <- published$outputs$version
+
+restored <- dataraft.core::dr_read_source(
+  dataraft.adapters::dr_source_rds(
+    release_root,
+    version
+  )
+)
+
+restored
+```
+
+Leaving the source version unresolved can be useful for "latest accepted data" discovery. Pinning the version is stronger evidence for a frozen report or reproducible analysis.
+
+## Definition version and release version are different
+
+A contract version such as `1.0.0` identifies a definition. An RDS release such as `v000000000001` identifies one accepted physical publication.
+
+A product can publish many releases under one unchanged contract. Conversely, a new contract version can exist before any delivery satisfies it.
+
+Do not collapse both ideas into one generic "version."
+
+## Other physical adapters
+
+`dataraft.adapters` also provides database, Parquet, pins, API, metadata, and experimental Iceberg integrations. Their capabilities differ.
+
+A database may provide transactions that a filesystem does not. A Parquet dataset has different update semantics from a mutable table. An API source has availability and replay limits that a local file does not.
+
+The adapter boundary gives these components a common place in the workflow without pretending their guarantees are identical.
+
+## When the lake becomes useful
+
+`dataraft.lake` adds a registry, immutable release identity, lifecycle state, recovery, integrity verification, and lake-oriented storage choices.
+
+A useful adoption sequence is:
+
+```text
+in memory
+  -> versioned RDS
+  -> governed lake when release operations require it
+```
+
+The step to a lake should be triggered by an operating requirement such as shared release history, recovery, lifecycle state, or registry-backed discovery. It should not be triggered by the desire to make a small project look more like a platform.
+
+::: {.callout-tip title="Physical change test"}
+If moving from RDS to a lake forces you to redefine product grain, keys, or business meaning, the physical layer has probably leaked too far into the logical definition.
+:::
+
+## Exercises
+
+1. Publish the policy product twice and read both explicit versions.
+2. List three guarantees the RDS adapter provides and two it does not.
+3. Decide which concrete requirement would justify moving this example from RDS to a DataRaft lake.

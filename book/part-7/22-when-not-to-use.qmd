@@ -1,0 +1,112 @@
+# When Not to Use DataRaft {#sec-not-use}
+
+Credible architecture includes a boundary. The question is not whether DataRaft can be inserted into a workflow. The question is whether its product, contract, quality, and evidence model is the simplest maintainable way to provide the guarantees that workflow needs.
+
+## Use a plain script when the output is disposable
+
+A one-off exploration with one author and no downstream dependency may not need a product identity, release history, or contract. Ordinary R code is easier to read and faster to change.
+
+A useful transition point is recurrence. When the same analysis becomes a monthly delivery, when another person consumes it, or when a bad input becomes costly, the additional structure starts to pay for itself.
+
+Do not make exploratory work imitate production before there is a production requirement.
+
+## Prefer dbt when SQL already owns the transformation domain
+
+If an organization is warehouse-centered, most transformations are SQL, teams already use dbt tests and documentation, and deployment is built around dbt, keep dbt at the center.
+
+The experimental `dataraft.dbt` package can connect existing dbt projects and artifacts to DataRaft workflows where that adds value. It is not a reason to rewrite established SQL transformations in R.
+
+A mixed architecture can be cleaner than a forced uniform one: dbt owns warehouse transformations, DataRaft owns a recurring R-side product or publication boundary, and the two exchange explicit artifacts.
+
+## Prefer the managed platform when it already owns the lifecycle
+
+A managed lakehouse or data platform may already provide contracts, quality gates, lineage, access control, deployment, release history, and operational tooling that fit the team's needs.
+
+Adding a parallel DataRaft governance layer can create two sources of truth. In that situation, DataRaft may still be useful at a narrow R integration boundary, but it should not become the primary system of record merely for consistency.
+
+The goal is not maximum use of DataRaft. It is minimum duplication of responsibility.
+
+## Use distributed compute for distributed compute problems
+
+DataRaft is not a distributed execution engine. It can work with supported lazy database-backed objects and delegate physical work, but it does not provide cluster scheduling, shuffle management, worker elasticity, or distributed fault tolerance.
+
+If those are the dominant problem, use an engine designed for them. DataRaft can describe a checked interface around selected outputs if that is useful, but it should not sit in the critical compute path only to make the architecture look symmetrical.
+
+## Be cautious when R is not part of the operating model
+
+A product definition is most useful when the responsible team can read, test, and maintain it.
+
+If production data engineering is entirely Python, SQL, JVM, or another ecosystem, introducing R solely to host governance definitions may create an additional language boundary without enough benefit. Open standards such as ODCS can be a better interchange point when authoring should remain outside R.
+
+R-first is a strength only when R is genuinely part of the team's work.
+
+## Do not use a contract to compensate for unclear ownership
+
+A technically precise contract cannot decide who is responsible for a product, who may approve a breaking change, or who responds when a delivery fails. Metadata can record ownership; it cannot manufacture organizational accountability.
+
+If no team owns the product, adding more checks may produce a better error message without producing a better operating model.
+
+Resolve ownership and decision rights as part of platform design.
+
+## Do not build a catalog before the definitions are worth discovering
+
+A catalog is valuable when it exposes products with meaningful identity, ownership, descriptions, contracts, and lineage.
+
+Publishing hundreds of vaguely defined tables into OpenMetadata does not turn them into data products. Start with good definitions. Add catalog integration when discovery across teams becomes a real problem.
+
+The same rule applies to lineage visualization. A graph is useful when its nodes and edges represent understood product boundaries.
+
+## Do not add a lake just because the word platform appears in the project
+
+The book deliberately starts with in-memory execution and RDS releases. That path is not a toy architecture if it meets the required scale, concurrency, and recovery needs.
+
+Move to `dataraft.lake` when its additional capabilities solve concrete problems such as shared release history, registry-backed discovery, recovery, integrity verification, lifecycle state, or lake-backed access.
+
+Infrastructure should follow the required guarantees.
+
+## A practical decision table
+
+| Situation | Likely primary approach | Where DataRaft may fit |
+|---|---|---|
+| one-off R analysis | plain R script/notebook | probably nowhere yet |
+| recurring R delivery with downstream users | DataRaft core + local target | primary product boundary |
+| warehouse-first SQL transformation estate | dbt / warehouse tooling | R-side integration or governed publication |
+| very large distributed transformation | distributed engine | interface around selected outputs |
+| managed platform already covers governance | managed platform | only at an uncovered R boundary |
+| R team needs contracts and quality but no platform services | DataRaft core | strong fit |
+| R team needs retained governed releases | DataRaft + adapters/lake | strong fit if backend guarantees match |
+| organization-wide semantic query layer | dedicated semantic system | metrics evidence may complement it |
+
+This table is not a ranking of tools. It maps responsibilities to the systems designed to own them.
+
+## The strongest fit
+
+DataRaft is strongest when recurring R-centered data work has grown beyond a script but does not need, or cannot yet justify, a large platform.
+
+Examples include:
+
+- regulated or management reporting inputs;
+- analytics data products produced in R;
+- recurring model inputs and feature preparation;
+- operational extracts with explicit consumer expectations;
+- small data teams that need contracts and quality before they need a full control plane;
+- platform teams that want an R-native product boundary around selected workflows.
+
+In these cases, DataRaft provides a local path to explicit interfaces, acceptance decisions, diagnostics, evidence, and replaceable publication targets.
+
+## The final design question
+
+The book began with a data frame and a recurring script. It ends with a more precise question:
+
+> Which guarantees do consumers need at this data boundary, and what is the smallest maintainable system that can provide them?
+
+Sometimes the answer is a plain R script. Sometimes it is DataRaft. Sometimes it is dbt, a managed platform, a distributed engine, or a combination of systems.
+
+The value of the DataRaft approach is not that every workflow becomes a DataRaft workflow. It is that when a recurring R delivery needs to become dependable, its meaning, acceptance rules, evidence, and physical realization can be made explicit without requiring the whole platform at once.
+
+## Exercises
+
+1. Evaluate three hypothetical teams: a single analyst with one monthly CSV, a SQL-first analytics team using dbt, and an R-heavy risk team producing governed recurring reports. Describe the simplest appropriate architecture for each.
+2. Write a one-paragraph exit criterion for DataRaft: what future workload or organizational change would make you reconsider it as the primary product layer?
+3. List the risks of adopting a development-stage package family and the controls you would require before using it for a critical production workflow.
+

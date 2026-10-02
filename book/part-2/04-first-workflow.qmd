@@ -1,0 +1,122 @@
+# A Complete DataRaft Workflow in 15 Minutes {#sec-first-workflow}
+
+This chapter runs the first complete workflow against the same synthetic policy data used throughout the book. It stays in memory so that the acceptance logic is visible before persistence is introduced.
+
+## Load the product data
+
+```{r}
+library(dataraft)
+
+policy_delivery <- read.csv("data/policies.csv")
+policy_delivery
+```
+
+The table is ordinary R data. Nothing has been accepted yet.
+
+## Define the agreement
+
+The first product states the interface and one business rule.
+
+```{r}
+policy_contract <- dr_contract(
+  "policies",
+  columns = c(
+    policy_id = "integer",
+    broker_id = "integer",
+    premium = "numeric",
+    status = "character"
+  ),
+  key = "policy_id"
+)
+
+policies <- dr_product("policies") |>
+  dr_add_contract(policy_contract) |>
+  dr_add_quality(~ premium >= 0)
+```
+
+The product is a definition. The incoming rows remain a separate object.
+
+## Run a bad delivery
+
+Create one known defect instead of waiting for a real source system to surprise us.
+
+```{r}
+bad_delivery <- policy_delivery
+bad_delivery$premium[2] <- -20
+
+bad <- dr_run(
+  policies,
+  data = bad_delivery,
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+
+bad$status
+dr_quality_report(bad)
+dataraft.core::dr_quality_rows(bad)
+```
+
+`write = FALSE` skips the configured DataRaft writer. `stop_on_failure = FALSE` returns the blocked result so the evidence remains inspectable.
+
+The useful result is not only "the code failed." The useful result identifies the acceptance rule that failed and, for a row predicate, the rows involved.
+
+## Correct and collect
+
+Run the unchanged product definition against the valid fixture.
+
+```{r}
+good <- dr_run(
+  policies,
+  data = policy_delivery,
+  write = FALSE
+)
+
+good$status
+accepted <- dr_collect(good)
+accepted
+```
+
+`dr_collect()` accepts executed results, not product definitions. That distinction creates a small trust boundary: downstream code asks for data only after the delivery has passed the configured gate.
+
+## Read the result as evidence
+
+A run result carries more than rows. It records status, validation status, timestamps, inputs, outputs, warnings, quality evidence, and an inspected copy of the definition.
+
+```{r}
+good$validation_status
+good$run_id
+names(good$metadata)
+```
+
+For repeated work, keep the result object before collecting:
+
+```r
+result <- dr_run(
+  policies,
+  data = incoming_delivery,
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+
+if (result$status == "completed") {
+  accepted <- dr_collect(result)
+}
+```
+
+The placeholder `incoming_delivery` represents the next delivery in your own process. The executable examples above use the checked-in fixture.
+
+::: {.callout-warning title="A successful R expression is not an accepted delivery"}
+The important status is the DataRaft run status and its checks, not whether the R process reached the end of the script.
+:::
+
+## Why not publish yet?
+
+Publication answers a second question: where should accepted data live? Keeping this chapter in memory lets you learn the acceptance boundary independently from filesystem, database, or lake semantics.
+
+Chapter 9 will attach a versioned RDS target. The contract and quality rule do not need to change.
+
+## Exercises
+
+1. Change one premium to a negative value and compare `status`, the quality report, and affected rows.
+2. Remove `premium` from the delivery. Explain why that is an interface failure rather than the same kind of failure as a negative premium.
+3. Duplicate a `policy_id`. Which expectation detects the problem, and why is identity stronger than a column name?

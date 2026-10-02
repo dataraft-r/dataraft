@@ -1,0 +1,115 @@
+# Data Contracts {#sec-contracts}
+
+A contract records what consumers may rely on. In DataRaft, the structural constructor is deliberately small: identity, columns, keys, rules, and version.
+
+## Start with shape and identity
+
+```{r}
+library(dataraft)
+
+policy_contract <- dr_contract(
+  "policies",
+  columns = c(
+    policy_id = "integer",
+    broker_id = "integer",
+    premium = "numeric",
+    status = "character"
+  ),
+  key = "policy_id",
+  version = "1.0.0"
+)
+
+policy_contract
+```
+
+Supported audited column types include `character`, `integer`, `numeric`, `logical`, `Date`, `POSIXct`, `integer64`, and `list`.
+
+A key is more than a useful name. It states that the declared field is part of row identity and must satisfy the key checks.
+
+## Add business meaning separately
+
+```{r}
+policy_contract <- policy_contract |>
+  dataraft.core::dr_contract_meta(
+    owner = "Risk Analytics",
+    description = "Policy portfolio used by the recurring reporting workflow",
+    grain = "One row per policy"
+  )
+```
+
+Metadata describes the product. It does not itself decide whether a delivery is accepted.
+
+## Add validation policy separately
+
+```{r}
+policy_contract <- policy_contract |>
+  dataraft.core::dr_contract_policy(
+    allow_empty = FALSE,
+    allow_extra = FALSE,
+    constraints = list(
+      premium = list(min = 0),
+      status = list(enum = c("active", "lapsed", "paid_up"))
+    )
+  )
+```
+
+This separation keeps three questions visible:
+
+1. What fields form the interface?
+2. What do those fields mean?
+3. How strict should validation be?
+
+## Semantics before schema
+
+![Grain, identity, and business meaning feed the executable contract, while broader cross-tool query semantics remain a separate integration boundary.](../diagrams/semantic-boundary.svg){#fig-semantic-boundary fig-alt="Three inputs named grain, identity, and business meaning feed an executable contract, which can integrate with a broader semantic layer for metrics, joins, and time grains."}
+
+A schema says that `premium` is numeric. It does not say whether the value is annual premium, monthly premium, gross premium, or net premium.
+
+For a reusable product, establish at least four semantic facts:
+
+- **grain**: what one row represents;
+- **identity**: which fields distinguish rows;
+- **meaning**: what important measures and categories represent;
+- **ownership**: who can decide whether that meaning changes.
+
+DataRaft models part of this directly through keys and contract metadata. It does not try to become a complete enterprise semantic layer. Broader metric semantics, universal join rules, and cross-tool query semantics can remain in a dedicated semantic system.
+
+The important design rule is that schema validation should not be mistaken for complete business meaning.
+
+## Contract evolution
+
+Changing rows is not the same as changing the interface.
+
+```{r}
+policy_contract_v2 <- dataraft.core::dr_contract_update(
+  policy_contract,
+  version = "2.0.0",
+  columns = c(
+    policy_id = "integer",
+    broker_id = "integer",
+    premium = "numeric",
+    status = "character",
+    sales_channel = "character"
+  )
+)
+
+dataraft.core::dr_contract_diff(policy_contract, policy_contract_v2)
+```
+
+A useful rule is:
+
+- new rows with the same meaning: new run, same contract version;
+- changed consumer expectation: new contract version;
+- changed storage location only: usually no contract change.
+
+Compatibility remains a consumer question. Adding a field may be harmless for one consumer and breaking for another. Renaming a key or changing row grain deserves explicit downstream review.
+
+::: {.callout-tip title="Design guidance"}
+Put business meaning in metadata, stable structural expectations in the contract, and delivery-specific outcome checks in quality rules.
+:::
+
+## Exercises
+
+1. Add `sales_channel` to a new contract version and explain whether existing consumers need to change.
+2. Change the key from `policy_id` to two columns. What statement about row identity have you changed?
+3. Write one semantic statement about `premium` that cannot be represented by its R type alone.
