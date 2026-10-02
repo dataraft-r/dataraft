@@ -1,59 +1,61 @@
 # Metadata and Catalogs {#sec-metadata}
 
-Metadata turns a product from an executable object into something other people can discover and reason about.
+Metadata helps other people decide whether a product is understandable, reusable, and trustworthy. A catalog makes that metadata discoverable, but it should not become a second independent definition of the product.
 
-## Technical and business metadata
+## Two useful kinds of metadata
 
-Technical metadata includes columns, types, source kinds, run identifiers, release identifiers, checks, and timestamps. Business metadata includes owner, description, grain, producer, classifications, and other governance fields.
+**Technical metadata** includes columns, types, source kinds, run identifiers, release identifiers, timestamps, checks, and lineage.
 
-DataRaft keeps these concerns close to the product definition and run evidence. External catalog systems can then receive the same metadata rather than becoming the only source of meaning.
+**Business metadata** includes owner, description, grain, producer, classifications, and other statements of meaning.
+
+A product needs enough of both. Perfect technical provenance does not compensate for an unknown grain. A polished description does not compensate for an interface that can drift silently.
+
+## Keep the definition close to execution
+
+DataRaft stores executable expectations with the product and contract. External catalog publication comes later.
+
+That ordering gives a simple source-of-truth rule:
+
+> The catalog should reflect the product definition. It should not silently redefine it.
+
+If a catalog entry and the code disagree, treat that as drift to resolve rather than choosing whichever view is more convenient.
 
 ## OpenMetadata and OpenLineage
 
-Current catalog integrations live in `dataraft.adapters`. The package includes:
+Current integrations live in `dataraft.adapters`.
 
-- OpenMetadata catalog publication;
-- OpenMetadata dbt integration;
-- OpenLineage publication;
-- catalog export and viewer helpers.
+OpenMetadata is a broader metadata platform [@openmetadata]. DataRaft can publish product metadata into it when an organization already uses that metadata plane.
 
-These integrations are optional and require their own services or dependencies.
+OpenLineage defines lineage events for interoperable lineage collection [@openlineage]. DataRaft can publish supported execution metadata without turning core into an OpenLineage implementation.
 
-## ODCS contracts
+Both are optional. A local checked product remains meaningful without either service.
 
-The adapters package also supports an executable subset of Open Data Contract Standard 3.2 interchange through contract YAML helpers. Treat interchange formats as boundaries, not as a reason to force every internal R object to look like external YAML.
+## ODCS as an interchange boundary
 
-## Catalog viewer
+The adapters package supports a documented subset of Open Data Contract Standard interchange [@odcs].
 
-`dataraft.adapters::dr_catalog_app()` and related helpers provide a lightweight view of known products. The experimental Positron tooling adds editor-oriented product views through the separate IDE bridge.
+Interchange should preserve the semantics that both sides actually understand. Do not assume every field in a broad external standard maps one-to-one to a DataRaft runtime guarantee.
 
-## A catalog is not governance by itself
+When importing or exporting a contract, review three things:
 
-A catalog can make a bad definition easy to find. It cannot make the definition correct. The contract, quality rules, ownership, and publication decisions still need to exist close to execution.
+1. what remains executable;
+2. what is descriptive only;
+3. what cannot be represented on the other side.
 
-This is why the book introduces catalogs only after products are already executable and checked.
+## Catalog viewer and IDE tooling
 
-## A catalog is downstream of good definitions
+`dataraft.adapters::dr_catalog_app()` provides a lightweight view of known products. The experimental IDE bridge and Positron extension expose editor-oriented metadata views.
 
-A catalog cannot repair definitions that have no stable names, contracts, owners, or descriptions. DataRaft therefore starts metadata at the product and contract level. External publication comes later.
+These interfaces improve discovery and diagnosis. They do not replace the R definitions or durable run and release evidence.
 
-`dataraft.adapters` owns the current catalog integrations. It can publish metadata to OpenMetadata and OpenLineage-oriented endpoints, expose catalog views, perform freshness-related operations, and exchange a documented subset of ODCS 3.2 contract information. The older `dataraft.catalog` repository is historical and should not be used as the current package.
+## When to add a catalog
 
-### Technical metadata and business metadata
+Add a shared catalog when discoverability across people or teams has become a real problem.
 
-Technical metadata includes types, source and output descriptors, run identifiers, release versions, timestamps, checks, and lineage. Business metadata includes owner, description, grain, producer, operator, governance fields, and other meaning attached to the contract.
-
-Neither category is sufficient alone. A table with perfect technical lineage but no explanation of its grain is difficult to use safely. A beautifully described catalog entry without executable expectations may still drift silently.
-
-DataRaft's design keeps the executable definition close to R code, then makes metadata export an adapter responsibility. This supports a useful rule: the catalog should reflect the product definition rather than becoming a second place where the product is independently redefined.
-
-### ODCS as interchange
-
-The ODCS helpers provide an interchange boundary. Treat that boundary as an executable subset rather than assuming that every field in a broad contract standard maps one-to-one to DataRaft runtime semantics. When importing or exporting a contract, review what is preserved, what is descriptive, and what remains outside DataRaft's enforcement model.
+Do not publish hundreds of vaguely named tables merely to populate a catalog. First create product identities worth discovering: clear grain, ownership, descriptions, contracts, and useful lineage.
 
 ## Exercises
 
-1. For one product, write the minimum business metadata that would let a new colleague decide whether to reuse it. Avoid implementation details.
-2. Compare an embedded metadata field with a catalog publication. Which one is the source of truth if the two disagree?
-3. Choose either OpenMetadata or OpenLineage and describe what DataRaft publishes to it versus what the external system remains responsible for.
-
+1. Write the minimum metadata a colleague would need to decide whether to reuse the policy product.
+2. Suppose the catalog says the grain is one row per broker while the checked contract says one row per policy. Describe the remediation path.
+3. Choose OpenMetadata or OpenLineage and state what DataRaft contributes versus what the external system still owns.
