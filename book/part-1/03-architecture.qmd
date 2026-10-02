@@ -1,83 +1,71 @@
 # The DataRaft Architecture {#sec-architecture}
 
-The package family is modular, but readers should not have to understand every repository before using the framework.
+The architecture is easiest to understand as three layers, not as a list of packages.
 
-## The beginner's stack
+## Three layers
 
-For an in-memory checked delivery, `dataraft.core` is enough. The `dataraft` metapackage installs and reexports the common surface so most users can start there.
+**Meaning** describes what a product is. It includes product identity, grain, contracts, business metadata, policies, and declared interfaces.
 
-When the workflow needs durable I/O, add one of two layers:
+**Execution** describes how one delivery is prepared and judged. It includes sources, recipes, quality rules, run state, diagnostics, and lineage evidence.
 
-- `dataraft.adapters` for files, databases, APIs, Parquet, pins, and metadata integrations;
-- `dataraft.lake` for governed versioned releases backed by DuckDB or DuckLake.
-
-The remaining packages are optional extensions.
+**Physical realization** describes where accepted data is read from or written to. It includes RDS releases, databases, Parquet, pins, DuckDB, DuckLake, S3, registries, and external metadata services.
 
 ![The current DataRaft package family with core at the center and adapters, lake, experimental extensions, and Positron tooling around it.](../diagrams/package-architecture.svg){#fig-package-architecture fig-alt="A package dependency diagram. dataraft exposes the common surface, dataraft.core holds the logical model, adapters and lake extend core, metrics and dbt are experimental extensions, and the Positron extension uses the experimental IDE bridge."}
 
-## Core responsibilities
+The important boundary is not the repository boundary. It is the direction of dependency: meaning should stay understandable when physical realization changes.
 
-`dataraft.core` owns the logical model. Its current public API includes product construction, contracts, recipes, quality rules, diagnostics, governance policies, ports, SLAs, lineage, and execution protocols.
+## The beginner path
 
-This is an important architectural boundary. Catalog integrations were moved out of core and now belong exclusively to `dataraft.adapters`. The former `dataraft.catalog` repository is inactive and points users to adapters.
+A first DataRaft workflow needs only four ideas:
+
+```text
+product -> contract -> quality -> run
+```
+
+The `dataraft` metapackage exposes the common beginner-facing surface. `dataraft.core` contains the logical model and execution protocols behind it.
+
+Only add physical components when the workflow needs them:
+
+- add `dataraft.adapters` for RDS, databases, Parquet, pins, APIs, or metadata integrations;
+- add `dataraft.lake` when release history, registry state, recovery, or governed lake publication is required.
+
+The experimental metrics, dbt, and IDE packages sit farther from the required path.
+
+## Packages implement responsibilities
+
+The package family is modular because the responsibilities change for different reasons.
+
+| Component | Status | Responsibility |
+|---|---|---|
+| `dataraft` | Implemented | common entry point |
+| `dataraft.core` | Implemented | product meaning, execution, diagnostics, governance |
+| `dataraft.adapters` | Implemented | physical sources, targets, and metadata integrations |
+| `dataraft.lake` | Implemented | governed versioned releases |
+| `dataraft.metrics` | Experimental | retained metric and report evidence |
+| `dataraft.dbt` | Experimental | dbt execution and artifact bridge |
+| `dataraft.ide` | Experimental | bounded IDE metadata bridge |
+| `dataraft-positron` | Optional | Positron visual tooling |
+
+The former `dataraft.catalog` repository is historical. Current catalog integrations belong to `dataraft.adapters`.
 
 ## Extension protocols
 
-The codebase uses S3 methods for extension points such as reading sources, writing targets, inspecting components, checking capabilities, and publishing metadata. The package family can therefore add physical implementations without changing the logical product constructors.
+Physical components plug into core through S3 protocols for reading sources, writing targets, inspecting components, and publishing metadata. That lets a product ask for a capability without embedding one storage technology in its definition.
 
-That separation is the R equivalent of an interface boundary. A product can ask for a target without knowing whether the target writes RDS files, a database table, Parquet, pins, Iceberg, or a governed lake.
+This is the practical value of the three-layer model. The contract can remain stable while a target moves from local RDS to a database or lake. A quality rule can be tested without credentials. A catalog outage does not make the product meaning impossible to inspect.
 
-## Stability matters more than package count
+## What belongs in the main book
 
-The metapackage intentionally exports a smaller common surface than `dataraft.core`. Advanced functions remain available from component namespaces. That keeps the beginner-facing API narrow while allowing specialist functionality to evolve.
+You do not need the full repository map to learn DataRaft. The detailed package and API maps live in Appendices B and C. Return to them when you are extending the framework or tracing an implementation responsibility.
 
-Current status from the repository audit:
+For now, remember the architecture rule:
 
-| Component | Status | Primary role |
-|---|---|---|
-| `dataraft` | Implemented | Common entry point and reexports |
-| `dataraft.core` | Implemented | Logical product model and execution |
-| `dataraft.adapters` | Implemented | External sources, targets, catalogs |
-| `dataraft.lake` | Implemented | Versioned governed releases |
-| `dataraft.metrics` | Experimental | Retained metric/report evidence |
-| `dataraft.dbt` | Experimental | dbt execution/artifact bridge |
-| `dataraft.ide` | Experimental | Bounded metadata bridge |
-| `dataraft-positron` | Optional | Positron visual tooling |
-| `dataraft.catalog` | Moved | Historical repository only |
+> Keep meaning stable, make execution observable, and let physical components own their real guarantees.
 
-## Implementation map
-
-The package boundaries can be traced to stable source locations. These references use repository-relative paths and symbol names rather than line numbers so they remain useful as files evolve.
-
-| Responsibility | Repository path | Key symbols |
-|---|---|---|
-| product definition | `dataraft.core/R/products.R` | `dr_product()`, `dr_model()` |
-| contracts and rule definitions | `dataraft.core/R/contracts.R`, `R/contract-composition.R` | `dr_contract()`, `dr_quality_rule()`, `dr_contract_meta()`, `dr_contract_policy()` |
-| preparation | `dataraft.core/R/recipe.R` | `dr_recipe()`, `dr_step_*()` |
-| execution and collection | `dataraft.core/R/execution.R` | `dr_run()`, `dr_publish()`, `dr_collect()` |
-| diagnostics | `dataraft.core/R/review.R`, `R/last-failure.R` | `dr_review()`, `dr_last_failure()` |
-| governance interfaces | `dataraft.core/R/governance.R`, `R/ports.R`, `R/sla.R` | `dr_policy()`, `dr_output()`, `dr_sla()` |
-| local and external adapters | `dataraft.adapters/R/adapter-*.R` | `dr_source_*()`, `dr_target_*()` |
-| governed lake publication | `dataraft.lake/R/target-lake.R`, `R/registry.R` | `dr_target_lake()`, release registry functions |
-| metadata integrations | `dataraft.adapters/R/catalog-*.R` | OpenMetadata and OpenLineage adapters |
-| IDE bridge | `dataraft.ide/R/bridge.R`, `R/context.R` | `ide_request()`, `ide_context()` |
-
-This map is not a second reference manual. It is a guide to where architectural responsibilities live when you need to inspect implementation details.
-
-## Why this modularity matters
-
-The package boundaries let a team adopt DataRaft without committing to the complete architecture. A local analyst can use core only. A team can add RDS publication next. A platform team can later introduce DuckLake, a PostgreSQL registry, S3 storage, OpenMetadata, or OpenLineage.
-
-That is the architecture principle we will reuse throughout the book: **keep the logical contract stable while allowing the physical implementation to change**.
-
-
-## Where next
-
-The architecture is easier to understand after seeing one complete run. Part II deliberately returns to a tiny local product before adding more package boundaries.
+The next chapter proves that rule with one complete in-memory workflow before any storage layer is introduced.
 
 ## Exercises
 
-1. Starting from the package diagram, identify the smallest package set needed for an in-memory checked delivery, a versioned RDS delivery, and a lake-backed delivery.
-2. Choose one experimental component and explain why keeping it outside `dataraft.core` reduces coupling for a beginner.
-3. Find one feature in the package map that belongs to an adapter rather than the core. Describe the extension boundary in terms of inputs and outputs.
-
+1. Classify these concerns as meaning, execution, or physical realization: product grain, an S3 bucket, a quality result, a contract key, and a PostgreSQL registry.
+2. Describe what should stay unchanged when a product moves from RDS to a lake.
+3. Pick one optional component and explain why the simplest in-memory workflow should remain understandable without it.
