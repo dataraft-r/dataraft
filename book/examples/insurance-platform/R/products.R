@@ -170,7 +170,15 @@ insurance_products <- function(book_root = ".") {
   ) |>
     dataraft::dr_add_contract(performance_contract) |>
     dataraft.core::dr_add_recipe(performance_recipe) |>
-    dataraft::dr_add_quality(~ outstanding >= 0)
+    dataraft::dr_add_quality(~ outstanding >= 0) |>
+    dataraft.core::dr_add_policy(
+      dataraft.core::dr_policy(
+        "require-owner",
+        when = "publish",
+        require = "owner",
+        action = "block"
+      )
+    )
 
   list(
     policies = policies,
@@ -179,5 +187,32 @@ insurance_products <- function(book_root = ".") {
     portfolio = portfolio,
     payment_totals = payment_totals,
     monthly_performance = monthly_performance
+  )
+}
+
+
+insurance_release_product <- function(products, release_root) {
+  if (!inherits(products$monthly_performance, "dr_product")) {
+    stop("products must come from insurance_products().")
+  }
+
+  delivery_sla <- dataraft.core::dr_sla(
+    freshness = 24,
+    refresh = "daily",
+    available_by = "09:00",
+    timezone = "UTC"
+  )
+
+  output <- dataraft.core::dr_output(
+    "reporting_extract",
+    target = dataraft.adapters::dr_target_rds(release_root),
+    version = "1",
+    access = "internal",
+    sla = delivery_sla
+  )
+
+  dataraft.core::dr_add_output(
+    products$monthly_performance,
+    output
   )
 }
