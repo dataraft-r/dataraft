@@ -6,6 +6,8 @@ The running example gives us several kinds of change to examine: a producer adds
 
 ## Treat change as an interface experiment
 
+![Safe change separates a source change from its logical interface impact, downstream tests, and physical rollout.](../diagrams/change-safety.svg){#fig-change-safety fig-alt="A source change flows through interface review and compatibility tests before a physical rollout, with a feedback path when meaning changes."}
+
 Before editing code, ask four questions:
 
 1. Did the physical source change, or did the logical product meaning change?
