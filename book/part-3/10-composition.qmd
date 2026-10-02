@@ -1,70 +1,80 @@
 # Multiple Data Products {#sec-composition}
 
-A platform begins to emerge when one checked product can become the source of another.
+A platform begins to emerge when one checked product can become the explicit input of another.
 
 ## Product dependencies
 
-Products can be nested as sources. Shared dependencies are executed once per execution context in the current core model.
+The running insurance example has three source deliveries and several derived products.
 
-A small dependency graph might look like this:
+![The running insurance example as a graph of checked products and derived products.](../diagrams/product-graph.svg){#fig-dependency-graph fig-alt="Policies and brokers feed a portfolio product. Payments feed a payment totals product. Portfolio and payment totals feed monthly performance."}
 
-![The running insurance example as a graph of checked products and derived products.](../diagrams/product-graph.svg){#fig-dependency-graph fig-alt="Policies and brokers feed a portfolio product. The portfolio and payments products feed a monthly performance product."}
+The arrows represent product dependencies, not necessarily copied files. A dependency may be evaluated in memory, read from a pinned release, or resolved through an adapter.
 
-The important distinction is that the arrows represent **product dependencies**, not necessarily copied files. A dependency may be an in-memory result, a pinned release, or an adapter-backed source.
+## Make grain changes visible
 
-## Composition with a lookup
+Policies have one row per policy. Payments have one row per payment event. Joining raw payments directly to policies would duplicate policy rows when a policy has several payments.
 
-For a single main table plus reference data, a recipe lookup is often simpler than a general multi-source graph.
+The running project therefore introduces `payment_totals` first:
 
-```{.r}
-monthly <- dr_product("monthly_portfolio", policy_delivery) |>
-  dataraft.core::dr_add_recipe(
-    dataraft.core::dr_recipe() |>
-      dataraft.core::dr_step_lookup(brokers, by = "broker_id", name = "brokers") |>
-      dataraft.core::dr_step_summarise(
-        premium = sum(premium),
-        .by = region
-      )
+```r
+payment_totals_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_summarise(
+    paid = sum(amount),
+    .by = policy_id
   )
 ```
 
-## Relational models
+That aggregation changes what one row means. Because the new grain is independently useful to downstream work, it deserves an explicit product boundary.
 
-Core also supports `dm` model products for related tables and declared relationships. A `dm` input creates a model product whose member tables can be checked together. `dr_model()` can construct a relational model from pinned lake releases.
+## Use lookups for meaningful reference dependencies
 
-Use this when preserving relationships is part of the product meaning. Do not flatten related tables merely to fit a single-table abstraction.
+The portfolio product keeps policy grain while enriching it with broker region.
 
-## Dependency discipline
+```r
+portfolio_recipe <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_lookup(
+    brokers,
+    by = "broker_id",
+    name = "brokers"
+  )
+```
 
-A dependency graph is useful only when identity is stable. Name products by business meaning, not by temporary file location. Pin releases when reproducibility matters. Keep preparation local to the product that owns the resulting meaning.
+A lookup is more than a hidden `left_join()` when the reference dataset is part of the product's repeatable dependency graph.
 
-This is how a collection of R scripts starts to become a platform: products depend on other products through explicit interfaces rather than undocumented file paths.
+## Products are not steps
 
-## Composition should preserve product boundaries
+Do not turn every transformation into a product. A node deserves product identity when it has at least one durable reason to exist:
 
-A dependency graph is useful when each node has meaning on its own. If `policies.validated` is independently useful, a downstream `portfolio.monthly` product can consume it as a product rather than reimplementing its validation. The upstream result then carries its own contract, evidence, and identity into the larger workflow.
+- an independent consumer boundary;
+- its own grain or contract;
+- a different owner;
+- a reusable result;
+- a separate release lifecycle.
 
-DataRaft supports products as sources of other products. Within one execution, shared dependencies are evaluated once. This provides a natural way to express a small directed graph without forcing the user to adopt a separate orchestration service for the first local workflow.
+Internal preparation that has no meaning outside one product usually belongs inside its recipe.
 
-Do not turn every dplyr step into a product. A product deserves an identity when it has at least one durable reason to exist: a consumer boundary, an independently meaningful contract, a release lifecycle, a separate owner, or a reusable result. Internal preparation steps usually belong inside a recipe.
+## Relational products
 
-### Relational products
+Some interfaces are inherently relational. Core supports `dm` model products for related tables and declared relationships. This is useful when flattening would lose meaningful grain or duplicate data.
 
-Some interfaces are inherently relational. DataRaft uses `dm` for model products that contain related tables and declared keys. A `dm` input to `dr_product()` creates a model product, and member contracts can be supplied by table. The member tables and relationships are checked together and published as a unit where the backend supports the model publication path.
+The same design rule still applies: use a relational product because the relationship is part of the interface, not because a multi-table object looks more sophisticated.
 
-This is different from flattening everything into one wide table. Keeping a relational model can preserve grain and reduce duplication. It also makes relationship constraints explicit.
+## Execution context and reuse
 
-### Draw the graph before adding infrastructure
+Within one root execution, shared product dependencies are evaluated once and reused inside that execution context. This is different from durable release caching.
 
-For the book's running example, a useful graph is:
+Session-local graph reuse avoids duplicate work in one run. Lake caching is a separate physical feature with stricter reproducibility requirements.
 
-The same dependency structure is shown in the figure above. As the project grows, keep this graph understandable before adding more infrastructure.
+## Draw the graph before adding infrastructure
 
-If this graph is difficult to explain, adding a lake, catalog, or orchestrator will not make it clearer. Start by making product boundaries and dependencies legible in R. Infrastructure should strengthen an understandable model rather than compensate for an unclear one.
+For the book's project, the graph is intentionally explainable in one sentence:
+
+> policies plus brokers create portfolio; payments create payment totals; portfolio plus payment totals create monthly performance.
+
+If the graph is difficult to explain, a lake, catalog, or orchestrator will not repair the conceptual model.
 
 ## Exercises
 
-1. Build two source products and a third product that depends on both. Draw the resulting graph before executing it.
-2. Introduce a dependency cycle intentionally and predict where validation should reject it.
-3. Pick a join in an existing analysis and decide whether the joined result deserves its own product identity. Use row grain and downstream reuse as your criteria.
-
+1. Add a claims delivery with one row per claim. Decide where a policy-grain aggregation should become a new product.
+2. Pick one join in an existing analysis and decide whether the result deserves product identity.
+3. Explain the difference between shared dependency reuse inside one run and reuse of a durable published release.
