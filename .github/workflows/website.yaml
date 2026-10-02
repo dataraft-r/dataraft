@@ -5,9 +5,9 @@ on:
     types: [completed]
   push:
     branches: [main]
-    paths: ['website/**', '.github/workflows/website.yaml', 'scripts/assemble-binary-repository.R']
+    paths: ['website/**', 'book/**', '.github/workflows/website.yaml', 'scripts/assemble-binary-repository.R']
   pull_request:
-    paths: ['website/**', '.github/workflows/website.yaml']
+    paths: ['website/**', 'book/**', '.github/workflows/website.yaml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,7 +31,15 @@ jobs:
           r-version: '4.6'
           use-public-rspm: false
       - run: python -m pip install -r website/requirements.txt
+      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b
       - run: python website/build.py
+      - name: Render companion book for Pages
+        run: |
+          python book/scripts/check-book.py
+          quarto render book --to html
+          rm -rf website/dist/book
+          mkdir -p website/dist/book
+          cp -a book/_book/. website/dist/book/
       - name: Include complete binary release for this commit in the site
         if: github.event_name != 'pull_request'
         env:
