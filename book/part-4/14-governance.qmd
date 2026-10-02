@@ -2,6 +2,8 @@
 
 Governance becomes useful when it changes a decision at a product boundary. DataRaft implements several deliberately bounded controls rather than claiming to be a general enterprise policy engine.
 
+![DataRaft product governance flows from the definition through a policy gate and output port to a durable release, while SLA evidence and external controls remain distinct responsibilities.](../diagrams/governance-boundaries.svg){#fig-governance-boundaries fig-alt="A product definition passes through a policy gate and output port to a durable release. The output port also produces SLA evidence, while external governance such as IAM, retention, and approvals remains separate."}
+
 ## Require evidence before publication
 
 ```{r}
