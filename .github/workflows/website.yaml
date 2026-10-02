@@ -13,7 +13,7 @@ permissions:
   contents: read
 concurrency:
   group: github-pages-website
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
