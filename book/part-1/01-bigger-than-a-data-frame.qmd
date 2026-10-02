@@ -1,0 +1,77 @@
+# The Data Problem Is Bigger Than a Data Frame {#sec-problem}
+
+A data frame can be perfectly valid R and still be the wrong input for a recurring delivery. The column names may have changed. A key may no longer be unique. A payment amount may be negative. A transformation may still run even though a downstream report no longer means what it meant last month.
+
+This is the gap DataRaft addresses. It is not primarily a new way to manipulate rows. R and dplyr already do that well. It is a way to make the **delivery around the rows** explicit.
+
+## A script is not an agreement
+
+Consider a monthly policy file:
+
+```{.r}
+policies <- read.csv("policies.csv")
+policies$premium <- round(policies$premium, 2)
+summary(policies$premium)
+```
+
+The script says how to read and transform data. It does not say whether `policy_id` must exist, whether it must be unique, whether `premium` may be negative, who owns the definition, or what another process may rely on.
+
+Those missing statements usually live elsewhere: in a notebook, a meeting, a ticket, a person's memory, or nowhere at all. As work becomes recurring, that omission creates predictable failure modes:
+
+- schema changes are discovered only after downstream code fails;
+- business rules are embedded in transformations instead of named checks;
+- a successful run is confused with a valid delivery;
+- a corrected rerun overwrites the context needed to explain the original result;
+- consumers copy data because they cannot discover or trust a reusable product;
+- ownership and expected service levels stay outside the executable workflow.
+
+Logical data management literature frames the same problem at a larger scale: physical integration alone does not create a common logical understanding of data [@gardner2025logical]. DataRaft applies a narrower version of that idea inside an R-first workflow.
+
+## The unit of work is the delivery
+
+DataRaft's core abstraction is a `dr_product`. A product is a reusable specification, not the data itself. Current source code defines a product by identity, optional sources, preparation, a contract, quality rules, metadata, and an optional target. Execution produces a run result.
+
+That distinction is important:
+
+```text
+product definition != data frame != run result != published release
+```
+
+A product can be inspected without reading data. A run can fail while the product definition remains valid. A successful run can remain only in memory. A published release adds a durable destination and evidence.
+
+::: {.callout-important title="Mental model"}
+Treat the product as the agreement about a recurring delivery. Treat a run as one attempt to satisfy that agreement.
+:::
+
+## Governance starts with explicit expectations
+
+Governance in this book does not begin with a central catalog. It begins with simple executable statements:
+
+- these columns are expected;
+- these columns identify a row;
+- these values must satisfy these rules;
+- this definition has an owner;
+- this output may be published only when its checks pass.
+
+Later chapters add organization policies, output ports, service-level expectations, catalogs, and persistent release history. The early workflow does not require any of them.
+
+## Why start locally
+
+A common platform mistake is to introduce infrastructure before the team has a stable logical model. DataRaft intentionally permits an in-memory workflow with no database, object store, catalog service, Docker container, or cloud credential. That makes it possible to learn and test the governance semantics before choosing infrastructure.
+
+This progression mirrors the teaching approach in *R for Data Science*: learn the whole game with a small working loop, then deepen each skill [@wickham2023r4ds]. We will follow the same rule throughout this book.
+
+## Summary
+
+A data platform is not just where data is stored. For recurring work, you also need executable expectations, named transformations, quality gates, evidence, and a path to publication. DataRaft makes those concerns composable around an R data product.
+
+::: {.callout-tip title="Try it"}
+Open `data/policies.csv` and write down three assumptions you would want to be true every month. Do not write R code yet. Phrase each assumption as something a producer and consumer could both understand.
+:::
+
+## Exercises
+
+1. Take one recurring R script you know. Write down three expectations that exist only in comments, tickets, or people's memory. Classify each as shape, business quality, ownership, or delivery behavior.
+2. For the policy example, explain in one sentence why a data frame and a product definition are different objects even when they refer to the same columns.
+3. Identify one situation where a plain script is still the right solution. What additional dependency would have to appear before a product abstraction becomes useful?
+

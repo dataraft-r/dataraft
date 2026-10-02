@@ -1,0 +1,61 @@
+# Installation {.unnumbered}
+
+DataRaft currently requires R 4.2 or later. It is a development package family, so installation comes from GitHub rather than CRAN.
+
+## Start with the metapackage
+
+For most readers:
+
+```r
+install.packages("pak")
+pak::pak("dataraft-r/dataraft")
+```
+
+The metapackage installs the core components used by the common workflow and reexports the small beginner-facing surface.
+
+## Install components explicitly
+
+For extension development or a deliberately smaller dependency set:
+
+```r
+pak::pak(c(
+  "dataraft-r/dataraft.core",
+  "dataraft-r/dataraft.adapters",
+  "dataraft-r/dataraft.lake"
+))
+```
+
+Optional features have optional dependencies. Examples include `duckdb` for lake storage, Arrow for Parquet workflows, pins for pins adapters, RPostgres for PostgreSQL registries, and Pointblank for the optional quality engine.
+
+## Reproduce the version used by this book
+
+The book audit records exact source revisions in `AUDIT.md`. Its CI installs the implemented packages at those revisions through `scripts/install-dataraft.R` before it runs the example tests.
+
+Pinning matters for a development package family. Installing `main` later may give you a newer API than the one documented in a historical copy of the book.
+
+## Run the companion example
+
+From the book root:
+
+```sh
+Rscript scripts/verify-examples.R
+Rscript examples/insurance-platform/run.R
+```
+
+The first command runs the book's self-contained example tests. The second performs the complete local workflow and writes a versioned RDS release below `examples/insurance-platform/releases/`.
+
+## Build the book
+
+With Quarto and R installed:
+
+```sh
+quarto render
+```
+
+The HTML book is the primary format. PDF is also configured. A fallback build is available for environments without R or Quarto:
+
+```sh
+bash scripts/build-fallback.sh
+```
+
+The fallback renders the manuscript and static diagrams but does not execute R. Use the native Quarto build or CI when you need executable verification.

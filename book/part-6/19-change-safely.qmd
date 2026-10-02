@@ -1,0 +1,178 @@
+# Changing the Platform Safely {#sec-change}
+
+A stable data platform is not one that never changes. It is one that makes the consequences of change visible early enough to choose a safe response.
+
+The running example gives us several kinds of change to examine: a producer adds a field, a column is renamed, a type changes, a quality threshold changes, a downstream product gains a dependency, and historical data must be repaired. These are different problems even when they all first appear as a failing pipeline.
+
+## Treat change as an interface experiment
+
+Before editing code, ask four questions:
+
+1. Did the physical source change, or did the logical product meaning change?
+2. Can preparation absorb the change while preserving the published contract?
+3. Which acceptance rules are affected?
+4. Which downstream products or consumers depend on the old behavior?
+
+This sequence prevents a common failure mode: changing the contract merely to make the newest source pass.
+
+## Source adds a column
+
+Suppose `policies.csv` adds `sales_channel`.
+
+If the product contract uses `allow_extra = FALSE`, the new delivery should fail until the team makes an explicit choice. There are at least three valid choices:
+
+- drop the physical field in preparation because it is irrelevant to the product;
+- add it to a new contract version because it belongs to the published interface;
+- accept extra fields by policy if the product is intentionally open to producer additions.
+
+The correct answer depends on the consumer agreement. Automatically loosening `allow_extra` is not a neutral technical fix. It changes the interface policy.
+
+## Source renames a field
+
+Now assume the producer changes `broker_id` to `intermediary_id` while the downstream product should still expose `broker_id`.
+
+This is precisely where separating physical input from logical output helps. A recipe can rename the incoming field back to the stable logical name before the final contract is checked.
+
+```r
+normalise_source <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_rename(broker_id = intermediary_id)
+```
+
+If the published product itself is meant to adopt `intermediary_id`, then this is no longer only a source-normalization change. Create a new contract version and assess consumers.
+
+The same physical event can therefore lead to two different architectural decisions. The product boundary tells you which one you are making.
+
+## Type changes need semantic review
+
+A type mismatch is easy to treat as a casting problem. Sometimes it is. Sometimes a cast destroys information.
+
+Imagine a broker identifier that arrives as character because values can contain leading zeros. Converting it to integer might make a contract green while changing identity semantics. Conversely, a numeric amount arriving as character because of a CSV export setting might safely be normalized before validation if parsing is explicit and failures are handled.
+
+The rule is simple: **do not use coercion to hide uncertainty**. Normalize only when the source representation and logical meaning are both understood.
+
+## A quality rule begins failing
+
+Suppose `premium_non_negative` starts failing for a small set of policies after a source-system release.
+
+The first response should not be to increase the threshold. Start with evidence:
+
+```r
+result <- dataraft::dr_run(
+  products$policies,
+  data = changed_delivery,
+  write = FALSE,
+  stop_on_failure = FALSE
+)
+
+dataraft::dr_quality_report(result)
+dataraft.core::dr_quality_rows(
+  result,
+  rule = "premium_non_negative",
+  limit = 20
+)
+```
+
+Then decide whether the data is wrong, the rule is wrong, or the business meaning changed.
+
+Changing a quality rule changes which deliveries are acceptable even when no column changes. Treat important rule changes as product behavior changes. Review them with the same care as contract changes.
+
+## Threshold changes are policy changes
+
+A threshold such as "up to 0.1% failures may warn" can look like an operational tuning parameter. It is actually part of the acceptance policy.
+
+Moving from zero tolerance to one percent tolerance can materially change which data reaches consumers. The code should make that decision explicit through a versioned rule or reviewed definition change. A threshold should not be silently changed in a deployment variable simply because it is convenient.
+
+## Downstream impact is broader than schema impact
+
+Current core includes `dr_impact()` for product impact analysis where applicable. Dependency graphs also reveal direct product relationships.
+
+Those tools can answer questions such as "which definitions depend on this product?" They cannot infer every semantic dependency. A consumer may rely on a particular distribution, ordering convention, or business interpretation that is not represented structurally.
+
+Use static impact analysis to identify where to look. Use consumer tests and domain review to decide whether the change is safe.
+
+## Adding a new destination
+
+A team may decide that the accepted `monthly_performance` output must be written both to a database and to a file delivery.
+
+Current core supports multiple output ports, but publication across destinations is sequential and not atomic. If the primary output commits and a later output fails, the earlier commit stays committed. The result records per-port status, and `dr_retry_ports()` can resume unpublished secondary outputs from the original in-memory result.
+
+That guarantee is different from a distributed transaction. Model operations accordingly:
+
+- make outputs idempotent where possible;
+- preserve the original run result while retrying secondary ports;
+- do not report "all destinations published" until every required port confirms success;
+- make partial publication visible to operators.
+
+A multi-output requirement is therefore both a product-interface change and an operations change.
+
+## Moving storage without changing meaning
+
+Suppose the project outgrows local RDS releases and moves to `dataraft.lake`.
+
+The migration is safest when the logical product remains unchanged:
+
+```text
+same product id
+same contract
+same quality rules
+same grain
+same preparation semantics
+new physical target
+```
+
+Test the old and new target against the same representative input. Compare accepted rows and key evidence. Then switch the environment-specific target configuration.
+
+If the migration also changes the logical contract, you lose the ability to tell whether differences came from storage or semantics. Separate the changes unless there is a strong reason not to.
+
+## Backfills are normal publications with an old business date
+
+Historical repair often receives special treatment because the affected date is old. That can become a governance bypass.
+
+A backfill should satisfy the same contract and acceptance rules appropriate to the definition being published. `dataraft.lake` includes backfill support that replaces bounded date partitions through the existing publication mechanisms. The historical path should not be allowed to bypass checks simply because it is inconvenient to reproduce the original delivery.
+
+There is one important complication: the current definition may differ from the definition that was valid at the historical date. Decide whether the backfill is meant to reconstruct the historical product under its old definition or restate history under a new definition. Record that choice.
+
+## Product retirement is different from deletion
+
+A product can stop accepting new releases while old releases remain relevant for reproducibility and audit. Current lake lifecycle support includes product state transitions, including retirement that prevents new publication.
+
+This is better than treating removal from a repository as the only lifecycle control. Code deletion answers "is this definition still maintained?" Product retirement answers "may this governed product accept new releases?"
+
+## A change matrix
+
+The table below is a useful review tool before implementation.
+
+| Change | Preserve contract? | New contract version? | Retest downstream? | Operational action? |
+|---|---:|---:|---:|---:|
+| irrelevant extra source field | usually | no | targeted | no |
+| source rename normalized in recipe | yes | no | yes | no |
+| published field rename | no | yes | yes | maybe |
+| identifier type semantics change | usually no | yes | yes | maybe |
+| quality threshold change | schema yes | rule behavior yes | yes | no |
+| new physical target | yes | no | yes | yes |
+| storage migration | yes if meaning unchanged | no | yes | yes |
+| product retirement | n/a | no | yes | yes |
+
+The point is not to turn every change into bureaucracy. It is to distinguish changes that alter meaning from changes that alter implementation.
+
+## Practice: break the example deliberately
+
+The example tests include a negative-premium failure. Extend them with one of these changes:
+
+1. rename `broker_id` in a temporary input and normalize it in a recipe;
+2. add a source-only column and decide whether to reject or drop it;
+3. change one `status` value to an unknown value and inspect the failing rows;
+4. publish twice to a temporary RDS directory and verify that two immutable versions exist.
+
+A mature workflow is not one that avoids broken test fixtures. It is one that uses controlled breakage to prove the acceptance boundary.
+
+## Where next
+
+Once a product can survive change safely, the remaining problem is operations: how do people know what ran, what failed, what was published, and what requires intervention? The next chapter turns the same model into a small operating routine.
+
+## Exercises
+
+1. Classify five changes as compatible, conditionally compatible, or breaking: adding an optional column, renaming a key, widening an allowed enum, changing grain, and changing a quality rule from warning to block. Defend each classification.
+2. Introduce a new contract version for one source product and trace which downstream products need review even if their own source code did not change.
+3. Create a correction scenario where the data changes but the interface does not. Describe the evidence you would retain to distinguish it from a definition change.
+

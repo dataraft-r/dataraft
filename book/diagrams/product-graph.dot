@@ -1,0 +1,16 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.6, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=10, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.3, arrowsize=0.7];
+  policies [label="policies\nchecked product"];
+  brokers [label="brokers\nreference product"];
+  payments [label="payments\nchecked product"];
+  portfolio [label="portfolio\npolicy + broker context", fillcolor="#E7F2F2", color="#2A7F7F"];
+  totals [label="payment_totals\none row per policy", fillcolor="#E7F2F2", color="#2A7F7F"];
+  performance [label="monthly_performance\nchecked derived product", fillcolor="#E8EEF6"];
+  policies -> portfolio;
+  brokers -> portfolio;
+  payments -> totals;
+  portfolio -> performance;
+  totals -> performance;
+}

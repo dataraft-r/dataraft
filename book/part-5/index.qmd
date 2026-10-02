@@ -1,0 +1,9 @@
+# V. From package to platform {.unnumbered}
+
+The same product definition can participate in a much larger data architecture. This part connects the R workflow to broader platform concepts without claiming that DataRaft replaces every surrounding tool.
+
+You will separate logical meaning from physical execution, position DataRaft alongside dbt, DuckDB, DuckLake, OpenMetadata, OpenLineage, pointblank, and orchestration tools, and then turn the workflow into a repeatable development and CI process.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to place DataRaft inside a modern data stack, choose which responsibility belongs to which component, and define a practical path from local development to automated checks.
+:::

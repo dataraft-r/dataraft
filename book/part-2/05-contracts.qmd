@@ -1,0 +1,137 @@
+# Data Contracts {#sec-contracts}
+
+A contract records what downstream users can expect from a data product. In DataRaft, the current `dr_contract()` constructor deliberately has five core arguments: `id`, `columns`, `key`, `rules`, and `version`.
+
+## Start with shape and identity
+
+```{.r}
+contract <- dr_contract(
+  "policies",
+  columns = c(
+    policy_id = "integer",
+    broker_id = "integer",
+    premium = "numeric",
+    status = "character"
+  ),
+  key = "policy_id",
+  version = "1.0.0"
+)
+```
+
+Supported contract column types in the audited source include `character`, `integer`, `numeric`, `logical`, `Date`, `POSIXct`, `integer64`, and `list`.
+
+Keys refer to declared columns and are treated as non-null identity fields. The constructor itself performs no data I/O.
+
+## Compose metadata separately
+
+Business metadata is added with `dataraft.core::dr_contract_meta()`:
+
+```{.r}
+contract <- contract |>
+  dataraft.core::dr_contract_meta(
+    owner = "Risk Analytics",
+    description = "One row per active policy delivery",
+    grain = "One policy"
+  )
+```
+
+This separation matters. Metadata explains meaning and ownership. It does not itself enforce a publication rule.
+
+## Compose validation policy separately
+
+Validation settings are added with `dataraft.core::dr_contract_policy()`:
+
+```{.r}
+contract <- contract |>
+  dataraft.core::dr_contract_policy(
+    allow_empty = FALSE,
+    allow_extra = FALSE,
+    constraints = list(
+      premium = list(min = 0),
+      status = list(enum = c("active", "lapsed", "paid_up"))
+    )
+  )
+```
+
+The current source supports per-column constraint concepts including minimum, maximum, enumeration, nullability, timezone, and precision checks. Use only constraints that are meaningful for the data rather than treating every possible check as governance.
+
+## Contracts are versioned definitions
+
+Changing an expectation is not the same as receiving new rows. A contract version should change when its meaning changes. The API includes tools such as `dataraft.core::dr_contract_diff()` and `dataraft.core::dr_contract_update()` to make changes explicit.
+
+A useful rule of thumb is:
+
+- new data with the same meaning: new run, same contract version;
+- changed expectation or meaning: new contract version;
+- changed storage location only: usually no contract change.
+
+## Producer and consumer thinking
+
+Contracts are most valuable when they express dependencies that cross team boundaries. A producer can promise that `policy_id` is unique and stable. A consumer can then build a downstream product without re-discovering that assumption every month.
+
+This does not remove communication. It gives communication an executable artifact.
+
+::: {.callout-tip title="Design guidance"}
+Put business meaning in metadata, structural expectations in the contract, and outcome checks in quality rules. Do not hide all three inside one transformation function.
+:::
+
+## Contract evolution
+
+At scale, compatibility becomes a product decision. A new optional column may be compatible for existing consumers. Renaming a key is not. DataRaft can compare definitions, but the team still owns the business decision about compatibility.
+
+The platform pattern is to make that decision visible: version the contract, test downstream products, and publish the new version only when the dependency graph is understood.
+
+## Contract design is an interface design problem
+
+A contract is most useful when it captures what consumers may rely on, not every fact that happens to be true today. If a source currently contains forty columns but downstream work depends on six, declaring all forty as required can create unnecessary coupling. Conversely, omitting a field that is part of the product's identity leaves an important expectation implicit.
+
+A practical sequence is:
+
+1. identify the product grain,
+2. declare the columns that belong to the interface,
+3. identify non-null keys,
+4. add structural constraints that are stable business expectations,
+5. add descriptive metadata,
+6. version deliberate interface changes.
+
+DataRaft supports this separation directly. `dr_contract()` holds the small structural core. `dataraft.core::dr_contract_meta()` adds meaning and ownership. `dataraft.core::dr_contract_policy()` adds validation settings such as required columns, extra-column behavior, freshness, and constraints. This makes definitions easier to read because the constructor does not become a list of unrelated governance arguments.
+
+### Keys are stronger than names
+
+A column called `policy_id` suggests identity, but a key states it. That difference becomes important when two deliveries each look plausible while containing duplicates. A contract can reject the second delivery before a downstream join multiplies rows.
+
+```r
+policy_contract <- dr_contract(
+  "policies",
+  columns = c(
+    policy_id = "integer",
+    broker_id = "integer",
+    premium = "numeric"
+  ),
+  key = "policy_id",
+  version = "1.0.0"
+) |>
+  dataraft.core::dr_contract_meta(
+    owner = "Reporting",
+    grain = "One row per policy"
+  )
+```
+
+The `grain` text is descriptive. The key is enforceable. Both are useful, but they serve different purposes.
+
+### Compatibility is a consumer question
+
+A schema change is not automatically breaking or non-breaking in the abstract. It is breaking relative to promises made to consumers. Adding a column may be harmless when extras are allowed. Removing a required column is usually incompatible. Changing an identifier from integer to character can be disruptive even if every value still looks like a number.
+
+Use `dataraft.core::dr_contract_diff()` to inspect changes and make version decisions explicit. DataRaft also provides `dataraft.core::dr_contract_update()` and contract composition helpers, but a new version should correspond to a deliberate interface decision, not simply to every edit made during development.
+
+::: {.callout-warning title="Watch out"}
+Do not confuse a contract with a complete business ontology. Contracts are executable boundaries around a product. Definitions that belong in a glossary, semantic model, or catalog can be linked to the product without forcing every concept into runtime validation.
+:::
+
+## Exercises
+
+1. Add `status` to the policy contract and restrict it to a small allowed set using the current contract policy tools. Then create a delivery that violates the rule.
+2. Create two versions of the same contract and describe which change you would consider breaking for an existing consumer.
+3. Add owner and grain metadata without changing the structural contract. Explain why metadata and validation policy are composed separately in the current API.
+

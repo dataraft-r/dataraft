@@ -1,0 +1,112 @@
+# Configuration Reference {.unnumbered}
+
+DataRaft separates product meaning from execution and connection details. The most useful configuration rule is therefore: **store definitions; inject environment-specific infrastructure**.
+
+## Execution defaults
+
+`dataraft.core::dr_execution_config()` is a connection-free value with four current fields:
+
+| Field | Purpose | Current default |
+|---|---|---|
+| `quality` | default engine for ordinary formula rules | `"native"` |
+| `relationships` | checked lookup engine | `"dm"` |
+| `to` | optional root publication target | `NULL` |
+| `layer` | optional lake publication layer | `NULL` |
+
+Example:
+
+```r
+execution <- dataraft.core::dr_execution_config(
+  quality = "native",
+  to = dataraft.adapters::dr_target_rds("releases/orders")
+)
+
+orders <- dataraft::dr_product("orders", execution = execution)
+```
+
+Stored execution defaults must not contain an open DBI or lake connection. Use a connection-free target, lake configuration, folder, or connection factory instead. An explicit `execution =` argument at run time overrides stored defaults for the root definition.
+
+## Source overrides for tests and runs
+
+A one-input product can receive replacement data directly:
+
+```r
+result <- dataraft::dr_run(
+  orders,
+  data = fixture,
+  write = FALSE
+)
+```
+
+For named inputs use `sources = list(name = value)`. `dr_set_sources()` changes the definition itself; run-time `data` and `sources` arguments replace delivery inputs for that execution.
+
+## Evidence option
+
+Core execution reads `getOption("dataraft.evidence")` as the default evidence destination where supported. A dry run with `write = FALSE` disables durable evidence writing in the current execution path.
+
+Do not use a global option as a substitute for product identity or contract metadata. Options are process configuration, not product meaning.
+
+## Organization policies
+
+`getOption("dataraft.policies", list())` can provide additional organization-wide `dr_policy()` values. Product-attached and option-supplied policies are evaluated together for their configured lifecycle event.
+
+This mechanism is useful for cross-cutting rules such as required ownership metadata. Keep the option value under deployment control so local developer sessions do not silently use a different governance policy than CI or production.
+
+## Local lake configuration
+
+The smallest connection-free local configuration is:
+
+```r
+config <- dataraft.lake::dr_lake_config(
+  path = "dataraft-lake",
+  backend = "duckdb"
+)
+```
+
+A path-based local configuration derives metadata, data, and landing locations within one folder. Reopening an existing folder reuses its saved backend and layers, and incompatible explicit settings are rejected.
+
+The more explicit form separates registry, storage, landing, and backend:
+
+```r
+config <- dataraft.lake::dr_lake_config(
+  catalog = dataraft.lake::dr_registry_duckdb("metadata.duckdb"),
+  storage = dataraft.lake::dr_storage_local("data"),
+  landing = "landing",
+  backend = "duckdb"
+)
+```
+
+## PostgreSQL registry
+
+`dr_registry_postgres()` stores the **name of an environment variable** containing the libpq connection string, not the credentials themselves:
+
+```r
+registry <- dataraft.lake::dr_registry_postgres(
+  connection_env = "DUCKLAKE_PG_CONNECTION",
+  lock_timeout = 30
+)
+```
+
+This keeps credentials out of serialized lake configuration. The external environment or secret manager remains responsible for providing the variable.
+
+## S3 storage
+
+`dr_storage_s3()` records bucket, prefix, endpoint, region, and credential-provider configuration. Credentials are resolved at connection time. The current constructor supports a static configuration provider or an AWS SDK credential chain.
+
+Do not commit resolved secrets into a book, package, product object, or saved configuration.
+
+## Environment strategy
+
+A simple deployment pattern is:
+
+```text
+same product definitions
+same contracts and rules
+same tests
+
+dev  -> in-memory or temporary RDS
+test -> disposable database/lake target
+prod -> controlled durable target
+```
+
+When a storage migration or environment change also changes the contract, separate the changes if possible. That makes it possible to attribute differences to either semantics or infrastructure.

@@ -1,0 +1,25 @@
+# Package Map {.unnumbered}
+
+The package family is easier to navigate when each repository has one primary responsibility.
+
+| Repository | Status | Responsibility | Add it when... |
+|---|---|---|---|
+| `dataraft` | Implemented | metapackage and common user surface | you want the normal entry point |
+| `dataraft.core` | Implemented | products, contracts, quality, recipes, execution, diagnostics, lineage, policies, ports, SLAs | you need the logical model or extension protocols |
+| `dataraft.adapters` | Implemented | RDS, database, Parquet, pins, API, experimental Iceberg, ODCS, OpenMetadata, OpenLineage, catalog viewer | data must cross an external boundary |
+| `dataraft.lake` | Implemented | DuckDB/DuckLake releases, registry, lifecycle, recovery, integrity, backfills | accepted releases need governed durable history |
+| `dataraft.metrics` | Experimental | reusable metric definitions and retained report evidence | a frozen report needs traceable measures |
+| `dataraft.dbt` | Experimental | dbt project execution, artifacts, lineage, managed publication | SQL transformations already live in dbt |
+| `dataraft.ide` | Experimental | bounded metadata bridge for IDE clients | an editor needs structured live metadata |
+| `dataraft-positron` | Optional | Positron extension for product, quality, lineage, release, and contract views | you want visual editor tooling |
+| `dataraft.catalog` | Moved | historical repository | do not add it; use `dataraft.adapters` |
+
+## Dependency direction
+
+`dataraft.core` is the logical center. Adapters and lake import core. Metrics builds on core and uses lake for retained report workflows. The dbt component imports core and lake. The IDE bridge imports core and optionally uses adapters and lake. The Positron extension consumes the IDE bridge.
+
+This dependency direction is intentional: storage and tooling depend on the logical model, not the other way around.
+
+## What a beginner actually needs
+
+For Chapters 1 through 8, think in terms of the `dataraft` metapackage plus ordinary R. Storage is optional. The first durable example adds `dataraft.adapters::dr_target_rds()`. A lake does not become necessary merely because the project has more than one product.

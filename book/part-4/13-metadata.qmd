@@ -1,0 +1,59 @@
+# Metadata and Catalogs {#sec-metadata}
+
+Metadata turns a product from an executable object into something other people can discover and reason about.
+
+## Technical and business metadata
+
+Technical metadata includes columns, types, source kinds, run identifiers, release identifiers, checks, and timestamps. Business metadata includes owner, description, grain, producer, classifications, and other governance fields.
+
+DataRaft keeps these concerns close to the product definition and run evidence. External catalog systems can then receive the same metadata rather than becoming the only source of meaning.
+
+## OpenMetadata and OpenLineage
+
+Current catalog integrations live in `dataraft.adapters`. The package includes:
+
+- OpenMetadata catalog publication;
+- OpenMetadata dbt integration;
+- OpenLineage publication;
+- catalog export and viewer helpers.
+
+These integrations are optional and require their own services or dependencies.
+
+## ODCS contracts
+
+The adapters package also supports an executable subset of Open Data Contract Standard 3.2 interchange through contract YAML helpers. Treat interchange formats as boundaries, not as a reason to force every internal R object to look like external YAML.
+
+## Catalog viewer
+
+`dataraft.adapters::dr_catalog_app()` and related helpers provide a lightweight view of known products. The experimental Positron tooling adds editor-oriented product views through the separate IDE bridge.
+
+## A catalog is not governance by itself
+
+A catalog can make a bad definition easy to find. It cannot make the definition correct. The contract, quality rules, ownership, and publication decisions still need to exist close to execution.
+
+This is why the book introduces catalogs only after products are already executable and checked.
+
+## A catalog is downstream of good definitions
+
+A catalog cannot repair definitions that have no stable names, contracts, owners, or descriptions. DataRaft therefore starts metadata at the product and contract level. External publication comes later.
+
+`dataraft.adapters` owns the current catalog integrations. It can publish metadata to OpenMetadata and OpenLineage-oriented endpoints, expose catalog views, perform freshness-related operations, and exchange a documented subset of ODCS 3.2 contract information. The older `dataraft.catalog` repository is historical and should not be used as the current package.
+
+### Technical metadata and business metadata
+
+Technical metadata includes types, source and output descriptors, run identifiers, release versions, timestamps, checks, and lineage. Business metadata includes owner, description, grain, producer, operator, governance fields, and other meaning attached to the contract.
+
+Neither category is sufficient alone. A table with perfect technical lineage but no explanation of its grain is difficult to use safely. A beautifully described catalog entry without executable expectations may still drift silently.
+
+DataRaft's design keeps the executable definition close to R code, then makes metadata export an adapter responsibility. This supports a useful rule: the catalog should reflect the product definition rather than becoming a second place where the product is independently redefined.
+
+### ODCS as interchange
+
+The ODCS helpers provide an interchange boundary. Treat that boundary as an executable subset rather than assuming that every field in a broad contract standard maps one-to-one to DataRaft runtime semantics. When importing or exporting a contract, review what is preserved, what is descriptive, and what remains outside DataRaft's enforcement model.
+
+## Exercises
+
+1. For one product, write the minimum business metadata that would let a new colleague decide whether to reuse it. Avoid implementation details.
+2. Compare an embedded metadata field with a catalog publication. Which one is the source of truth if the two disagree?
+3. Choose either OpenMetadata or OpenLineage and describe what DataRaft publishes to it versus what the external system remains responsible for.
+

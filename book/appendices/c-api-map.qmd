@@ -1,0 +1,96 @@
+# Public API Map {.unnumbered}
+
+This appendix is a learning map for the audited development version. It is not a replacement for pkgdown reference documentation.
+
+## The metapackage surface
+
+The audited `dataraft` metapackage exposes 17 product verbs plus `dr_demo()`:
+
+| Area | Reexported functions |
+|---|---|
+| define | `dr_product()`, `dr_model()`, `dr_contract()`, `dr_quality()` |
+| compose | `dr_add_contract()`, `dr_add_quality()`, `dr_set_sources()`, `dr_set_target()` |
+| execute | `dr_run()`, `dr_publish()`, `dr_collect()` |
+| inspect | `dr_inspect()`, `dr_lineage()`, `dr_quality_report()`, `dr_last_failure()`, `dr_releases()`, `dr_tbl()` |
+| demo | `dr_demo()` |
+
+Use component namespaces for the advanced surface below.
+
+## Contracts
+
+- `dataraft.core::dr_contract_meta()` composes owner, description, grain, producer, operator, governance, column metadata, or version metadata.
+- `dataraft.core::dr_contract_policy()` composes required fields, extra/empty policy, freshness, and column constraints.
+- `dataraft.core::dr_contract_update()` creates an explicit revision.
+- `dataraft.core::dr_contract_diff()` compares definitions.
+- `dataraft.core::dr_contract_from()` derives a contract from supported inputs.
+- `dataraft.core::dr_contract_confirm()` works with draft/import flows.
+
+## Quality and diagnostics
+
+- `dataraft.core::dr_quality_rule()` defines native or Pointblank-backed formula rules.
+- `dataraft.core::dr_pointblank_checks()` wraps a custom Pointblank agent builder.
+- `dataraft.core::dr_quality_rows()` identifies affected rows where the rule supports row diagnostics.
+- `dataraft.core::dr_quality_errors()` exposes locally retained rule exceptions.
+- `dataraft.core::dr_review()` opens rows, reports, or lineage in an IDE viewer.
+- `dataraft.core::dr_quarantine_rows()` exposes quarantined rows where applicable.
+
+## Preparation and composition
+
+- `dataraft.core::dr_recipe()` creates deferred preparation.
+- `dr_step_mutate()`, `dr_step_filter()`, `dr_step_select()`, `dr_step_rename()`, `dr_step_arrange()`, `dr_step_distinct()`, and `dr_step_summarise()` add dplyr-shaped steps.
+- `dr_step_lookup()` adds a checked lookup dependency.
+- `dr_step_transform()` adds a function, formula, or transform adapter.
+- `dr_add_recipe()`, `dr_update_recipe()`, and `dr_remove_recipe()` manage preparation on a product.
+- `dr_column_lineage()` performs conservative static field dependency analysis.
+
+## Execution and configuration
+
+- `dataraft.core::dr_execution_config()` records connection-free defaults for quality engine, relationship engine, target, and lake layer.
+- `dr_validate()` checks a definition without treating it as accepted output.
+- `dr_plan()` exposes planning information.
+- `dr_status()` and `dr_run_history()` expose supported execution state/history surfaces.
+- `dr_read_run()` reads supported retained run evidence.
+
+## Governance and product interfaces
+
+- `dr_policy()`, `dr_add_policy()`, and `dr_check_policies()` implement local and option-supplied organization policies.
+- `dr_input()`, `dr_output()`, `dr_add_input()`, and `dr_add_output()` declare ports.
+- `dr_sla()` and `dr_check_sla()` define and evaluate delivery expectations.
+- `dr_impact()` supports dependency impact analysis where available.
+- `dr_hook()` attaches supported lifecycle callbacks.
+
+## Adapter families
+
+`dataraft.adapters` owns:
+
+- `dr_source_rds()` / `dr_target_rds()`;
+- database source/target adapters;
+- Parquet source/target adapters;
+- pins source/target adapters;
+- API sources;
+- SQL transforms;
+- experimental Iceberg source/target adapters;
+- ODCS YAML import/export helpers;
+- OpenMetadata and OpenLineage publishers;
+- catalog export, app, and pane helpers;
+- adapter conformance testing with `dr_test_adapter()`.
+
+## Lake
+
+Important `dataraft.lake` functions include:
+
+- configuration: `dr_lake_config()`, `dr_registry_duckdb()`, `dr_registry_postgres()`, `dr_storage_local()`, `dr_storage_s3()`;
+- connection: `dr_open_lake()`, `dr_connect_lake()`, `dr_close_lake()`, `dr_disconnect_lake()`;
+- publication: `dr_target_lake()`, `dr_ingest()`;
+- reading: `dr_read_release()`, `dr_source_release()`, `dr_tbl()`;
+- operations: `dr_releases()`, `dr_compare()`, `dr_verify_releases()`, `dr_recover()`, `dr_cleanup()`;
+- lifecycle: `dr_promote()`, `dr_deprecate()`, `dr_retire()`, `dr_product_state()`, `dr_product_transitions()`;
+- history repair: `dr_backfill()`.
+
+## Experimental components
+
+Use `dataraft.metrics`, `dataraft.dbt`, and `dataraft.ide` through their own namespaces. Their README files explicitly describe them as experimental, so avoid treating them as stable extensions of the metapackage surface.
+
+## Extension-facing exports
+
+`dataraft.core` also exports S3 protocols and functions whose documentation describes them as implementation interfaces for the DataRaft package family. Seeing a symbol in `NAMESPACE` does not automatically make it part of the recommended user workflow. Prefer the API groups above unless you are implementing a component or adapter.

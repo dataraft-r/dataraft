@@ -1,0 +1,77 @@
+# Reviewing and Diagnosing Data Products {#sec-diagnostics}
+
+A governed workflow must make failure easier to understand, not merely harder to ignore.
+
+## Quality report
+
+`dr_quality_report()` summarizes rule outcomes. `dataraft.core::dr_quality_rows()` returns affected rows for checks that can identify them. `dataraft.core::dr_quality_errors()` exposes locally retained exceptions.
+
+## The last failure
+
+When a failed result disappears inside a pipe, `dr_last_failure()` retains the most recent execution error that carried a result in the current R session.
+
+```{.r}
+try(
+  dr_run(product, data = bad_data, write = FALSE, stop_on_failure = FALSE) |>
+    dr_collect(),
+  silent = TRUE
+)
+
+failed <- dr_last_failure()
+dr_quality_report(failed)
+```
+
+The object may retain input data and connections. Clear the package reference when it is no longer needed:
+
+```{.r}
+invisible(dr_last_failure(clear = TRUE))
+```
+
+## IDE review
+
+`dataraft.core::dr_review()` opens one of three diagnostic tables in an IDE data viewer:
+
+- affected rows;
+- quality report;
+- dataset lineage.
+
+It does not rerun the workflow. It inspects retained results or metadata.
+
+## Positron bridge
+
+The experimental `dataraft.ide` package exposes bounded metadata to IDE clients. The separate `dataraft-positron` extension renders product, quality, run, freshness, incident, and lineage views. The bridge intentionally excludes row data from its metadata channel; explicit view actions remain R operations.
+
+This boundary is useful beyond editor integration. Diagnostic interfaces should expose enough information to explain a product without casually expanding the data access surface.
+
+## Diagnose from the acceptance decision outward
+
+When a recurring delivery fails, begin with the question that DataRaft actually answered: was the candidate rejected by a known rule, or did execution itself fail?
+
+For a blocked delivery, inspect `dr_quality_report()` first. It summarizes checks without forcing you to scan the whole candidate. Then use `dataraft.core::dr_quality_rows()` for a specific row predicate when you need examples of rejected records. `dataraft.core::dr_quality_errors()` is useful when custom rule code raised locally retained exceptions.
+
+`dataraft.core::dr_review()` wraps the same diagnostics for an interactive IDE. Its `rows` mode collects at most a bounded number of affected rows by default, while `report` and `lineage` inspect metadata. It does not retry the run. This matters operationally because diagnosis should not silently repeat source reads or writes.
+
+### The last failure is a convenience, not durable history
+
+`dr_last_failure()` keeps the most recent execution failure in the current R session. It exists to rescue the common pipe where `dr_collect()` raises after a failed run. It is not a monitoring database. The object can retain data and connection references, so clear it when you no longer need it.
+
+Durable run history belongs in the configured evidence or lake mechanisms. Session state is for developer ergonomics.
+
+### A diagnosis checklist
+
+1. Inspect `result$status` and `validation_status`.
+2. Read the quality report.
+3. Identify the failing rule and whether it blocked, warned, or quarantined.
+4. Inspect a bounded set of affected rows when row-level evidence exists.
+5. Inspect warning conditions or the parent execution error when status is `error`.
+6. Check lineage and input release identifiers before assuming the source is the same as last time.
+7. Fix the smallest responsible layer: incoming data, contract, quality rule, preparation, adapter, or infrastructure.
+
+This workflow is deliberately boring. Reliable operations depend more on repeatable diagnosis than on elaborate dashboards.
+
+## Exercises
+
+1. Create a delivery with two different failing quality rules. Compare `dr_quality_report()`, `dr_quality_rows()`, and `dr_quality_errors()` and state which question each answers.
+2. Trigger a failure inside a pipe, then recover it with `dr_last_failure()`. Clear the retained reference afterward and explain why that can matter in a long-running R session.
+3. Design a short diagnostic checklist for an operator who sees a blocked monthly delivery at 08:00.
+

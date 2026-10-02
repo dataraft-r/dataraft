@@ -1,0 +1,66 @@
+name: Data Platforms with R book
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'book/**'
+      - '.github/workflows/book.yml'
+  pull_request:
+    paths:
+      - 'book/**'
+      - '.github/workflows/book.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05
+        with:
+          r-version: '4.6'
+          use-public-rspm: false
+
+      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b
+
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05
+        with:
+          packages: |
+            any::pak
+
+      - name: Check book sources
+        working-directory: book
+        run: python scripts/check-book.py
+
+      - name: Install pinned DataRaft family and test dependencies
+        working-directory: book
+        shell: Rscript {0}
+        run: source('scripts/install-dataraft.R')
+
+      - name: Verify runnable example project
+        working-directory: book
+        run: Rscript scripts/verify-examples.R
+
+      - name: Install SVG and PDF dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          quarto install tinytex --no-prompt
+
+      - name: Render HTML book
+        run: quarto render book --to html
+
+      - name: Render PDF book
+        run: quarto render book --to pdf
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: data-platforms-with-r
+          path: book/_book/
+          if-no-files-found: error

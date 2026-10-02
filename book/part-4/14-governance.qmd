@@ -1,0 +1,82 @@
+# Governance, Policies, Ports, and SLAs {#sec-governance}
+
+Governance becomes useful when it changes behavior, not when it merely adds labels.
+
+## Organization policies
+
+Core now includes `dataraft.core::dr_policy()`, `dataraft.core::dr_add_policy()`, and `dataraft.core::dr_check_policies()`. A policy can require metadata fields at `validate`, `activate`, or `publish` events and can block or warn.
+
+```{.r}
+owner_policy <- dataraft.core::dr_policy(
+  "require-owner",
+  when = "publish",
+  require = "owner",
+  action = "block"
+)
+
+product <- product |>
+  dataraft.core::dr_add_policy(owner_policy)
+```
+
+Additional organization-wide policies can be supplied through the `dataraft.policies` option. This is a local R policy mechanism, not a replacement for a general authorization engine.
+
+## Ports
+
+`dataraft.core::dr_input()` and `dataraft.core::dr_output()` describe consumer-facing interfaces. An output port can carry its own contract version, access description, and SLA. The `access` field is descriptive and is explicitly **not an IAM grant**.
+
+Ports help separate the product's meaning from the mechanics of one storage target. Multiple outputs also make partial publication behavior visible.
+
+## SLAs
+
+`dataraft.core::dr_sla()` currently models daily or weekly delivery expectations, an `available_by` local time, timezone, and optional freshness. `dataraft.core::dr_check_sla()` evaluates a business date against an actual publication timestamp.
+
+An SLA attached to an output port requires an explicit `business_date` during publication. The result records the evaluation in metadata.
+
+## Lifecycle in the lake
+
+`dataraft.lake` adds product lifecycle operations such as promote, deprecate, retire, and backfill. Retired products cannot publish new releases.
+
+Governance therefore spans several layers:
+
+- definition quality in core;
+- policy gates in core;
+- interface declarations through ports and SLAs;
+- durable product state in the lake;
+- external catalog or governance systems through adapters.
+
+No one layer should pretend to provide guarantees owned by another.
+
+## Governance works best as small executable decisions
+
+Large governance programs often begin with documents. A product workflow needs a smaller question: what must be true before this particular definition or delivery is allowed to progress?
+
+DataRaft policies address that question. A policy can require metadata paths at validation, activation, or publication. It can block or warn, and it may apply only to a classification. Policies can be attached to a product, while organization-level defaults can be supplied through the `dataraft.policies` option.
+
+That mechanism is intentionally narrower than an enterprise policy engine. It does not replace IAM, legal review, retention enforcement in storage, or an OPA deployment. It makes a bounded set of governance requirements executable at the product boundary.
+
+### Ports state how a product is consumed
+
+Input and output ports describe interfaces around a product. A port can carry a contract version, descriptive access class, and optional SLA. The `access` field is metadata. It is not an authorization grant.
+
+Multiple outputs are supported, but publication across them is sequential rather than distributed-transaction atomic. If a later output fails, earlier committed outputs remain committed and the result records per-port state. `dataraft.core::dr_retry_ports()` can resume unpublished secondary outputs from the original in-memory result.
+
+This is a good example of honest guarantees. DataRaft records partial publication rather than labeling a multi-destination operation atomic when the underlying systems cannot provide that guarantee.
+
+### SLAs are evaluated against delivery, not intention
+
+An SLA records freshness, refresh cadence, a local availability deadline, and timezone. `dataraft.core::dr_check_sla()` distinguishes pending, missing, late, stale, and met states. For publication through an SLA-bearing output, the business date must be explicit.
+
+A completed quality check is not the same as a successful delivery. SLA evidence therefore uses the actual publication timestamp. This distinction becomes important when data passes validation but a destination is unavailable.
+
+### Product lifecycle in the lake
+
+The lake adds persisted product lifecycle transitions including promotion, deprecation, and retirement. A retired product cannot publish new lake releases. Backfill support replaces bounded date partitions through existing publication gates rather than bypassing validation.
+
+Governance in DataRaft is therefore layered: executable product policies in core, interface declarations through ports and SLAs, and durable release lifecycle state in the lake.
+
+## Exercises
+
+1. Define a policy requiring an owner before publication and test a product with and without that metadata.
+2. Add two output ports and explain what happens if the first destination commits and the second fails. Why is this not a distributed transaction?
+3. Define a daily SLA with an explicit timezone and business date. Work through the difference between `pending`, `missing`, `late`, and `stale`.
+

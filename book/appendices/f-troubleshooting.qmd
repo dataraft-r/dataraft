@@ -1,0 +1,92 @@
+# Troubleshooting {.unnumbered}
+
+Start diagnosis from the product result and work outward. Avoid beginning with the storage system unless the result shows that validation already passed and the failure occurred at publication.
+
+## Quick decision path
+
+```text
+Did construction fail?
+  -> inspect definition, contract, source, or target configuration
+
+Did dr_run() return blocked/error/missing?
+  -> inspect status, quality report, affected rows, retained errors
+
+Did validation pass but publication fail?
+  -> inspect target capabilities, permissions, locks, storage, and output metadata
+
+Did publication succeed but a consumer is wrong?
+  -> inspect exact release identity, lineage, contract version, and consumer assumptions
+```
+
+## I cannot collect a result
+
+Check `result$status`. Blocked and error results cannot be collected as accepted data.
+
+```r
+result$status
+dataraft::dr_quality_report(result)
+dataraft.core::dr_quality_rows(result, limit = 20)
+```
+
+`dr_collect()` rejecting the result is intentional. Fix or explicitly handle the failed acceptance decision first.
+
+## I lost the failed result in a pipe
+
+Use `dr_last_failure()` in the same R session. It retains the most recent execution error carrying a run result. It may also retain data and connections, so clear it when finished:
+
+```r
+failed <- dataraft::dr_last_failure(clear = TRUE)
+```
+
+This is a session convenience, not durable history.
+
+## My contract rejects an extra column
+
+Inspect `allow_extra`. Do not set it to `TRUE` only to make the run green. Decide whether the new field is irrelevant physical input, part of the public product interface, or evidence that the wrong source arrived.
+
+## My lookup changes the number of rows
+
+Recheck the grain and lookup key. Validate uniqueness in the reference product. A join that multiplies rows can be syntactically valid while violating the logical product grain.
+
+## Column lineage says incomplete
+
+That is an expected conservative result for unsupported expressions, joins, dynamic selectors, or opaque transforms. Use product/run lineage and document the missing transformation semantics instead of inferring a false column map.
+
+## My local RDS target is locked
+
+The RDS adapter uses a local directory lock. Wait for the active writer. After a crashed writer, inspect the directory before manually removing a stale `.lock` or abandoned staging directory. Network filesystems must provide compatible create/rename semantics.
+
+## My RDS release fails integrity checking
+
+The adapter checks the stored data file against checksum metadata before deserializing it. Restore the original release files or publish a new corrected release. The checksum is for accidental modification detection, not protection against an attacker able to rewrite both data and metadata.
+
+## My lake target fails before publication
+
+Check:
+
+- `duckdb` is installed at the version required by the current package;
+- the configuration is writable, not `read_only`;
+- the target layer exists in the configured layer set;
+- the registry schema is current and supported;
+- landing and storage locations are accessible;
+- optional DuckDB extensions can be installed or are already available.
+
+## A second output failed after the first succeeded
+
+Multiple output ports are sequential, not a distributed transaction. Inspect `result$port_outputs`. Earlier committed destinations remain committed. Use `dataraft.core::dr_retry_ports()` with the original in-memory result when it is appropriate to resume only unpublished secondary outputs.
+
+## A cached lake result is rejected
+
+Caching requires a stable definition and fingerprintable sources. Volatile or live-reference checks cannot authorize cached reuse. A configured code version is required where the lake cache contract expects it.
+
+## A policy blocks publication
+
+Inspect the policy decisions retained in run metadata and the required metadata paths. Organization policies can come from both product attachments and `options(dataraft.policies = ...)`. Confirm that CI and production are using the intended policy set.
+
+## An SLA is missing or late
+
+SLAs are evaluated against actual publication and an explicit business date. A successful quality check is not a delivery. Check the output port, `business_date`, deadline timezone, and publication timestamp separately.
+
+## The IDE view and R disagree
+
+Treat the R definition and durable backend as authoritative. Refresh the IDE metadata bridge or connection. The Positron extension deliberately exposes bounded metadata and does not own publication state.

@@ -1,0 +1,8 @@
+_book/
+_build/
+_freeze/
+reference.docx
+examples/insurance-platform/releases/
+.Rproj.user/
+.Rhistory
+.RData

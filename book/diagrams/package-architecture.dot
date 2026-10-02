@@ -1,0 +1,26 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="transparent", pad=0.25, nodesep=0.35, ranksep=0.5, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=10, margin="0.16,0.10"];
+  edge [color="#52606D", penwidth=1.3, arrowsize=0.7];
+  meta [label="dataraft\ncommon user surface", fillcolor="#E8EEF6"];
+  core [label="dataraft.core\nproducts, contracts, quality, recipes, execution", fillcolor="#E7F2F2", color="#2A7F7F"];
+  adapters [label="dataraft.adapters\nI/O, ODCS, OpenMetadata, OpenLineage"];
+  lake [label="dataraft.lake\nversioned releases, registry, lifecycle"];
+  metrics [label="dataraft.metrics\nexperimental metrics"];
+  dbt [label="dataraft.dbt\nexperimental dbt integration"];
+  ide [label="dataraft.ide\nexperimental IDE bridge"];
+  positron [label="dataraft-positron\noptional editor extension"];
+  meta -> core;
+  meta -> adapters;
+  meta -> lake;
+  adapters -> core;
+  lake -> core;
+  metrics -> core;
+  metrics -> lake;
+  dbt -> core;
+  dbt -> lake;
+  ide -> core;
+  ide -> adapters [style=dashed];
+  ide -> lake [style=dashed];
+  positron -> ide;
+}

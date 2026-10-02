@@ -1,0 +1,73 @@
+# Transformations and Recipes {#sec-recipes}
+
+A recipe records ordered preparation independently of product identity, inputs, contracts, and destinations. DataRaft recipes are not fitted preprocessing models. There is no implicit `prep()` and `bake()` phase.
+
+## A small preparation
+
+```{.r}
+preparation <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_mutate(premium = round(premium, 2)) |>
+  dataraft.core::dr_step_filter(status != "cancelled")
+
+policies <- dr_product("policies") |>
+  dataraft.core::dr_add_recipe(preparation)
+```
+
+The current recipe API mirrors familiar dplyr verbs: mutate, filter, select, rename, arrange, summarise, and distinct. `dataraft.core::dr_step_transform()` accepts a custom function, formula, or transformation adapter.
+
+## Why record preparation?
+
+An ordinary R function is often enough for one script. A recipe becomes useful when preparation needs to be inspectable, composable, and connected to lineage.
+
+The recipe does not replace dplyr. It records deferred operations so DataRaft can apply them inside a product execution.
+
+## Lookups
+
+`dataraft.core::dr_step_lookup()` adds a checked lookup source. The current implementation reuses relationship checks and can build the lookup as part of the product definition.
+
+```{.r}
+brokers <- data.frame(
+  broker_id = c(10L, 20L),
+  region = c("North", "South")
+)
+
+preparation <- dataraft.core::dr_recipe() |>
+  dataraft.core::dr_step_lookup(brokers, by = "broker_id", name = "brokers")
+```
+
+The output contract should describe the data *after* preparation, including columns added by the lookup.
+
+## Recipes and static column lineage
+
+For a restricted set of mutate, select, and rename operations, `dataraft.core::dr_column_lineage()` can inspect direct field dependencies without executing expressions. Unsupported transformations return `complete = FALSE` rather than guessing.
+
+That conservative behavior is important. Incomplete lineage must never be presented as proof that no dependency exists.
+
+## Keep transformations ordinary when ordinary is enough
+
+Do not wrap every function in a recipe step just to make the architecture look formal. Use a recipe when deferred composition, inspection, or consistent execution adds value. Use a normal R function when the operation is local and self-contained.
+
+## Recipes create a visible preparation boundary
+
+There is nothing wrong with an ordinary R function for a transformation. DataRaft accepts custom transformations because real preparation cannot always be expressed as a small set of dplyr verbs. A recipe becomes useful when you want the sequence itself to be inspectable and composable.
+
+That visible sequence enables several things. The product can describe its preparation without executing it. An IDE can show steps. Static column lineage can reason about a supported subset. Tests can target the recipe independently from storage. The same preparation definition can also be attached to more than one product definition when that is genuinely appropriate.
+
+The tradeoff is that a recipe is not magic. Dynamic selectors, arbitrary functions, external services, and opaque transformations can exceed what static inspection can prove. DataRaft responds conservatively. For example, `dataraft.core::dr_column_lineage()` returns `complete = FALSE` when it cannot establish dependencies rather than inventing a lineage map.
+
+### Lookups make dependencies explicit
+
+A lookup is more than a `left_join()` when the relationship itself is part of the workflow. `dataraft.core::dr_step_lookup()` records the lookup as a named preparation step and uses DataRaft's dependency and relationship checks. Use it when a reference dataset is a meaningful input to the product.
+
+Keep large business joins understandable. If a recipe grows into dozens of transformations with several independently useful outputs, that is often a signal that the workflow contains multiple products rather than one enormous product.
+
+::: {.callout-note title="Under the hood"}
+Recipe expressions retain their R environments. This is convenient, but it also means that reproducibility still depends on external bindings you capture. Prefer explicit product sources for business data and stable constants for configuration. A recipe is inspectable preparation, not an isolation sandbox.
+:::
+
+## Exercises
+
+1. Create a recipe that rounds a numeric field, renames a column, and then selects the final interface. Inspect the recipe before running a product.
+2. Replace one declarative step with an ordinary R function. What do you gain, and what metadata or static understanding might you lose?
+3. Choose a transformation in one of your existing scripts and decide whether it belongs inside a reusable recipe or should remain local to a consumer.
+

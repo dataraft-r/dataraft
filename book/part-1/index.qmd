@@ -1,0 +1,11 @@
+# I. Why a data platform? {.unnumbered}
+
+A recurring R script becomes a platform concern when other people start depending on its output. This part builds the vocabulary for that transition without introducing infrastructure first.
+
+You will distinguish a data frame from a delivery, a delivery from a data product, and a logical product definition from its physical storage. The goal is a small mental model that remains useful when later chapters add contracts, quality, lineage, catalogs, and release history.
+
+::: {.callout-note title="By the end of this part"}
+You should be able to explain why DataRaft exists, name the core product lifecycle, and describe how the package family separates responsibilities.
+:::
+
+Keep the recurring insurance example in mind. The first question is not where a policy table lives. The first question is what downstream users are allowed to expect from it.

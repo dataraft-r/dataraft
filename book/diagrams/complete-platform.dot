@@ -1,0 +1,31 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.25, nodesep=0.3, ranksep=0.55, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#183153", fontcolor="#20252B", fontname="Arial", fontsize=9.5, margin="0.14,0.09"];
+  edge [color="#52606D", penwidth=1.2, arrowsize=0.65];
+  csv1 [label="policies.csv"];
+  csv2 [label="brokers.csv"];
+  csv3 [label="payments.csv"];
+  p1 [label="policies\ncontract + quality", fillcolor="#E7F2F2", color="#2A7F7F"];
+  p2 [label="brokers\ncontract + quality", fillcolor="#E7F2F2", color="#2A7F7F"];
+  p3 [label="payments\ncontract + quality", fillcolor="#E7F2F2", color="#2A7F7F"];
+  portfolio [label="portfolio\nchecked lookup", fillcolor="#E8EEF6"];
+  totals [label="payment_totals\nchecked aggregation", fillcolor="#E8EEF6"];
+  perf [label="monthly_performance\nchecked derived product", fillcolor="#E8EEF6"];
+  rds [label="Versioned RDS release"];
+  evidence [label="Run evidence\nquality + lineage + versions"];
+  csv1 -> p1;
+  csv2 -> p2;
+  csv3 -> p3;
+  p1 -> portfolio;
+  p2 -> portfolio;
+  p3 -> totals;
+  portfolio -> perf;
+  totals -> perf;
+  perf -> rds;
+  p1 -> evidence [style=dashed];
+  p2 -> evidence [style=dashed];
+  p3 -> evidence [style=dashed];
+  portfolio -> evidence [style=dashed];
+  totals -> evidence [style=dashed];
+  perf -> evidence [style=dashed];
+}

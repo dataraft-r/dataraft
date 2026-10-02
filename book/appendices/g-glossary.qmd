@@ -1,0 +1,55 @@
+# Glossary {.unnumbered}
+
+**Accepted delivery**: A run whose configured validation and quality gates permit use or publication.
+
+**Adapter**: A component that connects a logical product to an external source, target, transform, or metadata system through DataRaft protocols.
+
+**Backend**: The physical engine or service used for reading, executing, storing, or registering data.
+
+**Business date**: The date a delivery is intended to represent for an SLA or publication process, distinct from the wall-clock execution time.
+
+**Candidate**: Data being prepared and checked before it becomes an accepted result or release.
+
+**Contract**: A versioned specification of columns, keys, rules, and composed metadata/policy that describes a product interface.
+
+**Data product**: A named reusable definition combining inputs, preparation, expectations, metadata, and optional publication.
+
+**Definition version**: Version of the product or contract definition. It is distinct from a physical release identifier.
+
+**Evidence**: Metadata about execution, checks, inputs, outputs, timestamps, decisions, and warnings used to explain what happened.
+
+**Grain**: What one row represents in a table product.
+
+**Input port**: A declared consumer-facing input interface attached to a product.
+
+**Integrity verification**: A check that retained bytes or release evidence still match what was recorded. Its strength depends on the backend and threat model.
+
+**Lineage**: Evidence about dependencies between products, releases, or columns. Lineage can be complete, partial, or unknown depending on what the system can observe.
+
+**Logical layer**: Product identity, meaning, expectations, and interfaces independent of a specific storage implementation.
+
+**Output port**: A declared publication interface. Multiple outputs are sequential in current core and are not one distributed transaction.
+
+**Physical layer**: Files, databases, query engines, registries, object stores, and services used to realize a logical product.
+
+**Policy**: A governance rule evaluated at a supported lifecycle event such as validate or publish.
+
+**Product dependency**: A relationship in which one product is used as an input or transformation dependency of another.
+
+**Quarantine**: A quality action that removes failing rows before writing for supported native row predicates while retaining the rejected rows locally on the result.
+
+**Recipe**: Ordered deferred data preparation steps attached to a product. It is not a fitted preprocessing model.
+
+**Release**: A durable accepted publication. A release is not the same as a product definition or one execution attempt.
+
+**Run result**: The outcome and evidence from one execution attempt, including status and quality information.
+
+**SLA**: A declared delivery timing or freshness expectation evaluated against actual publication timing.
+
+**Source**: A component or value that can supply input data at execution time.
+
+**Target**: A component implementing publication behavior for accepted data.
+
+**Threshold**: Permitted fraction of failed quality test units for a rule.
+
+**Volatile rule**: A time-dependent or random check explicitly marked as volatile. Such checks limit reproducibility and cache guarantees.
