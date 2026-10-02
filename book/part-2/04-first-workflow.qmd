@@ -1,138 +1,122 @@
 # A Complete DataRaft Workflow in 15 Minutes {#sec-first-workflow}
 
-This chapter uses the smallest verified path through the current API. It runs entirely in memory.
+This chapter runs the first complete workflow against the same synthetic policy data used throughout the book. It stays in memory so that the acceptance logic is visible before persistence is introduced.
 
-## Define expectations
+## Load the product data
 
-```{.r}
+```{r}
 library(dataraft)
 
-policies <- dr_product("policies") |>
-  dr_add_contract(c(
+policy_delivery <- read.csv("data/policies.csv")
+policy_delivery
+```
+
+The table is ordinary R data. Nothing has been accepted yet.
+
+## Define the agreement
+
+The first product states the interface and one business rule.
+
+```{r}
+policy_contract <- dr_contract(
+  "policies",
+  columns = c(
     policy_id = "integer",
-    premium = "numeric"
-  )) |>
+    broker_id = "integer",
+    premium = "numeric",
+    status = "character"
+  ),
+  key = "policy_id"
+)
+
+policies <- dr_product("policies") |>
+  dr_add_contract(policy_contract) |>
   dr_add_quality(~ premium >= 0)
 ```
 
-The product is a definition. No delivery has been accepted yet.
+The product is a definition. The incoming rows remain a separate object.
 
 ## Run a bad delivery
 
-```{.r}
+Create one known defect instead of waiting for a real source system to surprise us.
+
+```{r}
+bad_delivery <- policy_delivery
+bad_delivery$premium[2] <- -20
+
 bad <- dr_run(
   policies,
-  data = data.frame(
-    policy_id = 1:2,
-    premium = c(120, -20)
-  ),
+  data = bad_delivery,
   write = FALSE,
   stop_on_failure = FALSE
 )
 
 bad$status
+dr_quality_report(bad)
 dataraft.core::dr_quality_rows(bad)
 ```
 
-`write = FALSE` prevents a configured DataRaft writer from running. `stop_on_failure = FALSE` returns the blocked result so you can inspect it. The same pattern is used in the tested README examples in the current repository.
+`write = FALSE` skips the configured DataRaft writer. `stop_on_failure = FALSE` returns the blocked result so the evidence remains inspectable.
+
+The useful result is not only "the code failed." The useful result identifies the acceptance rule that failed and, for a row predicate, the rows involved.
 
 ## Correct and collect
 
-```{.r}
+Run the unchanged product definition against the valid fixture.
+
+```{r}
 good <- dr_run(
   policies,
-  data = data.frame(
-    policy_id = 1:2,
-    premium = c(120, 20)
-  ),
+  data = policy_delivery,
   write = FALSE
 )
 
-dr_collect(good)
+good$status
+accepted <- dr_collect(good)
+accepted
 ```
 
-`dr_collect()` is intentionally defined on executed results, not product definitions. Trying to collect a product is an error because a definition is not data.
+`dr_collect()` accepts executed results, not product definitions. That distinction creates a small trust boundary: downstream code asks for data only after the delivery has passed the configured gate.
 
-## The workflow on one page
+## Read the result as evidence
 
-```{.r}
-library(dataraft)
+A run result carries more than rows. It records status, validation status, timestamps, inputs, outputs, warnings, quality evidence, and an inspected copy of the definition.
 
-policies <- dr_product("policies") |>
-  dr_add_contract(c(policy_id = "integer", premium = "numeric")) |>
-  dr_add_quality(~ premium >= 0)
-
-result <- dr_run(
-  policies,
-  data = data.frame(policy_id = 1:3, premium = c(120, 80, 95)),
-  write = FALSE
-)
-
-accepted <- dr_collect(result)
+```{r}
+good$validation_status
+good$run_id
+names(good$metadata)
 ```
 
-This small example already contains the essential method:
-
-1. define the product;
-2. state the expected shape;
-3. state a business quality rule;
-4. run one delivery;
-5. accept data only from a successful result.
-
-No storage choice is required yet.
-
-::: {.callout-warning title="A successful R expression is not enough"}
-The important status is the DataRaft run status and its checks, not whether the R process reached the end of the script.
-:::
-
-## Why not publish yet?
-
-Publication adds a second concern: where accepted data should live. Keeping the first workflow in memory makes it easier to understand the logical gate before adding filesystem, database, or lake semantics.
-
-In Chapter 9 we will attach an RDS target and then a governed lake target. The product definition can stay almost unchanged.
-
-## Try it
-
-Change `premium` to character data. Then add an extra column. Observe which failures come from the contract and which come from the quality rule. In the next chapter we will make those contract semantics explicit.
-
-## Read the result as evidence, not just data
-
-A successful run returns more than the rows. The result records a run identifier, status, validation status, timestamps, inputs, outputs, warnings, quality evidence, and the inspected product definition. This distinction matters because a recurring delivery has two questions: *what data did we get?* and *what happened while accepting it?* `dr_collect()` answers the first. The run result answers the second.
-
-Keep those two questions separate in your own code. A useful pattern is to retain the result before collecting it:
+For repeated work, keep the result object before collecting:
 
 ```r
 result <- dr_run(
-  orders,
-  data = incoming,
+  policies,
+  data = incoming_delivery,
   write = FALSE,
   stop_on_failure = FALSE
 )
-
-result$status
-result$validation_status
-dr_quality_report(result)
 
 if (result$status == "completed") {
   accepted <- dr_collect(result)
 }
 ```
 
-This is slightly more verbose than piping everything into `dr_collect()`, but it gives you a stable place to inspect warnings and failures. For an interactive analysis, the shorter pipe is often fine. For a repeated process, a named result object is easier to log, test, and hand to diagnostics.
+The placeholder `incoming_delivery` represents the next delivery in your own process. The executable examples above use the checked-in fixture.
 
-### Why `write = FALSE` comes first
-
-The first workflow deliberately runs without a configured writer. That lets you learn the validation path before persistence enters the picture. It also makes the boundary explicit: an accepted in-memory result is already useful. Publication is a separate decision.
-
-`write = FALSE` does not promise that arbitrary user callbacks are free of side effects. It skips the configured DataRaft writer. Source readers or custom transformation functions are ordinary R code and can still perform their own I/O. This is one reason the book starts with plain data frames and declarative recipes.
-
-::: {.callout-tip title="Try it"}
-Change one thing at a time. Add an unexpected column, remove `amount`, make one amount negative, and then duplicate an `id` after adding a keyed contract. Save the result with `stop_on_failure = FALSE` and compare the quality reports. The goal is to learn the shape of failure evidence before you add storage.
+::: {.callout-warning title="A successful R expression is not an accepted delivery"}
+The important status is the DataRaft run status and its checks, not whether the R process reached the end of the script.
 :::
+
+## Why not publish yet?
+
+Publication answers a second question: where should accepted data live? Keeping this chapter in memory lets you learn the acceptance boundary independently from filesystem, database, or lake semantics.
+
+Chapter 9 will attach a versioned RDS target. The contract and quality rule do not need to change.
 
 ## Exercises
 
-1. Run the same product definition against three deliveries: valid data, a negative premium, and a missing `premium` column. Compare the returned status and quality evidence.
-2. Keep `stop_on_failure = FALSE` and write a small function that returns only accepted data while preserving the failed result for diagnostics.
-3. Add a key to the contract and create a duplicate policy identifier. Explain why this failure is different from a negative premium.
-
+1. Change one premium to a negative value and compare `status`, the quality report, and affected rows.
+2. Remove `premium` from the delivery. Explain why that is an interface failure rather than the same kind of failure as a negative premium.
+3. Duplicate a `policy_id`. Which expectation detects the problem, and why is identity stronger than a column name?
