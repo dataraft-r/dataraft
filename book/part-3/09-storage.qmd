@@ -1,95 +1,96 @@
 # Storage and Persistence {#sec-storage}
 
-A product's logical definition should not depend on one physical storage engine. DataRaft makes storage a target component.
+Storage is a physical capability attached to a product. It should not be the only place where the product's meaning exists.
 
-## Start with versioned RDS
+## Add the smallest durable target
 
-`dataraft.adapters` includes a local RDS target that requires no optional database engine.
+The local RDS adapter is useful for learning because it needs no service or credentials.
 
-```{.r}
-library(dataraft.adapters)
+```{r}
+library(dataraft)
 
-path <- tempfile("policies-")
+policy_delivery <- read.csv("data/policies.csv")
 
-product <- dataraft.core::dr_product(
-  "policies",
-  data.frame(policy_id = 1L, premium = 120)
-) |>
-  dataraft.core::dr_add_quality(~ premium >= 0) |>
-  dataraft.core::dr_set_target(dataraft.adapters::dr_target_rds(path))
+policies <- dr_product("policies", policy_delivery) |>
+  dr_add_contract(dr_contract(
+    "policies",
+    columns = c(
+      policy_id = "integer",
+      broker_id = "integer",
+      premium = "numeric",
+      status = "character"
+    ),
+    key = "policy_id"
+  )) |>
+  dr_add_quality(~ premium >= 0)
 
-published <- dataraft.core::dr_publish(product)
-source <- dataraft.adapters::dr_source_rds(path, published$outputs$version)
-restored <- dataraft.core::dr_read_source(source)
+release_root <- tempfile("policy-releases-")
+
+published <- policies |>
+  dr_set_target(dataraft.adapters::dr_target_rds(release_root)) |>
+  dr_publish()
+
+published$status
+published$outputs
 ```
 
-The RDS adapter creates immutable version directories, writes a checksum, and commits by renaming a staging directory. It provides local filesystem safety, not a distributed transaction or lock service.
+Each successful RDS write creates a new immutable version directory and checksum metadata. Publication uses local filesystem locking and staging rename semantics. Those are useful local guarantees, not a distributed transaction.
 
-## Database, Parquet, pins, and API adapters
+## Read an exact release
 
-The adapters package also implements database sources and targets, Parquet, pins, API sources, and optional Iceberg support. Their dependencies and guarantees differ. The framework exposes capabilities so callers can inspect whether a component supports reading, writing, immutability, laziness, or transactions.
+A versioned destination becomes more valuable when a consumer can name the exact accepted output it used.
 
-## Governed lake releases
+```{r}
+version <- published$outputs$version
 
-`dataraft.lake` adds versioned release management. A local folder can use DuckDB. The package also supports DuckLake configurations, local or S3 storage, and a DuckDB or PostgreSQL registry depending on configuration.
+restored <- dataraft.core::dr_read_source(
+  dataraft.adapters::dr_source_rds(
+    release_root,
+    version
+  )
+)
 
-```{.r}
-lake <- dataraft.lake::dr_open_lake(tempfile("policy-lake-"))
-
-target <- dataraft.lake::dr_target_lake(lake)
+restored
 ```
 
-The lake path adds a registry, immutable landing, candidate checking, release history, recovery logic, integrity verification, and product lifecycle operations.
+Leaving the source version unresolved can be useful for "latest accepted data" discovery. Pinning the version is stronger evidence for a frozen report or reproducible analysis.
 
-## Logical versus physical versioning
+## Definition version and release version are different
 
-Keep two ideas separate:
+A contract version such as `1.0.0` identifies a definition. An RDS release such as `v000000000001` identifies one accepted physical publication.
 
-- **definition version**: the meaning of the product or contract;
-- **release version**: one accepted physical publication.
+A product can publish many releases under one unchanged contract. Conversely, a new contract version can exist before any delivery satisfies it.
 
-The RDS adapter, for example, returns versions such as `v000000000001`. That release identifier is not the same thing as a contract version like `1.0.0`.
+Do not collapse both ideas into one generic "version."
 
-::: {.callout-tip title="Design guidance"}
-Choose storage based on operational requirements after the product's logical expectations are clear. Do not let a database schema become the only place where the product meaning exists.
+## Other physical adapters
+
+`dataraft.adapters` also provides database, Parquet, pins, API, metadata, and experimental Iceberg integrations. Their capabilities differ.
+
+A database may provide transactions that a filesystem does not. A Parquet dataset has different update semantics from a mutable table. An API source has availability and replay limits that a local file does not.
+
+The adapter boundary gives these components a common place in the workflow without pretending their guarantees are identical.
+
+## When the lake becomes useful
+
+`dataraft.lake` adds a registry, immutable release identity, lifecycle state, recovery, integrity verification, and lake-oriented storage choices.
+
+A useful adoption sequence is:
+
+```text
+in memory
+  -> versioned RDS
+  -> governed lake when release operations require it
+```
+
+The step to a lake should be triggered by an operating requirement such as shared release history, recovery, lifecycle state, or registry-backed discovery. It should not be triggered by the desire to make a small project look more like a platform.
+
+::: {.callout-tip title="Physical change test"}
+If moving from RDS to a lake forces you to redefine product grain, keys, or business meaning, the physical layer has probably leaked too far into the logical definition.
 :::
-
-## Persistence is a capability, not the definition
-
-The product should survive a change in physical destination. That principle is easiest to see with the local RDS adapter. The contract, quality rules, and preparation can remain unchanged while the target changes from an in-memory run to versioned RDS releases, a database table, Parquet, pins, or a DataRaft lake.
-
-This does not mean all targets have identical guarantees. They do not. Adapters expose capabilities, and their implementations document different atomicity, immutability, transaction, and lazy-evaluation properties.
-
-### A deliberately small durable step
-
-The RDS adapter is useful for teaching because it needs no external service. Each successful write creates a new immutable version directory and stores a checksum. Publication uses a local directory lock and staging rename. That is appropriate for local filesystem semantics, but it is not a distributed transaction or lock service.
-
-```r
-library(dataraft.adapters)
-
-path <- tempfile("policy-releases-")
-
-target <- dataraft.adapters::dr_target_rds(path)
-source <- dataraft.adapters::dr_source_rds(path, version = NULL)
-```
-
-The version returned by a publication can be supplied to `dataraft.adapters::dr_source_rds()` to pin a later read. Leaving the version `NULL` resolves the latest committed version at read time. The former is reproducible evidence; the latter is convenient discovery.
-
-### Database, Parquet, pins, and APIs
-
-`dataraft.adapters` also provides database, Parquet, pins, and API sources or targets. Some preserve lazy data longer than others. Some require external packages or services. The adapter capability protocol exists so that DataRaft can reason about what a component can safely do instead of assuming that every storage technology behaves like a local data frame.
-
-Iceberg support is currently experimental and should be presented as such. Likewise, a checksum on a local release is an integrity aid, not a security boundary against a malicious actor who can replace both data and evidence.
-
-### The lake adds release semantics
-
-`dataraft.lake` is not simply another file writer. It adds a registry, immutable release identity, quality evidence, product lifecycle state, recovery behavior, release verification, and browsing integration. It can use local DuckDB or DuckLake-oriented configurations with local or S3 storage and DuckDB or PostgreSQL registry options.
-
-A useful progression is therefore: in memory first, RDS when you need simple durable versions, lake when release history and governance evidence become part of the operating model.
 
 ## Exercises
 
-1. Publish the same accepted product twice to a temporary RDS target. Read each explicit version instead of using the latest release.
-2. List the guarantees the RDS adapter gives and two guarantees it explicitly does not give.
-3. Sketch how the same product would move to a lake target. Which parts of the definition stay unchanged?
-
+1. Publish the policy product twice and read both explicit versions.
+2. List three guarantees the RDS adapter provides and two it does not.
+3. Decide which concrete requirement would justify moving this example from RDS to a DataRaft lake.
