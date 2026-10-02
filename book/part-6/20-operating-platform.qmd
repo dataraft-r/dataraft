@@ -12,6 +12,8 @@ For a recurring product, a practical loop is:
 define -> test -> execute -> inspect -> publish -> observe -> repair -> change
 ```
 
+![A recurring DataRaft operating loop keeps definition, execution evidence, publication, observation, and change connected without collapsing them into one status.](../diagrams/operating-loop.svg){#fig-operating-loop fig-alt="A loop from define to test, execute, inspect, publish, observe, repair, and change, then back to define."}
+
 The loop is deliberately broader than `dr_run()`. Some steps are product code, some are CI, and some belong to external operations.
 
 ### Define
@@ -27,7 +29,10 @@ Before a scheduled execution reaches a durable target, CI should prove the local
 - contracts construct successfully;
 - known bad fixtures are blocked;
 - the complete product graph succeeds on known good fixtures;
-- the local RDS target can publish and read a release.
+- dataset lineage is present for the root result;
+- the publish policy passes;
+- the output port publishes and records SLA evidence;
+- the local RDS target can read the exact created release.
 
 External adapter tests can be separate jobs because credentials and service availability have different failure modes from product logic.
 
@@ -71,7 +76,7 @@ Do not collapse all of these into one green/red flag. A product can execute corr
 
 ## A minimal operator checklist
 
-For a daily or monthly product, an operator should be able to answer:
+For a recurring product, an operator should be able to answer:
 
 1. Which product definition and version ran?
 2. Which inputs or upstream releases were used?
@@ -146,7 +151,7 @@ A small team can operate DataRaft without building a control plane on day one. A
 - review pending product or contract changes and their downstream impact;
 - retire products that should no longer accept new releases.
 
-The important point is that each review item has a concrete evidence source. The meeting should not depend on reconstructing what happened from console logs.
+The important point is that each review item has a concrete evidence source. In the companion project, the run result answers quality and lineage questions, `port_outputs` records the declared delivery boundary, `metadata$policies` records the publish decision, `metadata$sla` records delivery evidence, and the RDS release identifier anchors the physical output. The meeting should not depend on reconstructing what happened from console logs.
 
 ## What DataRaft still delegates
 
