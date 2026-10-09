@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'book/**'
+      - 'family-lock.json'
       - '.github/workflows/book.yml'
   pull_request:
     paths:
       - 'book/**'
+      - 'family-lock.json'
       - '.github/workflows/book.yml'
   workflow_dispatch:
 

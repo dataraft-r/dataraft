@@ -1,13 +1,18 @@
-repos <- c(
-  "dataraft-r/dataraft.core@d9cb454d0b60a7d1ba23ff7298b064f16af80c05",
-  "dataraft-r/dataraft.adapters@87a39686af0bafa40e64f9130a3ef2877ed64423",
-  "dataraft-r/dataraft.lake@113c17913fe326145b285a6c5720a0753a207b2c",
-  "dataraft-r/dataraft.metrics@513e09ea8143aaaefae5db319ebd7a807744f123",
-  "dataraft-r/dataraft@1053863d0c3eb94f5d8356c59a4cb1701e700991"
-)
+# Run from book/, using the same immutable family as package and binary CI.
+root <- normalizePath("..", mustWork = TRUE)
+if (!requireNamespace("jsonlite", quietly = TRUE)) pak::pak("jsonlite")
+lock <- jsonlite::fromJSON(file.path(root, "family-lock.json"),
+                           simplifyVector = FALSE)
+components <- setdiff(names(lock$packages), "dataraft")
+repos <- vapply(components, function(name) {
+  spec <- lock$packages[[name]]
+  stopifnot(grepl("^[0-9a-f]{40}$", spec$ref))
+  paste0(spec$repository, "@", spec$ref)
+}, character(1L))
 
 pak::pak(c(
   repos,
+  root,
   "testthat",
   "withr",
   "knitr",

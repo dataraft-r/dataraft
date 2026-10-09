@@ -64,6 +64,10 @@ Lake publication adds immutable landing/candidate/release behavior, registry met
 
 The book has two executable verification layers. First, the companion insurance project is tested with testthat, including a blocked delivery, product lineage, governed RDS publication, publish-policy evidence, an output port, and SLA evidence. Second, selected core teaching examples are native Quarto R cells and execute while HTML and PDF are rendered in CI against the pinned DataRaft revisions.
 
+Ongoing book builds use the umbrella's current `family-lock.json` and local
+metapackage checkout, the same source set as package and binary CI. The audited
+edition revisions below remain the historical source markers from 2026-10-02.
+
 The Pandoc/LibreOffice fallback remains available for environments without R or Quarto. Fallback artifacts prove manuscript and static-diagram renderability only; they do not execute R. Upstream DataRaft repositories independently test their package behavior and README examples.
 
 

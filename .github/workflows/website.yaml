@@ -3,6 +3,7 @@ on:
   workflow_run:
     workflows: [Build DataRaft family binaries]
     types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths: ['website/**', 'book/**', '.github/workflows/website.yaml', 'scripts/assemble-binary-repository.R']
@@ -16,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
@@ -65,6 +66,10 @@ jobs:
           fi
           tag="family-binaries-$sha"
           if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then
+              echo "The triggering binary build has no matching release: $tag" >&2
+              exit 1
+            fi
             tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 30 \
               --json tagName --jq '[.[].tagName | select(startswith("family-binaries-"))][0] // empty')
           fi
@@ -86,6 +91,13 @@ jobs:
             printf '%s\n' "$tag" > website/dist/packages/RELEASE.txt
           fi
       - run: python website/check.py
+      - name: Retain the exact binary release included in this publication
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: published-binary-release
+          path: website/dist/packages/RELEASE.txt
+          if-no-files-found: error
       - run: node --check website/assets/site.js
       - name: Check course in Chromium
         run: |

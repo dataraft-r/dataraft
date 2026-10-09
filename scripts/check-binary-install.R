@@ -1,6 +1,29 @@
 # Smoke test the published family and prove the installed bytes came from its archives.
 platform <- Sys.getenv("BINARY_PLATFORM")
 base <- "https://dataraft-r.github.io/dataraft/packages"
+expected_release <- Sys.getenv("EXPECTED_BINARY_RELEASE_TAG")
+release_file <- Sys.getenv("EXPECTED_BINARY_RELEASE_FILE")
+if (nzchar(release_file)) {
+  expected_release <- trimws(readLines(release_file, warn = FALSE))
+  stopifnot(length(expected_release) == 1L,
+            grepl("^family-binaries-[0-9a-f]{40}$", expected_release))
+}
+if (nzchar(expected_release)) {
+  for (attempt in seq_len(6L)) {
+    marker <- tempfile("binary-release-")
+    url <- paste0(base, "/RELEASE.txt?ci=", as.integer(Sys.time()), "-", attempt)
+    status <- download.file(url, marker, quiet = TRUE)
+    actual_release <- trimws(readLines(marker, warn = FALSE))
+    unlink(marker)
+    if (identical(status, 0L) && identical(actual_release, expected_release)) break
+    if (attempt == 6L) {
+      stop("Published binary release does not match the triggering website: ",
+           expected_release, "; served: ", paste(actual_release, collapse = ", "))
+    }
+    Sys.sleep(10)
+  }
+  cat("Verified published release:", expected_release, "\n")
+}
 minor <- paste(R.version$major, strsplit(R.version$minor, ".", fixed = TRUE)[[1L]][1L], sep = ".")
 stopifnot(identical(minor, Sys.getenv("BINARY_R_VERSION")))
 windows <- startsWith(platform, "windows-")

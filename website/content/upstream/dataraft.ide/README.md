@@ -1,33 +1,38 @@
 # dataraft.ide
 
-An experimental metadata bridge for DataRaft IDE clients. The package provides an R-only workspace workflow; DuckDB and a running lake are optional. It does not publish products from the IDE.
+**Make DataRaft metadata available to an editor.**
+
+This optional, experimental R package is the bridge between an existing R workspace and an IDE client. It exposes bounded product, run and lake metadata through explicit requests. The [Positron extension](https://github.com/dataraft-r/dataraft-positron) turns those responses into visual views; the bridge itself does not publish a product.
+
+[`dataraft` overview](https://github.com/dataraft-r/dataraft) · [IDE reference](https://dataraft-r.github.io/dataraft/components/dataraft.ide/reference/index.html)
+
+## Install
+
+Requires R 4.2 or later. Install the development package from GitHub:
+
+```r
+install.packages("pak")
+pak::pak("dataraft-r/dataraft.ide")
+```
+
+## Start in R
 
 ```r
 workspace <- new.env(parent = emptyenv())
 workspace$orders <- dataraft.core::dr_product(
-  "orders", data.frame(amount = c(-10, 20))
-) |> dataraft.core::dr_add_quality(~ amount >= 0)
+  "orders", data.frame(id = 1L, amount = 25)
+)
 context <- dataraft.ide::ide_context(workspace)
-request_metadata <- function(operation, handle = NULL) {
-  private <- tempfile("ide-private-")
-  dir.create(private, mode = "0700")
-  on.exit(unlink(private, recursive = TRUE))
-  request <- list(
-    version = 1L, operation = operation, request_id = "example",
-    response_path = file.path(private, "response.json")
-  )
-  if (!is.null(handle)) request$handle <- handle
-  encoded <- jsonlite::base64_enc(charToRaw(as.character(
-    jsonlite::toJSON(request, auto_unbox = TRUE)
-  )))
-  dataraft.ide::ide_request(gsub("[[:space:]]", "", encoded), context)
-}
-request_metadata("products")
-workspace$result <- dataraft.core::dr_run(workspace$orders, write = FALSE)
-request_metadata("incidents")
+str(context, max.level = 1)
 ```
 
-Only `ide_context()` and `ide_request()` are public. All other `ide_*` helpers are internal and may change without notice. Existing callers of `ide_products(context)` should use a `products` request as above; this applies equally to the other named operations. `ide_emit()` is internal too. The bridge validates allowed requests in R; clients validate the emitted envelope against the JSON Schema.
+The context identifies objects the client may inspect. The extension sends explicit `ide_request()` calls; it requires an R session you select in Positron. DuckDB and a lake are optional for workspace-only inspection. Data cells are not included in the metadata channel; an explicit View action opens a bounded view inside R.
+
+See the [IDE reference](https://dataraft-r.github.io/dataraft/components/dataraft.ide/reference/index.html) and [extension setup](https://github.com/dataraft-r/dataraft-positron#install).
+
+## Further details
+
+The bridge exposes `ide_context()` and `ide_request()`. The package also exports `dr_init_product()` to create a local product blueprint. Other `ide_*` helpers are internal and may change without notice. Clients should request the `products` operation through `ide_request()` instead of calling `ide_products()` directly; the same applies to other named operations. `ide_emit()` is internal too. The bridge validates allowed requests in R; clients validate the emitted envelope against the JSON Schema.
 
 `ide_context()` accepts an explicit workspace environment, optional exact object names and an already connected lake. Discovery skips active and delayed bindings and never runs source or transform callbacks. Workflows, model products, retained results and in-memory tables have opaque handles. Lake metadata comes from the current registry, including published contracts, latest attempt status, release ordering and lineage. Incident records describe observed failed or unchecked checks, not incident resolution state.
 
