@@ -1,18 +1,32 @@
 # dataraft.dbt
 
-This integration is **experimental**. Pin the DataRaft family and dbt adapter versions together. A dbt build is not an atomic DataRaft release; use managed publication for checked release governance.
+**Bring an existing dbt project into a DataRaft workflow.**
 
-Configure and execute dbt projects and inspect their artifacts. Definitions use `dr_dbt_project()`; execution requires dbt and processx. Managed publication integrates with dataraft.lake.
+Use this experimental integration when your SQL models already live in dbt. It can describe a dbt project, run builds and inspect artifacts. Managed publication requires a configured DataRaft lake. Running dbt alone does not create an atomic checked DataRaft release.
 
-This is an independently installable DataRaft component. The `dataraft`
-metapackage provides the shared introduction and re-exports the family API.
-See `help(package = "dataraft.dbt")` for the component reference.
+[`dataraft` overview](https://github.com/dataraft-r/dataraft) · [dbt reference](https://dataraft-r.github.io/dataraft/components/dataraft.dbt/reference/index.html)
 
-Install the development version:
+## Install
+
+Requires R 4.2 or later. Install the development package from GitHub:
 
 ```r
 install.packages("pak")
 pak::pak("dataraft-r/dataraft.dbt")
 ```
 
-[Get started with DataRaft](https://github.com/dataraft-r/dataraft).
+## Describe a project
+
+```r
+library(dataraft.dbt)
+
+project_dir <- tempfile("dbt-project-")
+dir.create(project_dir)
+writeLines("name: example", file.path(project_dir, "dbt_project.yml"))
+project <- dr_dbt_project(project_dir)
+print(project)
+```
+
+This constructs a project definition. To run `dr_dbt_build(project)`, provide a real dbt project, a dbt executable and the optional execution dependency `processx`. Use managed publication when outputs need DataRaft release checks and evidence.
+
+See the [integration guide](https://dataraft-r.github.io/dataraft/articles/integrations.html) and [lake package](https://github.com/dataraft-r/dataraft.lake).

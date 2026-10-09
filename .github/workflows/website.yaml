@@ -3,6 +3,7 @@ on:
   workflow_run:
     workflows: [Build DataRaft family binaries]
     types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths: ['website/**', 'book/**', '.github/workflows/website.yaml', 'scripts/assemble-binary-repository.R']
@@ -12,16 +13,19 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: github-pages-website
+  group: ${{ github.event_name == 'pull_request' && format('website-pr-{0}', github.event.pull_request.number) || 'github-pages-website' }}
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     env:
       BASE_PATH: /dataraft
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12.13'
@@ -62,6 +66,10 @@ jobs:
           fi
           tag="family-binaries-$sha"
           if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then
+              echo "The triggering binary build has no matching release: $tag" >&2
+              exit 1
+            fi
             tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 30 \
               --json tagName --jq '[.[].tagName | select(startswith("family-binaries-"))][0] // empty')
           fi
@@ -104,6 +112,7 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write
