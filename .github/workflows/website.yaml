@@ -12,16 +12,19 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: github-pages-website
+  group: ${{ github.event_name == 'pull_request' && format('website-pr-{0}', github.event.pull_request.number) || 'github-pages-website' }}
   cancel-in-progress: true
 jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     env:
       BASE_PATH: /dataraft
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12.13'
@@ -104,6 +107,7 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write
