@@ -2,6 +2,12 @@
 platform <- Sys.getenv("BINARY_PLATFORM")
 base <- "https://dataraft-r.github.io/dataraft/packages"
 expected_release <- Sys.getenv("EXPECTED_BINARY_RELEASE_TAG")
+release_file <- Sys.getenv("EXPECTED_BINARY_RELEASE_FILE")
+if (nzchar(release_file)) {
+  expected_release <- trimws(readLines(release_file, warn = FALSE))
+  stopifnot(length(expected_release) == 1L,
+            grepl("^family-binaries-[0-9a-f]{40}$", expected_release))
+}
 if (nzchar(expected_release)) {
   for (attempt in seq_len(6L)) {
     marker <- tempfile("binary-release-")
